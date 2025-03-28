@@ -40,8 +40,11 @@ bool FightingScene::init()
     // 创建血量标签
     createHealthLabels();
 
+    // 创建格挡标签
+    createBlockLabels();
+
 	// 更新血量标签
-	updateHealthLabels();
+    updateHealthAndBlockLabels();
 
     // 开始玩家回合
     startPlayerTurn();
@@ -68,11 +71,32 @@ void FightingScene::createHealthLabels()
     this->addChild(_monsterHealthLabel, 1);
 }
 
-// 更新血量标签
-void FightingScene::updateHealthLabels()
+// 创建格挡标签
+void FightingScene::createBlockLabels()
 {
-    _heroHealthLabel->setString("Hero Health: " + std::to_string(_hero->getHealth()) + " Block: " + std::to_string(_hero->getBlock()));
-    _monsterHealthLabel->setString("Monster Health: " + std::to_string(_monster->getHealth()) + " Block: " + std::to_string(_monster->getBlock()));
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    // 创建英雄格挡标签
+    _heroBlockLabel = Label::createWithTTF("Hero Block: 0", "fonts/Marker Felt.ttf", 60);
+    _heroBlockLabel->setTextColor(Color4B::BLUE); // 设置标签颜色为蓝色
+    _heroBlockLabel->setPosition(Vec2(origin.x + visibleSize.width / 4, origin.y + visibleSize.height - _heroHealthLabel->getContentSize().height - 70));
+    this->addChild(_heroBlockLabel, 1);
+
+    // 创建怪物格挡标签
+    _monsterBlockLabel = Label::createWithTTF("Monster Block: 0", "fonts/Marker Felt.ttf", 60);
+    _monsterBlockLabel->setTextColor(Color4B::BLUE); // 设置标签颜色为蓝色
+    _monsterBlockLabel->setPosition(Vec2(origin.x + 3 * visibleSize.width / 4, origin.y + visibleSize.height - _monsterHealthLabel->getContentSize().height - 70));
+    this->addChild(_monsterBlockLabel, 1);
+}
+
+// 更新血量和格挡标签
+void FightingScene::updateHealthAndBlockLabels()
+{
+    _heroHealthLabel->setString("Hero Health: " + std::to_string(_hero->getHealth()));
+    _monsterHealthLabel->setString("Monster Health: " + std::to_string(_monster->getHealth()));
+    _heroBlockLabel->setString("Hero Block: " + std::to_string(_hero->getBlock()));
+    _monsterBlockLabel->setString("Monster Block: " + std::to_string(_monster->getBlock()));
 }
 
 // 创建背景
@@ -185,7 +209,7 @@ void FightingScene::startMonsterTurn()
     int newHealth = _hero->getHealth() - damage;
     _hero->setHealth(newHealth);
     CCLOG("Hero Health: %d", _hero->getHealth());
-    updateHealthLabels();
+    updateHealthAndBlockLabels();
     endTurn();
 }
 
@@ -291,7 +315,7 @@ void FightingScene::updateHandDisplay()
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    // 假设每张卡牌的背景图片为 "cardBackground.jpg"
+    // 每张卡牌的背景图片为 "cardBackground.jpg"
     auto tempCardSprite = Sprite::create("cardBackground.jpg");
     float cardWidth = tempCardSprite->getContentSize().width;
 
@@ -401,7 +425,7 @@ void FightingScene::playCard(int index)
             CCLOG("Hero Block: %d", _hero->getBlock());
         }
 
-        updateHealthLabels();
+        updateHealthAndBlockLabels();
 
         // 延迟调用 discardCard 函数
         this->runAction(Sequence::create(
