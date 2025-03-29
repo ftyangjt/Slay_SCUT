@@ -2,6 +2,7 @@
 #define __MONSTER_H__
 
 #include "cocos2d.h"
+#include "Effect.h"
 
 class Monster : public cocos2d::Sprite
 {
@@ -20,9 +21,14 @@ public:
     void setBlock(int block);
     int getBlock() const;
 
+	// 效果操作接口
+    void addEffect(std::shared_ptr<Effect> effect);
+    const std::vector<std::shared_ptr<Effect>>& getEffects() const;
+
 private:
     int _health;
     int _block;
+    std::vector<std::shared_ptr<Effect>> _effects;
 };
 
 #endif // __MONSTER_H__

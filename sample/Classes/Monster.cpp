@@ -44,3 +44,13 @@ void Monster::setBlock(int block) {
 int Monster::getBlock() const {
     return _block;
 }
+
+void Monster::addEffect(std::shared_ptr<Effect> effect)
+{
+    _effects.push_back(effect);
+}
+
+const std::vector<std::shared_ptr<Effect>>& Monster::getEffects() const
+{
+    return _effects;
+}

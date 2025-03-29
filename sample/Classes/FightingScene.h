@@ -6,6 +6,12 @@
 #include "Hero.h"
 #include "Monster.h"
 
+// 常量定义
+const int DOUBLE_CLICK_THRESHOLD = 300;  // 毫秒
+const float CARD_SCALE = 0.25f;
+const float COOLDOWN_TIME = 0.5f;
+const float DISCARD_DELAY = 0.1f;
+
 class FightingScene : public cocos2d::Scene
 {
 public:
@@ -34,7 +40,14 @@ private:
     void addCardEffectLabel(cocos2d::Sprite* cardSprite, const std::string& effect);
     void playCard(int index);
     void highlightSelectedCard();
+    void handleCardTap(size_t cardIndex, cocos2d::Touch* touch); // 确保使用正确的类型
+    void applyCardEffects(const Card& card);
+    void applyEffects(int& damage, int& block, const std::vector<std::shared_ptr<Effect>>& effects, bool isTargetMonster);
 
+
+    cocos2d::Size _visibleSize;
+    cocos2d::Vec2 _origin;
+    bool _isCooldown = false; // 表示出牌是否处于冷却状态
     int _selectedCardIndex = -1; // -1 表示没有选中的卡牌
     std::vector<Card> _drawPile; // 抽牌堆
     std::vector<Card> _discardPile; // 弃牌堆

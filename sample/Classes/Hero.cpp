@@ -2,6 +2,7 @@
 
 USING_NS_CC;
 
+// 创建主角实例
 Hero* Hero::create(const std::string& filename)
 {
     Hero* hero = new (std::nothrow) Hero();
@@ -14,6 +15,7 @@ Hero* Hero::create(const std::string& filename)
     return nullptr;
 }
 
+// 初始化主角
 bool Hero::init(const std::string& filename)
 {
     if (!Sprite::initWithFile(filename))
@@ -30,39 +32,47 @@ bool Hero::init(const std::string& filename)
     return true;
 }
 
+// 设置主角的生命值
 void Hero::setHealth(int health)
 {
     _health = health;
 }
 
+// 获取主角的生命值
 int Hero::getHealth() const
 {
     return _health;
 }
 
+// 设置主角的防御值
 void Hero::setBlock(int block) {
     _block = block;
 }
 
+// 获取主角的防御值
 int Hero::getBlock() const {
     return _block;
 }
 
+// 添加卡牌到卡组
 void Hero::addCardToDeck(const Card& card)
 {
     _deck.push_back(card);
 }
 
+// 获取卡组
 const std::vector<Card>& Hero::getDeck() const
 {
     return _deck;
 }
 
+// 清空卡组
 void Hero::clearDeck()
 {
     _deck.clear();
 }
 
+// 初始化默认卡组
 void Hero::createDefaultDeck()
 {
     // 这里示例创建一个初始卡组，具体卡牌属性根据实际需求调整
@@ -76,4 +86,16 @@ void Hero::createDefaultDeck()
     addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
     addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
     addCardToDeck(Card("Bash", Card::Type::Attack, 2, "Deal 8 damage and apply Vulnerable", "cardBackground.jpg", 8, 0));
+}
+
+// 添加效果
+void Hero::addEffect(std::shared_ptr<Effect> effect)
+{
+    _effects.push_back(effect);
+}
+
+// 获取拥有的效果
+const std::vector<std::shared_ptr<Effect>>& Hero::getEffects() const
+{
+    return _effects;
 }

@@ -2,8 +2,8 @@
 #define __HERO_H__
 
 #include "cocos2d.h"
-#include <vector>
-#include "Card.h" // 假设 Card 类已经定义
+#include "Card.h"
+#include "Effect.h"
 
 class Hero : public cocos2d::Sprite
 {
@@ -26,14 +26,19 @@ public:
     void addCardToDeck(const Card& card);
     const std::vector<Card>& getDeck() const;
     void clearDeck();
+    // 初始化默认卡组
+    void createDefaultDeck();
+
+	// 效果操作接口
+    void addEffect(std::shared_ptr<Effect> effect);
+    const std::vector<std::shared_ptr<Effect>>& getEffects() const;
+
 
 private:
     int _health; // 生命值
 	int _block; // 防御值
 	std::vector<Card> _deck; // 卡组
-
-    // 初始化默认卡组
-    void createDefaultDeck();
+    std::vector<std::shared_ptr<Effect>> _effects;
 };
 
 #endif // __HERO_H__

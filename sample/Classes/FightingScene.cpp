@@ -25,8 +25,8 @@ bool FightingScene::init()
         return false;
     }
 
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    _visibleSize = Director::getInstance()->getVisibleSize();
+    _origin = Director::getInstance()->getVisibleOrigin();
 
     // 创建背景
     createBackground();
@@ -315,15 +315,13 @@ void FightingScene::updateHandDisplay()
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    // 每张卡牌的背景图片为 "cardBackground.jpg"
+    // 假设每张卡牌的背景图片为 "cardBackground.jpg"
     auto tempCardSprite = Sprite::create("cardBackground.jpg");
     float cardWidth = tempCardSprite->getContentSize().width;
 
     // 计算卡牌之间的间距
     float totalWidth = _cards.size() * cardWidth;
     float spacing = 0.0f;
-
-    // 如果总宽度超过屏幕宽度，调整卡牌间距
     if (totalWidth > visibleSize.width)
     {
         cardWidth = (visibleSize.width - 20.0f) / _cards.size(); // 20.0f 是左右边距
@@ -340,45 +338,21 @@ void FightingScene::updateHandDisplay()
     {
         auto cardSprite = Sprite::create("cardBackground.jpg");
         cardSprite->setPosition(Vec2(startX + i * (cardWidth + spacing), origin.y + cardSprite->getContentSize().height / 3));
-        cardSprite->setScale(cardWidth / cardSprite->getContentSize().width); // 调整卡牌大小以适应屏幕
+        cardSprite->setScale(cardWidth / cardSprite->getContentSize().width);
         this->addChild(cardSprite, 1);
         _cardSprites.push_back(cardSprite);
         _lastClickTimes.push_back(std::chrono::steady_clock::now()); // 初始化上次点击时间
 
         addCardEffectLabel(cardSprite, _cards[i].getEffect());
 
-        // 添加点击事件监听器
+        // 添加点击事件监听器：提高响应性
         auto listener = EventListenerTouchOneByOne::create();
         listener->setSwallowTouches(true);
-        listener->onTouchBegan = [this, i](Touch* touch, Event* event) {
+        listener->onTouchBegan = [this, i](Touch* touch, Event* event) -> bool {
             auto target = static_cast<Sprite*>(event->getCurrentTarget());
             if (target->getBoundingBox().containsPoint(touch->getLocation()))
             {
-                auto now = std::chrono::steady_clock::now();
-                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lastClickTimes[i]).count();
-
-                if (duration < 400) // 双击时间间隔（400毫秒）
-                {
-                    playCard(i); // 双击打出卡牌
-                }
-                else
-                {
-                    _selectedCardIndex = i; // 单击选中卡牌
-                    highlightSelectedCard(); // 高亮选中的卡牌
-
-                    // 添加短暂延迟，确保单击事件不会被误认为是双击
-                    this->runAction(Sequence::create(
-                        DelayTime::create(0.1f), // 延迟 0.1 秒
-                        CallFunc::create([this, i]() {
-                            if (_selectedCardIndex == i)
-                            {
-                                highlightSelectedCard(); // 确保高亮选中的卡牌
-                            }
-                            }),
-                        nullptr));
-                }
-
-                _lastClickTimes[i] = now; // 更新上次点击时间
+                handleCardTap(i, touch);
                 return true;
             }
             return false;
@@ -387,55 +361,119 @@ void FightingScene::updateHandDisplay()
     }
 }
 
+// 应用BUFF和DEBUFF
+void FightingScene::applyEffects(int& damage, int& block, const std::vector<std::shared_ptr<Effect>>& effects, bool isTargetMonster)
+{
+    for (const auto& effect : effects)
+    {
+        if (auto buff = dynamic_cast<Buff*>(effect.get()))
+        {
+            switch (buff->getType())
+            {
+            case Effect::Type::Strength:
+                damage += buff->getLevel();
+                break;
+            default:
+                break;
+            }
+        }
+        else if (auto debuff = dynamic_cast<Debuff*>(effect.get()))
+        {
+            switch (debuff->getType())
+            {
+            case Effect::Type::Vulnerable:
+                if (isTargetMonster)
+                {
+                    damage = static_cast<int>(damage * 1.5);
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
+
+// 应用卡牌效果
+void FightingScene::applyCardEffects(const Card& card)
+{
+    int damage = card.getAttack();
+    int block = card.getBlock();
+
+    // 应用英雄的效果
+    applyEffects(damage, block, _hero->getEffects(), false);
+
+    // 应用怪物的效果
+    applyEffects(damage, block, _monster->getEffects(), true);
+
+    // 处理怪物的格挡
+    int monsterBlock = _monster->getBlock();
+    if (monsterBlock > 0)
+    {
+        if (monsterBlock >= damage)
+        {
+            _monster->setBlock(monsterBlock - damage);
+            damage = 0;
+        }
+        else
+        {
+            damage -= monsterBlock;
+            _monster->setBlock(0);
+        }
+    }
+
+    // 处理怪物的生命值
+    int newHealth = _monster->getHealth() - damage;
+    _monster->setHealth(newHealth);
+    CCLOG("Monster Health: %d", _monster->getHealth());
+
+    // 处理英雄的格挡
+    if (block > 0)
+    {
+        int newBlock = _hero->getBlock() + block;
+        _hero->setBlock(newBlock);
+        CCLOG("Hero Block: %d", _hero->getBlock());
+    }
+
+    updateHealthAndBlockLabels();
+}
+
 // 打出卡牌
 void FightingScene::playCard(int index)
 {
+    if (_isCooldown) {
+        // 如果处于冷却状态，直接返回
+        return;
+    }
+
     if (index >= 0 && index < _cards.size())
     {
-        // 获取打出的卡牌
+        // 执行打出卡牌的逻辑
         Card playedCard = _cards[index];
+        applyCardEffects(playedCard);
 
-        // 处理卡牌的攻击属性
-        int damage = playedCard.getAttack();
-		int playerBlock = playedCard.getBlock();
-        int monsterBlock = _monster->getBlock();
-        if (monsterBlock > 0)
-        {
-            if (monsterBlock >= damage)
-            {
-                _monster->setBlock(monsterBlock - damage);
-                damage = 0;
-            }
-            else
-            {
-                damage -= monsterBlock;
-                _monster->setBlock(0);
-            }
-        }
-        int newHealth = _monster->getHealth() - damage;
-        _monster->setHealth(newHealth);
-        CCLOG("Monster Health: %d", _monster->getHealth());
-
-		// 处理卡牌的防御属性
-		int block = playedCard.getBlock();
-        if (block > 0)
-        {
-            int newBlock = _hero->getBlock() + block;
-            _hero->setBlock(newBlock);
-            CCLOG("Hero Block: %d", _hero->getBlock());
-        }
-
-        updateHealthAndBlockLabels();
-
-        // 延迟调用 discardCard 函数
+        // 设置冷却状态
+        _isCooldown = true;
         this->runAction(Sequence::create(
-            DelayTime::create(0.1f), // 延迟 0.1 秒
-            CallFunc::create([this, index]() {
-                discardCard(index);
-                _selectedCardIndex = -1;
-                highlightSelectedCard();
-                }),
-            nullptr));
+            Spawn::create(
+                Sequence::create(
+                    DelayTime::create(COOLDOWN_TIME),
+                    CallFunc::create([this]() { _isCooldown = false; }),
+                    nullptr
+                ),
+                Sequence::create(
+                    DelayTime::create(DISCARD_DELAY),
+                    CallFunc::create([this, index]() {
+                        discardCard(index);
+                        _selectedCardIndex = -1;
+                        highlightSelectedCard();
+                        }),
+                    nullptr
+                ),
+                nullptr
+            ),
+            nullptr
+        ));
     }
 }
 
@@ -453,4 +491,22 @@ void FightingScene::highlightSelectedCard()
             _cardSprites[i]->setColor(Color3B::WHITE); // 取消高亮其他卡牌
         }
     }
+}
+
+// 处理卡牌点击事件
+void FightingScene::handleCardTap(size_t cardIndex, cocos2d::Touch* touch)
+{
+    auto now = std::chrono::steady_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lastClickTimes[cardIndex]).count();
+
+    if (duration < DOUBLE_CLICK_THRESHOLD)
+    {
+        playCard(cardIndex);
+    }
+    else
+    {
+        _selectedCardIndex = cardIndex;
+        highlightSelectedCard();
+    }
+    _lastClickTimes[cardIndex] = now;
 }
