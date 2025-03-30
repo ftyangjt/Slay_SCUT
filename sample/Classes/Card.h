@@ -1,8 +1,8 @@
 #ifndef __CARD_H__
 #define __CARD_H__
 
-#include <string>
 #include "cocos2d.h"
+#include "Effect.h"
 
 class Card
 {
@@ -41,6 +41,12 @@ public:
     // 获取卡牌精灵
     cocos2d::Sprite* getSprite() const;
 
+    // 添加效果
+    void addEffect(std::shared_ptr<Effect> effect);
+
+    // 获取效果列表
+    const std::vector<std::shared_ptr<Effect>>& getEffects() const;
+
 private:
     std::string _name;
     Type _type;
@@ -50,6 +56,7 @@ private:
     int _attack;
     int _block;
     cocos2d::Sprite* _sprite; // 添加卡牌精灵成员变量
+    std::vector<std::shared_ptr<Effect>> _effects; // 添加效果列表
 };
 
 #endif // __CARD_H__

@@ -85,7 +85,10 @@ void Hero::createDefaultDeck()
     addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
     addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
     addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
-    addCardToDeck(Card("Bash", Card::Type::Attack, 2, "Deal 8 damage and apply Vulnerable", "cardBackground.jpg", 8, 0));
+    // 创建 Bash 卡牌并添加易伤效果
+    Card bashCard("Bash", Card::Type::Attack, 2, "Deal 8 damage and apply Vulnerable", "cardBackground.jpg", 8, 0);
+    bashCard.addEffect(std::make_shared<Debuff>(Effect::Type::Vulnerable, 1));
+    addCardToDeck(bashCard);
 }
 
 // 添加效果

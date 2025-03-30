@@ -43,6 +43,7 @@ private:
     void handleCardTap(size_t cardIndex, cocos2d::Touch* touch); // 确保使用正确的类型
     void applyCardEffects(const Card& card);
     void applyEffects(int& damage, int& block, const std::vector<std::shared_ptr<Effect>>& effects, bool isTargetMonster);
+    void createTurnCountLabel();
 
 
     cocos2d::Size _visibleSize;
@@ -63,6 +64,7 @@ private:
     cocos2d::Label* _monsterBlockLabel; // 显示怪物格挡的标签
     std::vector<cocos2d::Sprite*> _cardSprites; // 卡牌精灵
     std::vector<std::chrono::steady_clock::time_point> _lastClickTimes; // 记录每张卡牌的上次点击时间
+    cocos2d::Label* _turnCountLabel; // 声明回合数标签
 };
 
 #endif // __FIGHTING_SCENE_H__

@@ -53,3 +53,13 @@ cocos2d::Sprite* Card::getSprite() const
 {
     return _sprite;
 }
+
+void Card::addEffect(std::shared_ptr<Effect> effect)
+{
+    _effects.push_back(effect);
+}
+
+const std::vector<std::shared_ptr<Effect>>& Card::getEffects() const
+{
+    return _effects;
+}

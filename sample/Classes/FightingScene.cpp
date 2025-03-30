@@ -4,6 +4,7 @@
 
 USING_NS_CC;
 
+// 以下为初始化函数的实现
 // 创建场景
 Scene* FightingScene::createScene()
 {
@@ -45,6 +46,12 @@ bool FightingScene::init()
 
 	// 更新血量标签
     updateHealthAndBlockLabels();
+
+	// 初始化回合数
+    _turnCount = 1;
+
+	// 创建回合数标签
+    createTurnCountLabel();
 
     // 开始玩家回合
     startPlayerTurn();
@@ -90,15 +97,6 @@ void FightingScene::createBlockLabels()
     this->addChild(_monsterBlockLabel, 1);
 }
 
-// 更新血量和格挡标签
-void FightingScene::updateHealthAndBlockLabels()
-{
-    _heroHealthLabel->setString("Hero Health: " + std::to_string(_hero->getHealth()));
-    _monsterHealthLabel->setString("Monster Health: " + std::to_string(_monster->getHealth()));
-    _heroBlockLabel->setString("Hero Block: " + std::to_string(_hero->getBlock()));
-    _monsterBlockLabel->setString("Monster Block: " + std::to_string(_monster->getBlock()));
-}
-
 // 创建背景
 void FightingScene::createBackground()
 {
@@ -114,6 +112,19 @@ void FightingScene::createBackground()
 
     background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
     this->addChild(background, 0);
+}
+
+// 创建回合数标签
+void FightingScene::createTurnCountLabel()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    // 创建回合数标签
+    _turnCountLabel = Label::createWithTTF("Turn: 1", "fonts/Marker Felt.ttf", 60);
+    _turnCountLabel->setTextColor(Color4B::GREEN); // 设置标签颜色为绿色
+    _turnCountLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - _turnCountLabel->getContentSize().height));
+    this->addChild(_turnCountLabel, 1);
 }
 
 // 创建角色和怪物
@@ -145,10 +156,32 @@ void FightingScene::createCharacters()
     this->addChild(_monster, 1);
 }
 
+// 初始化牌堆
+void FightingScene::initializeDrawPile()
+{
+    // 获取 Hero 的卡组并设置为抽牌堆
+    _drawPile = _hero->getDeck();
+    shuffleDrawPile();
+}
+
+
+// 以下为回合制战斗逻辑的实现
+// 更新血量和格挡标签
+void FightingScene::updateHealthAndBlockLabels()
+{
+    _heroHealthLabel->setString("Hero Health: " + std::to_string(_hero->getHealth()));
+    _monsterHealthLabel->setString("Monster Health: " + std::to_string(_monster->getHealth()));
+    _heroBlockLabel->setString("Hero Block: " + std::to_string(_hero->getBlock()));
+    _monsterBlockLabel->setString("Monster Block: " + std::to_string(_monster->getBlock()));
+}
+
 // 开始玩家回合(抽牌、添加回合结束按钮、设置按钮位置)
 void FightingScene::startPlayerTurn()
 {
     _isPlayerTurn = true;
+
+	// 更新回合数标签
+    _turnCountLabel->setString("Turn: " + std::to_string(_turnCount));
 
     for (int i = 0; i < 5; i++) {
         drawCard();
@@ -213,9 +246,27 @@ void FightingScene::startMonsterTurn()
     endTurn();
 }
 
-// 判断回合是否结束
+// 结束回合
 void FightingScene::endTurn()
 {
+    if (_isPlayerTurn)
+    {
+        // 丢弃所有手牌至弃牌堆
+        _discardPile.insert(_discardPile.end(), _cards.begin(), _cards.end());
+        _cards.clear();
+        updateHandDisplay(); // 更新手牌显示
+    }
+
+    else
+    {
+        // 怪物回合结束时，递增回合计数器
+        _turnCount++;
+
+		// 重置格挡
+        _hero->setBlock(0);
+        _monster->setBlock(0);
+    }
+
     checkBattleEnd();
     if (!_isPlayerTurn)
     {
@@ -283,19 +334,17 @@ void FightingScene::shuffleDrawPile()
     std::shuffle(_drawPile.begin(), _drawPile.end(), g);
 }
 
-// 初始化牌堆
-void FightingScene::initializeDrawPile()
-{
-    // 获取 Hero 的卡组并设置为抽牌堆
-    _drawPile = _hero->getDeck();
-    shuffleDrawPile();
-}
-
 // 给卡牌添加效果标签
 void FightingScene::addCardEffectLabel(cocos2d::Sprite* cardSprite, const std::string& effect)
 {
-    auto effectLabel = Label::createWithTTF(effect, "fonts/Marker Felt.ttf", 48);
+    // 获取卡牌的宽度
+    float cardWidth = cardSprite->getContentSize().width;
+
+    // 创建多行标签，并设置最大宽度为卡牌宽度
+    auto effectLabel = Label::createWithTTF(effect, "fonts/Marker Felt.ttf", 48, Size(cardWidth, 0), TextHAlignment::CENTER);
     effectLabel->setColor(cocos2d::Color3B::BLACK);
+
+    // 设置标签位置为卡牌中心
     effectLabel->setPosition(Vec2(cardSprite->getContentSize().width / 2, cardSprite->getContentSize().height / 2));
     cardSprite->addChild(effectLabel, 1);
 }
@@ -405,6 +454,32 @@ void FightingScene::applyCardEffects(const Card& card)
 
     // 应用怪物的效果
     applyEffects(damage, block, _monster->getEffects(), true);
+
+    for (const auto& effect : card.getEffects())
+    {
+        if (auto buff = dynamic_cast<Buff*>(effect.get()))
+        {
+            switch (buff->getType())
+            {
+            case Effect::Type::Strength:
+                _hero->addEffect(effect);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (auto debuff = dynamic_cast<Debuff*>(effect.get()))
+        {
+            switch (debuff->getType())
+            {
+            case Effect::Type::Vulnerable:
+                _monster->addEffect(effect);
+                break;
+            default:
+                break;
+            }
+        }
+    }
 
     // 处理怪物的格挡
     int monsterBlock = _monster->getBlock();
