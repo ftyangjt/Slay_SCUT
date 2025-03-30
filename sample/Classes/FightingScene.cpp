@@ -11,7 +11,7 @@ Scene* FightingScene::createScene()
     return FightingScene::create();
 }
 
-// 找错误函数
+// 检查加载资源是否出错
 static void problemLoading(const char* filename)
 {
     printf("Error while loading: %s\n", filename);
@@ -293,6 +293,8 @@ void FightingScene::checkBattleEnd()
     }
 }
 
+
+// 以下为卡牌系统的实现
 // 抽一张牌
 void FightingScene::drawCard()
 {

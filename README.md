@@ -1,1 +1,3 @@
 # sample_game
+
+在使用该项目之前需要把cocos2d文件夹复制到sample文件夹中
