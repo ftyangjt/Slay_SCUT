@@ -1,5 +1,6 @@
 #include "AppDelegate.h"
 #include "FightingScene.h"
+#include "MainMenu.h"
 
 // #define USE_AUDIO_ENGINE 1
 // #define USE_SIMPLE_AUDIO_ENGINE 1
@@ -93,10 +94,9 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     register_all_packages();
 
-    auto scene = FightingScene::createScene();
-
-    // run
+    auto scene = MainMenu::createScene();
     director->runWithScene(scene);
+
 
     return true;
 }
