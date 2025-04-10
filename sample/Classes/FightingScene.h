@@ -5,6 +5,8 @@
 #include "Card.h"
 #include "Hero.h"
 #include "Monster.h"
+#include "DiscardDeck.h"
+#include "DrawDeck.h"
 
 // 常量定义
 const int DOUBLE_CLICK_THRESHOLD = 300;  // 毫秒
@@ -25,6 +27,8 @@ public:
 private:
     void createBackground();
     void createCharacters();
+	void createDrawDeck();// 创建抽牌堆按钮
+	void createDiscardDeck();// 创建弃牌堆按钮
     void updateHealthAndBlockLabels();
     void startPlayerTurn();
     void startMonsterTurn();
@@ -44,8 +48,8 @@ private:
     void applyCardEffects(const Card& card);
     void applyEffects(int& damage, int& block, const std::vector<std::shared_ptr<Effect>>& effects, bool isTargetMonster);
     void createTurnCountLabel();
-
-
+	void goToDrawDeck(Ref* sender);// 前往抽牌堆
+	void goToDiscardDeck(Ref* sender);// 前往弃牌堆
     cocos2d::Size _visibleSize;
     cocos2d::Vec2 _origin;
     bool _isCooldown = false; // 表示出牌是否处于冷却状态

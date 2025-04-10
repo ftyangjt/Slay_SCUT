@@ -1,6 +1,5 @@
 #include "MainMenu.h"
-#include "HelloWorldScene.h"
-#include "SimpleAudioEngine.h"
+#include "Map.h"  // 引入地图场景头文件
 
 USING_NS_CC;
 
@@ -17,76 +16,64 @@ bool MainMenu::init()
     }
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // 创建背景
-    auto background = Sprite::create("mainmenu_background.png");
-    if (background == nullptr)
+    // 添加背景图片
+    auto background = Sprite::create("background.webp");
+    if (background)
     {
-        printf("Error while loading: %s\n", "mainmenu_background.png");
-        return false;
+        background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+        this->addChild(background, 0);  // 将背景图片添加到最底层
+		setScale(1.6);  // 调整背景图片大小
     }
-    background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-    this->addChild(background, 0);
 
-    // 创建菜单项
+    // 创建“开始游戏”菜单项
     auto startItem = MenuItemImage::create(
-        "StartNormal.png",
-        "StartSelected.png",
-        CC_CALLBACK_1(MainMenu::menuStartCallback, this));
-    if (startItem == nullptr || startItem->getContentSize().width <= 0 || startItem->getContentSize().height <= 0)
+        "start_normal.png",  // 正常状态的图片
+        "start_normal.png",  // 选中状态的图片
+        CC_CALLBACK_1(MainMenu::menuStartCallback, this)
+    );
+    if (startItem)
     {
-        printf("Error while loading: %s and %s\n", "StartNormal.png", "StartSelected.png");
-        return false;
+        startItem->setPosition(Vec2(
+            origin.x + visibleSize.width / 2,
+            origin.y + visibleSize.height / 2 - 145
+        ));
+        startItem->setScale(0.75);  // 调整按钮大小
     }
-    startItem->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y + 100));
 
-    auto optionsItem = MenuItemImage::create(
-        "OptionsNormal.png",
-        "OptionsSelected.png",
-        CC_CALLBACK_1(MainMenu::menuOptionsCallback, this));
-    if (optionsItem == nullptr || optionsItem->getContentSize().width <= 0 || optionsItem->getContentSize().height <= 0)
+    // 创建“退出游戏”菜单项
+    auto exitItem = MenuItemImage::create(
+        "CloseNormal.png",  // 正常状态的图片
+        "CloseSelected.png",  // 选中状态的图片
+        CC_CALLBACK_1(MainMenu::menuCloseCallback, this)
+    );
+    if (exitItem)
     {
-        printf("Error while loading: %s and %s\n", "OptionsNormal.png", "OptionsSelected.png");
-        return false;
+        exitItem->setPosition(Vec2(
+            origin.x + visibleSize.width - 50,
+            origin.y + visibleSize.height / 2 - 300
+        ));
+        exitItem->setScale(3);  // 调整按钮大小
     }
-    optionsItem->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 
-    auto closeItem = MenuItemImage::create(
-        "CloseNormal.png",
-        "CloseSelected.png",
-        CC_CALLBACK_1(MainMenu::menuCloseCallback, this));
-    if (closeItem == nullptr || closeItem->getContentSize().width <= 0 || closeItem->getContentSize().height <= 0)
-    {
-        printf("Error while loading: %s and %s\n", "CloseNormal.png", "CloseSelected.png");
-        return false;
-    }
-    closeItem->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y - 100));
-
-    // 创建菜单
-    auto menu = Menu::create(startItem, optionsItem, closeItem, NULL);
+    // 将两个菜单项加入菜单
+    auto menu = Menu::create(startItem, exitItem, nullptr);
     menu->setPosition(Vec2::ZERO);
-    this->addChild(menu, 1);
+    this->addChild(menu, 1);  // 确保菜单在背景图片之上
 
     return true;
 }
 
 void MainMenu::menuStartCallback(Ref* pSender)
 {
-    // 切换到游戏场景
-    auto scene = HelloWorld::createScene();
-    Director::getInstance()->replaceScene(TransitionFade::create(1.0, scene));
-}
-
-void MainMenu::menuOptionsCallback(Ref* pSender)
-{
-    // 处理选项菜单
-    // 这里可以添加选项菜单的逻辑
-    printf("Options menu clicked\n");
+    // 切换到地图场景
+    auto scene = MyGame::Map::createScene();
+    Director::getInstance()->replaceScene(scene);
 }
 
 void MainMenu::menuCloseCallback(Ref* pSender)
 {
-    // 关闭游戏
+    // 退出游戏
     Director::getInstance()->end();
 }

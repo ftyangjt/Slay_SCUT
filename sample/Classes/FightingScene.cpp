@@ -1,6 +1,9 @@
 #include "FightingScene.h"
 #include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
+#include "Map.h"
+#include "fail.h"
+#include "Effect.h"
 
 USING_NS_CC;
 
@@ -35,6 +38,13 @@ bool FightingScene::init()
     // 创建角色和怪物
     createCharacters();
 
+	// 设置抽牌堆按钮
+    createDrawDeck();
+
+	//创建弃牌堆按钮
+    createDiscardDeck();
+
+
     // 初始化抽牌堆和弃牌堆
     initializeDrawPile();
 
@@ -52,6 +62,8 @@ bool FightingScene::init()
 
 	// 创建回合数标签
     createTurnCountLabel();
+
+    
 
     // 开始玩家回合
     startPlayerTurn();
@@ -212,6 +224,49 @@ void FightingScene::startPlayerTurn()
     this->addChild(endTurnButton, 1);
 }
 
+// 设置弃牌堆按钮
+void FightingScene::createDiscardDeck()
+{
+    auto showDiscardDeckButton = MenuItemImage::create(
+        "showDiscard_Normal.png",
+        "showDiscard_Selected.png",
+        CC_CALLBACK_1(FightingScene::goToDiscardDeck, this)
+    );
+    showDiscardDeckButton->setScale(0.5f);
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    // 设置按钮位置在画面右下角
+    showDiscardDeckButton->setPosition(Vec2(origin.x + visibleSize.width - showDiscardDeckButton->getContentSize().width / 2,
+        origin.y + showDiscardDeckButton->getContentSize().height / 2));
+    auto buttonMenu = Menu::create(showDiscardDeckButton, nullptr);
+    buttonMenu->setPosition(Vec2::ZERO);
+    this->addChild(buttonMenu, 4);
+}
+
+
+// 设置抽牌堆按钮
+
+void FightingScene::createDrawDeck()
+{
+    auto showDrawDeckButton = MenuItemImage::create(
+        "showDraw_Normal.png",
+        "showDraw_Selected.png",
+        CC_CALLBACK_1(FightingScene::goToDrawDeck, this)
+    );
+    showDrawDeckButton->setScale(0.5f);
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    // 设置按钮位置在画面左下角
+    showDrawDeckButton->setPosition(Vec2(origin.x + showDrawDeckButton->getContentSize().width / 2,
+        origin.y + showDrawDeckButton->getContentSize().height / 2));
+    auto buttonMenu = Menu::create(showDrawDeckButton, nullptr);
+    buttonMenu->setPosition(Vec2::ZERO);
+    this->addChild(buttonMenu, 4);
+}
+
+
 // 开始怪物回合
 void FightingScene::startMonsterTurn()
 {
@@ -277,22 +332,58 @@ void FightingScene::endTurn()
         startMonsterTurn();
     }
 }
-
 // 检查战斗是否结束
 void FightingScene::checkBattleEnd()
 {
     if (_hero->getHealth() <= 0)
     {
         CCLOG("Hero is dead. Game Over.");
-        // 处理游戏结束逻辑
+
+        // 创建失败信息标签
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+        auto defeatLabel = Label::createWithTTF("你已阵亡！", "fonts/Marker Felt.ttf", 80);
+        defeatLabel->setTextColor(Color4B::RED);
+        defeatLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+        this->addChild(defeatLabel, 10);
+
+        // 添加延迟动作，然后切换到失败场景
+        this->runAction(Sequence::create(
+            DelayTime::create(0.1f),  // 延迟2秒
+            CallFunc::create([]() {
+                // 切换到失败场景
+                auto failScene = FailScene::createScene();
+                Director::getInstance()->replaceScene(TransitionFade::create(0.5f, failScene));
+                }),
+            nullptr
+        ));
     }
     else if (_monster->getHealth() <= 0)
     {
         CCLOG("Monster is dead. You Win!");
-        // 处理游戏胜利逻辑
+
+        // 创建胜利消息标签
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+        auto victoryLabel = Label::createWithTTF("战斗胜利！", "fonts/Marker Felt.ttf", 80);
+        victoryLabel->setTextColor(Color4B::YELLOW);
+        victoryLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+        this->addChild(victoryLabel, 10);
+
+        // 添加延迟动作，然后返回地图场景
+        this->runAction(Sequence::create(
+            DelayTime::create(0.1f),  // 延迟2秒
+            CallFunc::create([]() {
+                // 返回到地图场景
+                auto mapScene = MyGame::Map::createScene();
+                Director::getInstance()->replaceScene(TransitionFade::create(0.5f, mapScene));
+                }),
+            nullptr
+        ));
     }
 }
-
 
 // 以下为卡牌系统的实现
 // 抽一张牌
@@ -586,4 +677,16 @@ void FightingScene::handleCardTap(size_t cardIndex, cocos2d::Touch* touch)
         highlightSelectedCard();
     }
     _lastClickTimes[cardIndex] = now;
+}
+
+void FightingScene::goToDrawDeck(Ref* sender)
+{
+    auto drawDeckScene = DrawDeck::createScene(_drawPile);
+    Director::getInstance()->pushScene(drawDeckScene);
+}
+
+void FightingScene::goToDiscardDeck(Ref* sender)
+{
+    auto discardDeckScene = DiscardDeck::createScene(_discardPile);
+    Director::getInstance()->pushScene(discardDeckScene);
 }
