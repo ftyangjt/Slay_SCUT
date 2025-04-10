@@ -50,6 +50,8 @@ private:
     void createTurnCountLabel();
 	void goToDrawDeck(Ref* sender);// 前往抽牌堆
 	void goToDiscardDeck(Ref* sender);// 前往弃牌堆
+    void playDiscardToDrawMeteorEffect(const cocos2d::Vec2& discardPilePosition, const cocos2d::Vec2& drawPilePosition);
+    void drawSequentialCards(int count);
     cocos2d::Size _visibleSize;
     cocos2d::Vec2 _origin;
     bool _isCooldown = false; // 表示出牌是否处于冷却状态
@@ -69,6 +71,9 @@ private:
     std::vector<cocos2d::Sprite*> _cardSprites; // 卡牌精灵
     std::vector<std::chrono::steady_clock::time_point> _lastClickTimes; // 记录每张卡牌的上次点击时间
     cocos2d::Label* _turnCountLabel; // 声明回合数标签
+    cocos2d::MenuItemImage* _discardDeckButton;
+	cocos2d::MenuItemImage* _drawDeckButton;
+ 
 };
 
 #endif // __FIGHTING_SCENE_H__

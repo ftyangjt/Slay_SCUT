@@ -195,9 +195,9 @@ void FightingScene::startPlayerTurn()
 	// 更新回合数标签
     _turnCountLabel->setString("Turn: " + std::to_string(_turnCount));
 
-    for (int i = 0; i < 5; i++) {
-        drawCard();
-    }
+    updateHandDisplay();
+
+    drawSequentialCards(5);
 
     // 添加一个按钮来手动结束回合
     auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -239,10 +239,15 @@ void FightingScene::createDiscardDeck()
     // 设置按钮位置在画面右下角
     showDiscardDeckButton->setPosition(Vec2(origin.x + visibleSize.width - showDiscardDeckButton->getContentSize().width / 2,
         origin.y + showDiscardDeckButton->getContentSize().height / 2));
+
+    // 保存按钮指针到成员变量中
+    _discardDeckButton = showDiscardDeckButton;
+
     auto buttonMenu = Menu::create(showDiscardDeckButton, nullptr);
     buttonMenu->setPosition(Vec2::ZERO);
     this->addChild(buttonMenu, 4);
 }
+
 
 
 // 设置抽牌堆按钮
@@ -261,6 +266,8 @@ void FightingScene::createDrawDeck()
     // 设置按钮位置在画面左下角
     showDrawDeckButton->setPosition(Vec2(origin.x + showDrawDeckButton->getContentSize().width / 2,
         origin.y + showDrawDeckButton->getContentSize().height / 2));
+	// 保存按钮指针到成员变量中
+	_drawDeckButton = showDrawDeckButton;
     auto buttonMenu = Menu::create(showDrawDeckButton, nullptr);
     buttonMenu->setPosition(Vec2::ZERO);
     this->addChild(buttonMenu, 4);
@@ -309,7 +316,10 @@ void FightingScene::endTurn()
         // 丢弃所有手牌至弃牌堆
         _discardPile.insert(_discardPile.end(), _cards.begin(), _cards.end());
         _cards.clear();
-        updateHandDisplay(); // 更新手牌显示
+        Vec2 discardDeckPosition = _discardDeckButton->getPosition();
+		Vec2 drawDeckPosition = _drawDeckButton->getPosition();
+        playDiscardToDrawMeteorEffect(discardDeckPosition,drawDeckPosition);
+        
     }
 
     else
@@ -386,12 +396,11 @@ void FightingScene::checkBattleEnd()
 }
 
 // 以下为卡牌系统的实现
-// 抽一张牌
 void FightingScene::drawCard()
 {
     if (_drawPile.empty())
     {
-        // 如果抽牌堆为空，将弃牌堆的牌洗入抽牌堆
+        // 若抽牌堆为空，将弃牌堆洗回抽牌堆
         _drawPile = _discardPile;
         _discardPile.clear();
         shuffleDrawPile();
@@ -399,13 +408,38 @@ void FightingScene::drawCard()
 
     if (!_drawPile.empty())
     {
-        // 从抽牌堆顶抽一张牌
+        // 从抽牌堆取顶
         Card drawnCard = _drawPile.back();
         _drawPile.pop_back();
-        _cards.push_back(drawnCard);
-        updateHandDisplay(); // 更新手牌显示
+
+        // 创建临时精灵，从抽牌堆按钮位置出现
+        auto tempSprite = Sprite::create("cardBackground.jpg");
+        tempSprite->setPosition(_drawDeckButton->getPosition());
+        tempSprite->setScale(0.0f);
+        tempSprite->setLocalZOrder(9999); // 保证显示在最前
+        this->addChild(tempSprite);
+
+        // 计算飞往手牌放置位置（简单示例：手牌区域中心）
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        float targetX = visibleSize.width * 0.5f;
+        float targetY = tempSprite->getContentSize().height / 3;
+
+        // 飞行并放大
+        auto moveAction = MoveTo::create(0.3f, Vec2(targetX, targetY));
+        auto scaleAction = ScaleTo::create(0.3f, 1.0f);
+        auto spawn = Spawn::create(moveAction, scaleAction, nullptr);
+
+        // 动作结束后，将卡牌加入 _cards 并刷新手牌
+        auto finish = CallFunc::create([this, drawnCard, tempSprite]() {
+            _cards.push_back(drawnCard);
+            tempSprite->removeFromParent();
+            updateHandDisplay();
+            });
+
+        tempSprite->runAction(Sequence::create(spawn, finish, nullptr));
     }
 }
+
 
 // 弃一张牌
 void FightingScene::discardCard(int index)
@@ -440,54 +474,81 @@ void FightingScene::addCardEffectLabel(cocos2d::Sprite* cardSprite, const std::s
     // 设置标签位置为卡牌中心
     effectLabel->setPosition(Vec2(cardSprite->getContentSize().width / 2, cardSprite->getContentSize().height / 2));
     cardSprite->addChild(effectLabel, 1);
-}
 
-// 更新手牌显示
+}
+// 刷新手牌显示
 void FightingScene::updateHandDisplay()
 {
-    // 清除当前手牌显示
-    for (auto cardSprite : _cardSprites)
+    size_t newCount = _cards.size();
+
+    // 清除现有的所有卡牌精灵
+    for (auto sprite : _cardSprites)
     {
-        this->removeChild(cardSprite);
+        sprite->removeFromParent();
     }
     _cardSprites.clear();
-    _lastClickTimes.clear(); // 清除上次点击时间
+    _lastClickTimes.clear();
 
-    // 获取可见区域大小和原点
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    if (newCount == 0)
+        return;  // 没有卡牌时直接返回
 
-    // 假设每张卡牌的背景图片为 "cardBackground.jpg"
-    auto tempCardSprite = Sprite::create("cardBackground.jpg");
-    float cardWidth = tempCardSprite->getContentSize().width;
+    // 创建临时精灵以获取实际尺寸
+    auto tempSprite = Sprite::create("cardBackground.jpg");
+    float originalCardWidth = tempSprite->getContentSize().width;
+    float originalCardHeight = tempSprite->getContentSize().height;
 
-    // 计算卡牌之间的间距
-    float totalWidth = _cards.size() * cardWidth;
-    float spacing = 0.0f;
-    if (totalWidth > visibleSize.width)
-    {
-        cardWidth = (visibleSize.width - 20.0f) / _cards.size(); // 20.0f 是左右边距
-        spacing = 0.0f;
+    // 计算最大可用宽度（考虑边缘间距）
+    float availableWidth = _visibleSize.width * 0.9f;  // 留出屏幕边缘10%的空间
+
+    // 计算每张卡牌最小的水平间距（可根据需要调整）
+    float minCardSpacing = 10.0f;
+
+    // 计算最大可能的卡牌宽度，使得所有卡牌能够显示
+    float maxCardWidth;
+
+    if (newCount == 1) {
+        // 只有一张卡牌时，宽度可以稍大
+        maxCardWidth = originalCardWidth * 0.8f;
     }
-    else
-    {
-        spacing = (visibleSize.width - totalWidth) / (_cards.size() + 1);
+    else {
+        // 计算最大可能的卡牌宽度，确保所有卡牌都能显示
+        float totalSpacing = (newCount - 1) * minCardSpacing;
+        maxCardWidth = (availableWidth - totalSpacing) / newCount;
     }
 
-    float startX = origin.x + spacing + cardWidth / 2;
+    // 根据最大宽度计算缩放因子
+    float scaleFactor = std::min(1.0f, maxCardWidth / originalCardWidth);
 
-    for (size_t i = 0; i < _cards.size(); ++i)
+    // 计算实际卡牌宽度和高度
+    float actualCardWidth = originalCardWidth * scaleFactor;
+    float actualCardHeight = originalCardHeight * scaleFactor;
+
+    // 计算卡牌排列的起始X坐标（居中显示）
+    float totalWidth = newCount * actualCardWidth + (newCount - 1) * minCardSpacing;
+    float startX = (_visibleSize.width - totalWidth) / 2 + actualCardWidth / 2;
+
+    // 修改这里：调整卡牌垂直位置，使其更接近屏幕底部
+    // 将卡牌放在更低的位置，只露出部分高度
+    float cardY = _origin.y + actualCardHeight * 0.4f; // 改为0.4倍卡牌高度
+
+    // 创建并排列卡牌
+    for (size_t i = 0; i < newCount; ++i)
     {
-        auto cardSprite = Sprite::create("cardBackground.jpg");
-        cardSprite->setPosition(Vec2(startX + i * (cardWidth + spacing), origin.y + cardSprite->getContentSize().height / 3));
-        cardSprite->setScale(cardWidth / cardSprite->getContentSize().width);
-        this->addChild(cardSprite, 1);
-        _cardSprites.push_back(cardSprite);
-        _lastClickTimes.push_back(std::chrono::steady_clock::now()); // 初始化上次点击时间
+        auto sprite = Sprite::create("cardBackground.jpg");
+        float posX = startX + i * (actualCardWidth + minCardSpacing);
 
-        addCardEffectLabel(cardSprite, _cards[i].getEffect());
+        // 设置位置和初始缩放
+        sprite->setPosition(Vec2(posX, cardY));
+        sprite->setScale(scaleFactor);
 
-        // 添加点击事件监听器：提高响应性
+        this->addChild(sprite, 1);
+        _cardSprites.push_back(sprite);
+        _lastClickTimes.push_back(std::chrono::steady_clock::now());
+
+        // 添加卡牌效果标签
+        addCardEffectLabel(sprite, _cards[i].getEffect());
+
+        // 注册触摸事件
         auto listener = EventListenerTouchOneByOne::create();
         listener->setSwallowTouches(true);
         listener->onTouchBegan = [this, i](Touch* touch, Event* event) -> bool {
@@ -499,7 +560,13 @@ void FightingScene::updateHandDisplay()
             }
             return false;
             };
-        _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, cardSprite);
+        _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, sprite);
+    }
+
+    // 检查并高亮选中的卡牌
+    if (_selectedCardIndex >= 0 && _selectedCardIndex < _cardSprites.size())
+    {
+        highlightSelectedCard();
     }
 }
 
@@ -607,56 +674,69 @@ void FightingScene::applyCardEffects(const Card& card)
 }
 
 // 打出卡牌
+
 void FightingScene::playCard(int index)
 {
     if (_isCooldown) {
-        // 如果处于冷却状态，直接返回
-        return;
+        return; // 如果处于冷却状态，直接返回
     }
 
-    if (index >= 0 && index < _cards.size())
-    {
-        // 执行打出卡牌的逻辑
+    if (index >= 0 && index < _cards.size()) {
+        // 原逻辑不变
         Card playedCard = _cards[index];
         applyCardEffects(playedCard);
 
-        // 设置冷却状态
+        // 获取对应卡牌精灵
+        auto cardSprite = _cardSprites[index];
+
+        // 让该卡牌优先显示
+        cardSprite->setLocalZOrder(9999);
+
+        // 目标位置：弃牌堆按钮
+        Vec2 discardPos = _discardDeckButton->getPosition();
+        auto moveAction = MoveTo::create(0.3f, discardPos);
+        auto scaleAction = ScaleTo::create(0.3f, 0.1f);
+        auto moveAndScale = Spawn::create(moveAction, scaleAction, nullptr);
+
+        // 动画播放完再移除并丢弃
+        auto finish = CallFunc::create([this, index, cardSprite]() {
+            cardSprite->removeFromParent();
+            discardCard(index);
+            _selectedCardIndex = -1;
+            highlightSelectedCard();
+            });
+
+        cardSprite->runAction(Sequence::create(moveAndScale, finish, nullptr));
+
+        // 设置冷却
         _isCooldown = true;
         this->runAction(Sequence::create(
-            Spawn::create(
-                Sequence::create(
-                    DelayTime::create(COOLDOWN_TIME),
-                    CallFunc::create([this]() { _isCooldown = false; }),
-                    nullptr
-                ),
-                Sequence::create(
-                    DelayTime::create(DISCARD_DELAY),
-                    CallFunc::create([this, index]() {
-                        discardCard(index);
-                        _selectedCardIndex = -1;
-                        highlightSelectedCard();
-                        }),
-                    nullptr
-                ),
-                nullptr
-            ),
+            DelayTime::create(COOLDOWN_TIME),
+            CallFunc::create([this]() { _isCooldown = false; }),
             nullptr
         ));
     }
 }
+
 
 // 高亮选中的卡牌
 void FightingScene::highlightSelectedCard()
 {
     for (size_t i = 0; i < _cardSprites.size(); ++i)
     {
-        if (i == _selectedCardIndex)
+        // 确保精灵有效且仍然在场景中
+        if (_cardSprites[i] && _cardSprites[i]->getParent())
         {
-            _cardSprites[i]->setColor(Color3B::YELLOW); // 高亮选中的卡牌
-        }
-        else
-        {
-            _cardSprites[i]->setColor(Color3B::WHITE); // 取消高亮其他卡牌
+            if (i == _selectedCardIndex)
+            {
+                // 高亮选中的卡牌
+                _cardSprites[i]->setColor(cocos2d::Color3B(255, 255, 0)); // 黄色
+            }
+            else
+            {
+                // 恢复正常颜色
+                _cardSprites[i]->setColor(cocos2d::Color3B(255, 255, 255)); // 白色
+            }
         }
     }
 }
@@ -689,4 +769,79 @@ void FightingScene::goToDiscardDeck(Ref* sender)
 {
     auto discardDeckScene = DiscardDeck::createScene(_discardPile);
     Director::getInstance()->pushScene(discardDeckScene);
+}
+
+// 假设 discardPilePosition、drawPilePosition 为弃牌堆与抽牌堆的屏幕坐标
+
+void FightingScene::playDiscardToDrawMeteorEffect(const Vec2& discardPilePosition, const Vec2& drawPilePosition)
+{
+    // 创建流星粒子
+    auto meteor = ParticleMeteor::create();
+    meteor->setPosition(discardPilePosition);
+    meteor->setDuration(0.8f); // 总时长，可根据需要调整
+
+    // 调整粒子颜色（加深颜色）
+    Color4F currentColor = meteor->getStartColor();
+    Color4F deepColor(currentColor.r * 0.5f, currentColor.g * 0.5f, currentColor.b * 0.5f, currentColor.a);
+    meteor->setStartColor(deepColor);
+    // 如有需要，也可以调整终点颜色
+    Color4F endColor = meteor->getEndColor();
+    Color4F deepEndColor(endColor.r * 0.5f, endColor.g * 0.5f, endColor.b * 0.5f, endColor.a);
+    meteor->setEndColor(deepEndColor);
+
+    // 创建移动动作
+    auto moveAction = MoveTo::create(0.8f, drawPilePosition);
+    auto sequence = Sequence::create(
+        moveAction,
+        CallFunc::create([meteor]() {
+            meteor->removeFromParent(); // 移除粒子
+            }),
+        nullptr);
+
+    // 运行动作并添加到场景
+    meteor->runAction(sequence);
+    meteor->setAutoRemoveOnFinish(false); // 不自动移除，手动移除
+    this->addChild(meteor, 10);
+}
+
+// 递归依次抽多张牌的函数
+void FightingScene::drawSequentialCards(int count)
+{
+    if (count <= 0) return;
+
+    if (_drawPile.empty())
+    {
+        _drawPile = _discardPile;
+        _discardPile.clear();
+        shuffleDrawPile();
+    }
+
+    if (!_drawPile.empty())
+    {
+        // 从抽牌堆取顶
+        Card drawnCard = _drawPile.back();
+        _drawPile.pop_back();
+
+        // 创建临时精灵，从抽牌堆按钮位置出现
+        auto tempSprite = Sprite::create("cardBackground.jpg");
+        tempSprite->setPosition(_drawDeckButton->getPosition());
+        tempSprite->setScale(0.0f);
+        tempSprite->setLocalZOrder(9999);
+        this->addChild(tempSprite);
+
+        // 飞行并放大
+        auto moveAction = MoveTo::create(0.3f, Vec2(_visibleSize.width * 0.5f, tempSprite->getContentSize().height / 3));
+        auto scaleAction = ScaleTo::create(0.3f, 1.0f);
+        auto spawn = Spawn::create(moveAction, scaleAction, nullptr);
+
+        // 动画结束后：加入到手牌、移除临时精灵并递归调用下一张
+        auto finish = CallFunc::create([this, drawnCard, tempSprite, count]() {
+            _cards.push_back(drawnCard);
+            tempSprite->removeFromParent();
+            updateHandDisplay();
+            drawSequentialCards(count - 1);
+            });
+
+        tempSprite->runAction(Sequence::create(spawn, finish, nullptr));
+    }
 }
