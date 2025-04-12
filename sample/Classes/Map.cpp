@@ -3,6 +3,7 @@
 #include "FightingScene.h"
 #include "question.h"
 #include "Rest.h"
+#include "Shop.h"
 #include <random>
 
 USING_NS_CC;
@@ -74,10 +75,27 @@ namespace MyGame {
         this->addChild(scrollView);
 
         // 添加地图背景图片
-        auto background = Sprite::create("map_background.png");
+        // 添加地图背景图片
+        auto background = Sprite::create("map_background.jpg");
         if (background)
         {
-            background->setPosition(Vec2(visibleSize.width / 2, scrollView->getInnerContainerSize().height / 2));
+            // 获取背景图片原始大小和滚动容器大小
+            Size bgSize = background->getContentSize();
+            Size containerSize = scrollView->getInnerContainerSize();
+
+            // 计算缩放因子使图片宽度适应屏幕宽度
+            float scaleX = visibleSize.width / bgSize.width;
+            // 计算缩放因子使图片高度适应滚动区域高度
+            float scaleY = containerSize.height / bgSize.height;
+            // 使用较大的缩放因子以确保图片覆盖整个可见区域
+            float scale = std::max(scaleX, scaleY);
+
+            // 设置背景图片缩放
+            background->setScale(scale);
+
+            // 设置背景图片位置到滚动容器中心
+            background->setPosition(Vec2(visibleSize.width / 2, containerSize.height / 2));
+
             scrollView->addChild(background, 0);  // 将背景图片添加到最底层
         }
 
@@ -186,7 +204,7 @@ namespace MyGame {
 
         // 更新概率分布，添加ELITE类型
         // START(0), BATTLE(1), QUESTION(2), REST(3), BOSS(4), ELITE(5)
-        static std::discrete_distribution<> dis({ 0, 45, 30, 10, 0, 15 });  // 给ELITE 15%的概率
+        static std::discrete_distribution<> dis({ 0, 45, 20, 10, 0, 15,10 });  // 给ELITE 15%的概率
 
         // 获取随机值并转换为RoomType
         int randomType = dis(gen);
@@ -273,6 +291,7 @@ namespace MyGame {
                         "battle_selected.png",
                         CC_CALLBACK_1(Map::menuBattleCallback, this)
                     );
+                    roomItem->setScale(0.5);
                     break;
                 case RoomType::QUESTION:
                     roomItem = MenuItemImage::create(
@@ -280,6 +299,7 @@ namespace MyGame {
                         "question_selected.png",
                         CC_CALLBACK_1(Map::menuQuestionCallback, this)
                     );
+                    roomItem->setScale(0.5);
                     break;
                 case RoomType::REST:
                     roomItem = MenuItemImage::create(
@@ -287,6 +307,7 @@ namespace MyGame {
                         "rest_selected.png",
                         CC_CALLBACK_1(Map::menuRestCallback, this)
                     );
+                    roomItem->setScale(0.5);
                     break;
                 case RoomType::BOSS:
                     roomItem = MenuItemImage::create(
@@ -294,6 +315,7 @@ namespace MyGame {
                         "boss_selected.png",
                         CC_CALLBACK_1(Map::menuBossCallback, this)
                     );
+                    roomItem->setScale(0.5);
                     break;
 
                 case RoomType::ELITE:
@@ -302,7 +324,16 @@ namespace MyGame {
                         "elite_selected.png",
                         CC_CALLBACK_1(Map::menuEliteCallback, this)
                     );
+                    roomItem->setScale(0.5);
                     break;
+				case RoomType::SHOP:
+					roomItem = MenuItemImage::create(
+						"shop_normal.png",
+						"shop_selected.png",
+						CC_CALLBACK_1(Map::menuShopCallback, this)
+					);
+                    roomItem->setScale(0.15);
+					break;
                 }
                 if (roomItem)
                 {
@@ -325,7 +356,6 @@ namespace MyGame {
                     }
 
                     roomItem->setPosition(position);
-                    roomItem->setScale(0.5);  // 调整按钮大小
                     // 存储层级信息
                     roomItem->setTag(i);
 
@@ -345,7 +375,6 @@ namespace MyGame {
 
         connectRooms(mapLayers);
     }
-
 
     void Map::generateMapFromSavedInfo()
     {
@@ -370,6 +399,7 @@ namespace MyGame {
                         "battle_selected.png",
                         CC_CALLBACK_1(Map::menuBattleCallback, this)
                     );
+                    roomItem->setScale(0.5);
                     break;
                 case RoomType::QUESTION:
                     roomItem = MenuItemImage::create(
@@ -377,6 +407,7 @@ namespace MyGame {
                         "question_selected.png",
                         CC_CALLBACK_1(Map::menuQuestionCallback, this)
                     );
+                    roomItem->setScale(0.5);
                     break;
                 case RoomType::REST:
                     roomItem = MenuItemImage::create(
@@ -384,6 +415,7 @@ namespace MyGame {
                         "rest_selected.png",
                         CC_CALLBACK_1(Map::menuRestCallback, this)
                     );
+                    roomItem->setScale(0.5);
                     break;
                 case RoomType::BOSS:
                     roomItem = MenuItemImage::create(
@@ -391,6 +423,7 @@ namespace MyGame {
                         "boss_selected.png",
                         CC_CALLBACK_1(Map::menuBossCallback, this)
                     );
+                    roomItem->setScale(0.5);
                     break;
                 case RoomType::ELITE:
                     roomItem = MenuItemImage::create(
@@ -398,13 +431,22 @@ namespace MyGame {
                         "elite_selected.png",
                         CC_CALLBACK_1(Map::menuEliteCallback, this)
                     );
+                    roomItem->setScale(0.5);
                     break;
+                case RoomType::SHOP:
+                    roomItem = MenuItemImage::create(
+                        "shop_normal.png",  // 使用商店图标
+                        "shop_selected.png",
+                        CC_CALLBACK_1(Map::menuShopCallback, this)
+                    );
+                    roomItem->setScale(0.15);
+                    break;
+
                 }
 
                 if (roomItem)
                 {
                     roomItem->setPosition(roomInfo.position);
-                    roomItem->setScale(0.5);  // 调整按钮大小
                     // 存储层级信息
                     roomItem->setTag(i);
 
@@ -423,13 +465,39 @@ namespace MyGame {
 
     void Map::connectRooms(const std::vector<std::vector<Room>>& map)
     {
+        // 创建一个DrawNode用于绘制连接线，降低zOrder使其位于图标下方
         auto drawNode = DrawNode::create();
-        scrollView->addChild(drawNode, 2);  // 确保连接线在按钮之上
+        scrollView->addChild(drawNode, 0);  // zOrder为0，会被zOrder为1的房间图标覆盖
 
         // 如果已经有保存的连线信息，直接使用
         if (!staticConnectionInfo.empty()) {
             for (const auto& connection : staticConnectionInfo) {
-                drawNode->drawLine(connection.start, connection.end, Color4F::WHITE);
+                // 使用渐变色的线条，从起点到终点由浅蓝色过渡到深蓝色
+                Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);  // 浅蓝色，半透明
+                Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);    // 深蓝色，半透明
+
+                // 绘制粗线段，使用渐变效果
+                float lineWidth = 3.0f;  // 增加线条宽度
+
+                // 先绘制阴影效果
+                drawNode->drawSegment(
+                    connection.start,
+                    connection.end,
+                    lineWidth + 1.0f,
+                    Color4F(0.0f, 0.0f, 0.0f, 0.3f)
+                );
+
+                // 再绘制主线
+                drawNode->drawSegment(
+                    connection.start,
+                    connection.end,
+                    lineWidth,
+                    startColor
+                );
+
+                // 在关键点绘制小圆点，增加视觉效果
+                drawNode->drawDot(connection.start, lineWidth * 1.2f, startColor);
+                drawNode->drawDot(connection.end, lineWidth * 1.2f, endColor);
             }
             return;
         }
@@ -452,7 +520,26 @@ namespace MyGame {
                 auto bossPos = nextLayer[0].item->getPosition();
                 for (const auto& currentRoom : currentLayer) {
                     auto startPos = currentRoom.item->getPosition();
-                    drawNode->drawLine(startPos, bossPos, Color4F::WHITE);
+
+                    // 使用渐变色的线条
+                    Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);
+                    Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);
+
+                    // 先绘制阴影
+                    drawNode->drawSegment(
+                        startPos,
+                        bossPos,
+                        3.0f + 1.0f,  // 主线宽度+阴影宽度
+                        Color4F(0.0f, 0.0f, 0.0f, 0.3f)
+                    );
+
+                    // 再绘制主线
+                    drawNode->drawSegment(startPos, bossPos, 3.0f, startColor);
+
+                    // 添加点缀效果
+                    drawNode->drawDot(startPos, 4.0f, startColor);
+                    drawNode->drawDot(bossPos, 4.0f, endColor);
+
                     // 保存连线信息
                     staticConnectionInfo.push_back({ startPos, bossPos });
                 }
@@ -477,7 +564,26 @@ namespace MyGame {
                     // 如果下一层房间少于3个，所有房间都可以互相连接
                     for (size_t k = 0; k < nextLayer.size() && connectionsCount < maxConnections; k++) {
                         auto endPos = nextLayer[k].item->getPosition();
-                        drawNode->drawLine(startPos, endPos, Color4F::WHITE);
+
+                        // 使用渐变色的线条
+                        Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);  // 浅蓝色
+                        Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);    // 深蓝色
+
+                        // 先绘制阴影
+                        drawNode->drawSegment(
+                            startPos,
+                            endPos,
+                            3.0f + 1.0f,
+                            Color4F(0.0f, 0.0f, 0.0f, 0.3f)
+                        );
+
+                        // 再绘制主线
+                        drawNode->drawSegment(startPos, endPos, 3.0f, startColor);
+
+                        // 添加点缀效果
+                        drawNode->drawDot(startPos, 4.0f, startColor);
+                        drawNode->drawDot(endPos, 4.0f, endColor);
+
                         // 保存连线信息
                         staticConnectionInfo.push_back({ startPos, endPos });
                         nextRoomConnected[k] = true;
@@ -486,37 +592,29 @@ namespace MyGame {
                 }
                 else {
                     // 为每个房间找到"合理"的连接位置
-                    // 首先尝试正下方的位置索引
+                    // 与原代码相同的逻辑
                     int baseIndex;
 
                     if (currentLayer.size() <= nextLayer.size()) {
-                        // 当前层房间少于等于下一层
                         baseIndex = j * nextLayer.size() / currentLayer.size();
                     }
                     else {
-                        // 当前层房间多于下一层
                         baseIndex = j * nextLayer.size() / currentLayer.size();
                         baseIndex = std::min(baseIndex, (int)nextLayer.size() - 1);
                     }
 
-                    // 可连接范围：允许跨越一个房间
-                    int minIndex = std::max(0, baseIndex - 1); // 往左最多一个
-                    int maxIndex = std::min((int)nextLayer.size() - 1, baseIndex + 1); // 往右最多一个
+                    int minIndex = std::max(0, baseIndex - 1);
+                    int maxIndex = std::min((int)nextLayer.size() - 1, baseIndex + 1);
 
-                    // 随机连接范围内的1-2个房间
                     std::vector<int> connectIndexes;
-
-                    // 首先总是连接正下方或最接近的房间
                     connectIndexes.push_back(baseIndex);
                     nextRoomConnected[baseIndex] = true;
                     connectionsCount++;
 
-                    // 50%几率添加第二个连接
                     if (std::rand() % 2 == 0 && connectionsCount < maxConnections) {
-                        // 在剩余范围内随机选择
                         std::vector<int> remainingIndexes;
                         for (int k = minIndex; k <= maxIndex; k++) {
-                            if (k != baseIndex) { // 不包括已经连接的baseIndex
+                            if (k != baseIndex) {
                                 remainingIndexes.push_back(k);
                             }
                         }
@@ -529,10 +627,29 @@ namespace MyGame {
                         }
                     }
 
-                    // 绘制所有连接
+                    // 绘制所有连接，使用美化效果
                     for (int idx : connectIndexes) {
                         auto endPos = nextLayer[idx].item->getPosition();
-                        drawNode->drawLine(startPos, endPos, Color4F::WHITE);
+
+                        // 使用渐变色的线条
+                        Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);
+                        Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);
+
+                        // 先绘制阴影
+                        drawNode->drawSegment(
+                            startPos,
+                            endPos,
+                            3.0f + 1.0f,
+                            Color4F(0.0f, 0.0f, 0.0f, 0.3f)
+                        );
+
+                        // 再绘制主线
+                        drawNode->drawSegment(startPos, endPos, 3.0f, startColor);
+
+                        // 添加点缀效果
+                        drawNode->drawDot(startPos, 4.0f, startColor);
+                        drawNode->drawDot(endPos, 4.0f, endColor);
+
                         // 保存连线信息
                         staticConnectionInfo.push_back({ startPos, endPos });
                     }
@@ -558,7 +675,26 @@ namespace MyGame {
 
                     auto startPos = currentLayer[closestRoomIndex].item->getPosition();
                     auto endPos = nextLayer[j].item->getPosition();
-                    drawNode->drawLine(startPos, endPos, Color4F::WHITE);
+
+                    // 使用渐变色的线条
+                    Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);
+                    Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);
+
+                    // 先绘制阴影
+                    drawNode->drawSegment(
+                        startPos,
+                        endPos,
+                        3.0f + 1.0f,
+                        Color4F(0.0f, 0.0f, 0.0f, 0.3f)
+                    );
+
+                    // 再绘制主线
+                    drawNode->drawSegment(startPos, endPos, 3.0f, startColor);
+
+                    // 添加点缀效果
+                    drawNode->drawDot(startPos, 4.0f, startColor);
+                    drawNode->drawDot(endPos, 4.0f, endColor);
+
                     // 保存连线信息
                     staticConnectionInfo.push_back({ startPos, endPos });
                     nextRoomConnected[j] = true;
@@ -566,6 +702,7 @@ namespace MyGame {
             }
         }
     }
+
 
     void Map::menuBattleCallback(Ref* pSender)
     {
@@ -761,5 +898,45 @@ namespace MyGame {
         auto scene = FightingScene::createScene();
         Director::getInstance()->replaceScene(scene);
     }
+
+    void Map::menuShopCallback(Ref* pSender)
+    {
+        auto item = static_cast<MenuItemImage*>(pSender);
+        int layerIndex = item->getTag();
+
+        // 检查是否可以访问这个层级
+        if (layerIndex > maxAccessibleLayer)
+        {
+            // 创建提示标签
+            auto visibleSize = Director::getInstance()->getVisibleSize();
+            auto label = Label::createWithTTF("无法进入商店", "fonts/Marker Felt.ttf", 32);
+            label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
+            this->addChild(label, 5);
+
+            // 2秒后移除提示
+            label->runAction(Sequence::create(
+                DelayTime::create(2.0f),
+                RemoveSelf::create(),
+                nullptr
+            ));
+
+            return;
+        }
+
+        // 设置当前选中的层和房间
+        currentLayer = layerIndex;
+        currentRoom = 0;
+
+        // 记录当前房间位置
+        currentRoomPosition = item->getPosition();
+
+        // 标记为已完成房间
+        roomCompleted = true;
+
+        // 切换到商店场景
+        auto scene = ShopScene::createScene();
+        Director::getInstance()->replaceScene(scene);
+    }
+
 
 }

@@ -2,6 +2,9 @@
 
 USING_NS_CC;
 
+// 添加一个静态变量来存储英雄的健康值
+static int heroHealth = 100; // 默认生命值为100
+
 // 创建主角实例
 Hero* Hero::create(const std::string& filename)
 {
@@ -15,6 +18,18 @@ Hero* Hero::create(const std::string& filename)
     return nullptr;
 }
 
+// 获取当前健康值
+int Hero::getCurrentHealth()
+{
+    return heroHealth;
+}
+
+// 恢复指定数量的生命值，不超过上限
+void Hero::healHealth(int amount)
+{
+    heroHealth = std::min(heroHealth + amount, MAX_HEALTH);
+}
+
 // 初始化主角
 bool Hero::init(const std::string& filename)
 {
@@ -23,9 +38,9 @@ bool Hero::init(const std::string& filename)
         return false;
     }
 
-    // 初始化主角的属性
-    _health = 100; // 默认生命值
-    _coins = 0;    // 默认金币数量
+    // 使用保存的生命值初始化主角
+    _health = heroHealth;
+
     // 创建默认的卡组
     createDefaultDeck();
 
@@ -36,12 +51,21 @@ bool Hero::init(const std::string& filename)
 void Hero::setHealth(int health)
 {
     _health = health;
+    // 同时更新静态变量
+    heroHealth = health;
 }
 
 // 获取主角的生命值
 int Hero::getHealth() const
 {
     return _health;
+}
+
+// 重置健康值（可以在游戏重新开始时调用）
+void Hero::resetHealth()
+{
+    heroHealth = 100;  // 只需重置静态变量
+    // 删除对 _health 的引用
 }
 
 // 设置主角的防御值
@@ -73,7 +97,6 @@ void Hero::clearDeck()
 }
 
 // 初始化默认卡组
-// 初始化默认卡组
 void Hero::createDefaultDeck()
 {
     // 这里示例创建一个初始卡组，具体卡牌属性根据实际需求调整
@@ -97,7 +120,6 @@ void Hero::createDefaultDeck()
     strengthCard.addEffect(Effect::Type::Strength, 2, -1); // 2级力量，持续时间为永久
     addCardToDeck(strengthCard);
 }
-
 
 //  添加效果
 void Hero::addEffect(std::shared_ptr<Effect> effect) {
