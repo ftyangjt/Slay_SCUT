@@ -16,7 +16,8 @@ namespace MyGame {
         QUESTION,
         REST,
         BOSS,// 添加 BOSS 类型
-        ELITE
+        ELITE,
+        SHOP
     };
 
     struct Room {
@@ -43,6 +44,7 @@ namespace MyGame {
         void menuRestCallback(cocos2d::Ref* pSender);
         void menuBossCallback(cocos2d::Ref* pSender);  // 添加 BOSS 回调函数
 		void menuEliteCallback(cocos2d::Ref* pSender); // 添加 ELITE 回调函数
+		void menuShopCallback(cocos2d::Ref* pSender); // 添加 SHOP 回调函数
         RoomType getRandomRoomType();
         void generateRandomMap(int layers, int roomsPerLayer);
         void generateMapFromSavedInfo();
