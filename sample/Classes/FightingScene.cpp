@@ -47,6 +47,8 @@ bool FightingScene::init()
 
     // 初始化抽牌堆和弃牌堆
     initializeDrawPile();
+	// 创建费用标签
+	createCostLabel();
 
     // 创建血量标签
     createHealthLabels();
@@ -72,6 +74,23 @@ bool FightingScene::init()
     startPlayerTurn();
 
     return true;
+}
+
+
+//创建费用标签
+void FightingScene::createCostLabel()
+{
+    // 获取英雄的位置
+    Vec2 heroPosition = _hero->getPosition();
+    float heroHeight = _hero->getContentSize().height;
+
+    // 创建费用标签
+    _costLabel = Label::createWithTTF("Cost: 3", "fonts/Marker Felt.ttf", 60);
+    _costLabel->setTextColor(Color4B::ORANGE); // 设置标签颜色为orange
+
+    // 设置费用标签的位置到英雄脚下
+    _costLabel->setPosition(Vec2(heroPosition.x, heroPosition.y - heroHeight / 2+60));
+    this->addChild(_costLabel, 1);
 }
 
 // 创建血量标签
@@ -208,6 +227,12 @@ void FightingScene::updateHealthAndBlockLabels()
     _monsterBlockLabel->setString("Monster Block: " + std::to_string(_monster->getBlock()));
 }
 
+// 更新费用标签
+void FightingScene::updateCostLabel()
+{
+    _costLabel->setString("Cost: " + std::to_string(_currentCost));
+}
+
 // 更新 BUFF 和 DEBUFF 标签
 void FightingScene::updateBuffLabels() {
     // 更新英雄 BUFF 标签
@@ -245,9 +270,12 @@ void FightingScene::updateBuffLabels() {
 void FightingScene::startPlayerTurn()
 {
     _isPlayerTurn = true;
-
+	// 重置费用
+    _currentCost = 3;
 	// 更新回合数标签
     _turnCountLabel->setString("Turn: " + std::to_string(_turnCount));
+
+	_costLabel->setString("Cost: " + std::to_string(_currentCost));
 
     updateHandDisplay();
 
@@ -526,7 +554,7 @@ void FightingScene::shuffleDrawPile()
 }
 
 // 给卡牌添加效果标签
-void FightingScene::addCardEffectLabel(cocos2d::Sprite* cardSprite, const std::string& effect)
+cocos2d::Label* FightingScene::addCardEffectLabel(cocos2d::Sprite* cardSprite, const std::string& effect)
 {
     // 获取卡牌的宽度
     float cardWidth = cardSprite->getContentSize().width;
@@ -539,13 +567,17 @@ void FightingScene::addCardEffectLabel(cocos2d::Sprite* cardSprite, const std::s
     effectLabel->setPosition(Vec2(cardSprite->getContentSize().width / 2, cardSprite->getContentSize().height / 2));
     cardSprite->addChild(effectLabel, 1);
 
+    return effectLabel; // 返回效果标签
 }
+
+
+// 刷新手牌显示
 // 刷新手牌显示
 void FightingScene::updateHandDisplay()
 {
     size_t newCount = _cards.size();
 
-    // 清除现有的所有卡牌精灵
+    // 清除现有卡牌精灵
     for (auto sprite : _cardSprites)
     {
         sprite->removeFromParent();
@@ -554,63 +586,49 @@ void FightingScene::updateHandDisplay()
     _lastClickTimes.clear();
 
     if (newCount == 0)
-        return;  // 没有卡牌时直接返回
+        return;  // 无卡牌则直接返回
 
-    // 创建临时精灵以获取实际尺寸
+    // 创建临时精灵获取卡牌原始尺寸
     auto tempSprite = Sprite::create("cardBackground.jpg");
     float originalCardWidth = tempSprite->getContentSize().width;
     float originalCardHeight = tempSprite->getContentSize().height;
 
-    // 计算最大可用宽度（考虑边缘间距）
-    float availableWidth = _visibleSize.width * 0.9f;  // 留出屏幕边缘10%的空间
+    // 设置固定的缩放比例
+    float cardScale = 0.6f;
 
-    // 计算每张卡牌最小的水平间距（可根据需要调整）
-    float minCardSpacing = 10.0f;
+    // 计算缩放后的实际卡牌宽度
+    float scaledCardWidth = originalCardWidth * cardScale;
+    float scaledCardHeight = originalCardHeight * cardScale;
 
-    // 计算最大可能的卡牌宽度，使得所有卡牌能够显示
-    float maxCardWidth;
+    // 使用负值的间距使卡牌重叠，这将使它们更紧密
+    float cardOverlap = -20.0f;  // 负值表示重叠
 
-    if (newCount == 1) {
-        // 只有一张卡牌时，宽度可以稍大
-        maxCardWidth = originalCardWidth * 0.8f;
-    }
-    else {
-        // 计算最大可能的卡牌宽度，确保所有卡牌都能显示
-        float totalSpacing = (newCount - 1) * minCardSpacing;
-        maxCardWidth = (availableWidth - totalSpacing) / newCount;
-    }
-
-    // 根据最大宽度计算缩放因子
-    float scaleFactor = std::min(1.0f, maxCardWidth / originalCardWidth);
-
-    // 计算实际卡牌宽度和高度
-    float actualCardWidth = originalCardWidth * scaleFactor;
-    float actualCardHeight = originalCardHeight * scaleFactor;
-
-    // 计算卡牌排列的起始X坐标（居中显示）
-    float totalWidth = newCount * actualCardWidth + (newCount - 1) * minCardSpacing;
-    float startX = (_visibleSize.width - totalWidth) / 2 + actualCardWidth / 2;
-
-    // 修改这里：调整卡牌垂直位置，使其更接近屏幕底部
-    // 将卡牌放在更低的位置，只露出部分高度
-    float cardY = _origin.y + actualCardHeight * 0.4f; // 改为0.4倍卡牌高度
+    // 计算全部卡牌排列的总宽度，并居中显示
+    float totalWidth = scaledCardWidth + (newCount - 1) * (scaledCardWidth + cardOverlap);
+    float startX = (_visibleSize.width - totalWidth) / 2 + scaledCardWidth / 2;
 
     // 创建并排列卡牌
     for (size_t i = 0; i < newCount; ++i)
     {
         auto sprite = Sprite::create("cardBackground.jpg");
-        float posX = startX + i * (actualCardWidth + minCardSpacing);
+        // 计算重叠的位置
+        float posX = startX + i * (scaledCardWidth + cardOverlap);
 
-        // 设置位置和初始缩放
-        sprite->setPosition(Vec2(posX, cardY));
-        sprite->setScale(scaleFactor);
-
+        // 设置卡牌位置和固定缩放比例
+        sprite->setPosition(Vec2(posX, _origin.y + scaledCardHeight * 0.4f));
+        sprite->setScale(cardScale);
         this->addChild(sprite, 1);
         _cardSprites.push_back(sprite);
         _lastClickTimes.push_back(std::chrono::steady_clock::now());
 
         // 添加卡牌效果标签
-        addCardEffectLabel(sprite, _cards[i].getEffect());
+        auto effectLabel = addCardEffectLabel(sprite, _cards[i].getEffect());
+
+        // 添加费用标签
+        auto costLabel = Label::createWithTTF("Cost: " + std::to_string(_cards[i].getCost()), "fonts/Marker Felt.ttf", 24);
+        costLabel->setTextColor(Color4B::ORANGE);
+        costLabel->setPosition(Vec2(sprite->getContentSize().width / 2, effectLabel->getPositionY() - 60));
+        sprite->addChild(costLabel, 1);
 
         // 注册触摸事件
         auto listener = EventListenerTouchOneByOne::create();
@@ -627,12 +645,15 @@ void FightingScene::updateHandDisplay()
         _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, sprite);
     }
 
-    // 检查并高亮选中的卡牌
+    // 高亮选中的卡牌（如果有）
     if (_selectedCardIndex >= 0 && _selectedCardIndex < _cardSprites.size())
     {
         highlightSelectedCard();
     }
 }
+
+
+
 
 // 应用BUFF和DEBUFF
 void FightingScene::applyEffects(int& damage, int& block, const std::vector<std::shared_ptr<Effect>>& effects, const Card::Type cardType, bool isTargetMonster)
@@ -763,10 +784,21 @@ void FightingScene::playCard(int index)
     if (index >= 0 && index < _cards.size()) {
         // 原逻辑不变
         Card playedCard = _cards[index];
-        applyCardEffects(playedCard);
+        
+        int cost = playedCard.getCost();
+		// 检查能量是否足够
+        if (cost > _currentCost)
+        {
+            CCLOG("Energy not enough to play this card!");
+            return;
+        }
+        // 如果费用足够，扣费并进行原有逻辑
+        _currentCost -= cost;
+        updateCostLabel();
 
+		// 处理卡牌精灵
         auto cardSprite = _cardSprites[index];
-
+        applyCardEffects(playedCard);
         // 让该卡牌优先显示
         cardSprite->setLocalZOrder(9999);
 
@@ -810,8 +842,18 @@ void FightingScene::highlightSelectedCard()
         {
             if (i == _selectedCardIndex)
             {
-                // 高亮选中的卡牌
-                _cardSprites[i]->setColor(cocos2d::Color3B(255, 255, 0)); // 黄色
+                // 获取卡牌的费用
+                int cardCost = _cards[i].getCost();
+
+                // 如果费用足够，标黄；否则标红
+                if (cardCost <= _currentCost)
+                {
+                    _cardSprites[i]->setColor(cocos2d::Color3B(255, 255, 0)); // 黄色
+                }
+                else
+                {
+                    _cardSprites[i]->setColor(cocos2d::Color3B(255, 0, 0)); // 红色
+                }
             }
             else
             {

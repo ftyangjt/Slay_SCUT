@@ -38,12 +38,13 @@ private:
     void discardCard(int index); // 弃一张牌
     void shuffleDrawPile(); // 洗牌
     void initializeDrawPile(); // 初始化牌堆
+	void createCostLabel();
     void createHealthLabels();
     void createBlockLabels();
     void createBuffLabels();
     void updateBuffLabels();
     void updateHandDisplay();
-    void addCardEffectLabel(cocos2d::Sprite* cardSprite, const std::string& effect);
+    cocos2d::Label* addCardEffectLabel(cocos2d::Sprite* cardSprite, const std::string& effect);
     void playCard(int index);
     void highlightSelectedCard();
     void handleCardTap(size_t cardIndex, cocos2d::Touch* touch); // 确保使用正确的类型
@@ -54,10 +55,12 @@ private:
 	void goToDiscardDeck(Ref* sender);// 前往弃牌堆
     void playDiscardToDrawMeteorEffect(const cocos2d::Vec2& discardPilePosition, const cocos2d::Vec2& drawPilePosition);
     void drawSequentialCards(int count);
+    void updateCostLabel();
     cocos2d::Size _visibleSize;
     cocos2d::Vec2 _origin;
     bool _isCooldown = false; // 表示出牌是否处于冷却状态
     int _selectedCardIndex = -1; // -1 表示没有选中的卡牌
+    int _currentCost;         // 当前可用费用
     std::vector<Card> _drawPile; // 抽牌堆
     std::vector<Card> _discardPile; // 弃牌堆
     bool _isPlayerTurn; // 是否是玩家回合
@@ -66,6 +69,7 @@ private:
     cocos2d::Sprite* _selectedCard; // 选中的卡牌
     Hero* _hero; // 英雄对象
     Monster* _monster; // 怪物对象
+    cocos2d::Label* _costLabel; // 显示当前费用的UI
     cocos2d::Label* _heroHealthLabel; // 显示英雄血量的标签
     cocos2d::Label* _monsterHealthLabel; // 显示怪物血量的标签
     cocos2d::Label* _heroBlockLabel; // 显示英雄格挡的标签
