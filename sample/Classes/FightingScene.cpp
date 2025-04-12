@@ -1,4 +1,4 @@
-#include "FightingScene.h"
+﻿#include "FightingScene.h"
 #include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
 #include "Map.h"
@@ -286,13 +286,13 @@ void FightingScene::createDiscardDeck()
         "showDiscard_Selected.png",
         CC_CALLBACK_1(FightingScene::goToDiscardDeck, this)
     );
-    showDiscardDeckButton->setScale(0.5f);
+    showDiscardDeckButton->setScale(0.25f);
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     // 设置按钮位置在画面右下角
     showDiscardDeckButton->setPosition(Vec2(origin.x + visibleSize.width - showDiscardDeckButton->getContentSize().width / 2,
-        origin.y + showDiscardDeckButton->getContentSize().height / 2));
+        origin.y + showDiscardDeckButton->getContentSize().height * 1.4));
 
     // 保存按钮指针到成员变量中
     _discardDeckButton = showDiscardDeckButton;
@@ -312,13 +312,13 @@ void FightingScene::createDrawDeck()
         "showDraw_Selected.png",
         CC_CALLBACK_1(FightingScene::goToDrawDeck, this)
     );
-    showDrawDeckButton->setScale(0.5f);
+    showDrawDeckButton->setScale(0.25f);
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     // 设置按钮位置在画面左下角
     showDrawDeckButton->setPosition(Vec2(origin.x + showDrawDeckButton->getContentSize().width / 2,
-        origin.y + showDrawDeckButton->getContentSize().height / 2));
+        origin.y + showDrawDeckButton->getContentSize().height * 1.4));
 	// 保存按钮指针到成员变量中
 	_drawDeckButton = showDrawDeckButton;
     auto buttonMenu = Menu::create(showDrawDeckButton, nullptr);
@@ -441,7 +441,7 @@ void FightingScene::checkBattleEnd()
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-        auto victoryLabel = Label::createWithTTF("战斗胜利！", "fonts/Marker Felt.ttf", 80);
+        auto victoryLabel = Label::createWithTTF("YOU WIN！", "fonts/Marker Felt.ttf", 80);
         victoryLabel->setTextColor(Color4B::YELLOW);
         victoryLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
         this->addChild(victoryLabel, 10);
