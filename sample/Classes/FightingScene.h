@@ -8,8 +8,8 @@
 #include "DiscardDeck.h"
 #include "DrawDeck.h"
 
-// ³£Á¿¶¨Òå
-const int DOUBLE_CLICK_THRESHOLD = 300;  // ºÁÃë
+// å¸¸é‡å®šä¹‰
+const int DOUBLE_CLICK_THRESHOLD = 300;  // æ¯«ç§’
 const float CARD_SCALE = 0.25f;
 const float COOLDOWN_TIME = 0.5f;
 const float DISCARD_DELAY = 0.1f;
@@ -27,53 +27,56 @@ public:
 private:
     void createBackground();
     void createCharacters();
-	void createDrawDeck();// ´´½¨³éÅÆ¶Ñ°´Å¥
-	void createDiscardDeck();// ´´½¨ÆúÅÆ¶Ñ°´Å¥
+	void createDrawDeck();// åˆ›å»ºæŠ½ç‰Œå †æŒ‰é’®
+	void createDiscardDeck();// åˆ›å»ºå¼ƒç‰Œå †æŒ‰é’®
     void updateHealthAndBlockLabels();
     void startPlayerTurn();
     void startMonsterTurn();
     void endTurn();
     void checkBattleEnd();
-    void drawCard(); // ³éÒ»ÕÅÅÆ
-    void discardCard(int index); // ÆúÒ»ÕÅÅÆ
-    void shuffleDrawPile(); // Ï´ÅÆ
-    void initializeDrawPile(); // ³õÊ¼»¯ÅÆ¶Ñ
+    void drawCard(); // æŠ½ä¸€å¼ ç‰Œ
+    void discardCard(int index); // å¼ƒä¸€å¼ ç‰Œ
+    void shuffleDrawPile(); // æ´—ç‰Œ
+    void initializeDrawPile(); // åˆå§‹åŒ–ç‰Œå †
     void createHealthLabels();
     void createBlockLabels();
+    void createBuffLabels();
+    void updateBuffLabels();
     void updateHandDisplay();
     void addCardEffectLabel(cocos2d::Sprite* cardSprite, const std::string& effect);
     void playCard(int index);
     void highlightSelectedCard();
-    void handleCardTap(size_t cardIndex, cocos2d::Touch* touch); // È·±£Ê¹ÓÃÕıÈ·µÄÀàĞÍ
+    void handleCardTap(size_t cardIndex, cocos2d::Touch* touch); // ç¡®ä¿ä½¿ç”¨æ­£ç¡®çš„ç±»å‹
     void applyCardEffects(const Card& card);
-    void applyEffects(int& damage, int& block, const std::vector<std::shared_ptr<Effect>>& effects, bool isTargetMonster);
+    void FightingScene::applyEffects(int& damage, int& block, const std::vector<std::shared_ptr<Effect>>& effects, const Card::Type cardType, bool isTargetMonster);
     void createTurnCountLabel();
-	void goToDrawDeck(Ref* sender);// Ç°Íù³éÅÆ¶Ñ
-	void goToDiscardDeck(Ref* sender);// Ç°ÍùÆúÅÆ¶Ñ
+	void goToDrawDeck(Ref* sender);// å‰å¾€æŠ½ç‰Œå †
+	void goToDiscardDeck(Ref* sender);// å‰å¾€å¼ƒç‰Œå †
     void playDiscardToDrawMeteorEffect(const cocos2d::Vec2& discardPilePosition, const cocos2d::Vec2& drawPilePosition);
     void drawSequentialCards(int count);
     cocos2d::Size _visibleSize;
     cocos2d::Vec2 _origin;
-    bool _isCooldown = false; // ±íÊ¾³öÅÆÊÇ·ñ´¦ÓÚÀäÈ´×´Ì¬
-    int _selectedCardIndex = -1; // -1 ±íÊ¾Ã»ÓĞÑ¡ÖĞµÄ¿¨ÅÆ
-    std::vector<Card> _drawPile; // ³éÅÆ¶Ñ
-    std::vector<Card> _discardPile; // ÆúÅÆ¶Ñ
-    bool _isPlayerTurn; // ÊÇ·ñÊÇÍæ¼Ò»ØºÏ
-    int _turnCount; // »ØºÏÊı
-    std::vector<Card> _cards; // ÊÖÅÆ
-    cocos2d::Sprite* _selectedCard; // Ñ¡ÖĞµÄ¿¨ÅÆ
-    Hero* _hero; // Ó¢ĞÛ¶ÔÏó
-    Monster* _monster; // ¹ÖÎï¶ÔÏó
-    cocos2d::Label* _heroHealthLabel; // ÏÔÊ¾Ó¢ĞÛÑªÁ¿µÄ±êÇ©
-    cocos2d::Label* _monsterHealthLabel; // ÏÔÊ¾¹ÖÎïÑªÁ¿µÄ±êÇ©
-    cocos2d::Label* _heroBlockLabel; // ÏÔÊ¾Ó¢ĞÛ¸ñµ²µÄ±êÇ©
-    cocos2d::Label* _monsterBlockLabel; // ÏÔÊ¾¹ÖÎï¸ñµ²µÄ±êÇ©
-    std::vector<cocos2d::Sprite*> _cardSprites; // ¿¨ÅÆ¾«Áé
-    std::vector<std::chrono::steady_clock::time_point> _lastClickTimes; // ¼ÇÂ¼Ã¿ÕÅ¿¨ÅÆµÄÉÏ´Îµã»÷Ê±¼ä
-    cocos2d::Label* _turnCountLabel; // ÉùÃ÷»ØºÏÊı±êÇ©
+    bool _isCooldown = false; // è¡¨ç¤ºå‡ºç‰Œæ˜¯å¦å¤„äºå†·å´çŠ¶æ€
+    int _selectedCardIndex = -1; // -1 è¡¨ç¤ºæ²¡æœ‰é€‰ä¸­çš„å¡ç‰Œ
+    std::vector<Card> _drawPile; // æŠ½ç‰Œå †
+    std::vector<Card> _discardPile; // å¼ƒç‰Œå †
+    bool _isPlayerTurn; // æ˜¯å¦æ˜¯ç©å®¶å›åˆ
+    int _turnCount; // å›åˆæ•°
+    std::vector<Card> _cards; // æ‰‹ç‰Œ
+    cocos2d::Sprite* _selectedCard; // é€‰ä¸­çš„å¡ç‰Œ
+    Hero* _hero; // è‹±é›„å¯¹è±¡
+    Monster* _monster; // æ€ªç‰©å¯¹è±¡
+    cocos2d::Label* _heroHealthLabel; // æ˜¾ç¤ºè‹±é›„è¡€é‡çš„æ ‡ç­¾
+    cocos2d::Label* _monsterHealthLabel; // æ˜¾ç¤ºæ€ªç‰©è¡€é‡çš„æ ‡ç­¾
+    cocos2d::Label* _heroBlockLabel; // æ˜¾ç¤ºè‹±é›„æ ¼æŒ¡çš„æ ‡ç­¾
+    cocos2d::Label* _monsterBlockLabel; // æ˜¾ç¤ºæ€ªç‰©æ ¼æŒ¡çš„æ ‡ç­¾
+    std::vector<cocos2d::Sprite*> _cardSprites; // å¡ç‰Œç²¾çµ
+    std::vector<std::chrono::steady_clock::time_point> _lastClickTimes; // è®°å½•æ¯å¼ å¡ç‰Œçš„ä¸Šæ¬¡ç‚¹å‡»æ—¶é—´
+    cocos2d::Label* _turnCountLabel; // å£°æ˜å›åˆæ•°æ ‡ç­¾
     cocos2d::MenuItemImage* _discardDeckButton;
-	cocos2d::MenuItemImage* _drawDeckButton;
- 
+	  cocos2d::MenuItemImage* _drawDeckButton;
+    cocos2d::Label* _heroBuffLabel;    // è‹±é›„ BUFF æ ‡ç­¾
+    cocos2d::Label* _monsterBuffLabel; // æ€ªç‰© BUFF æ ‡ç­¾
 };
 
 #endif // __FIGHTING_SCENE_H__

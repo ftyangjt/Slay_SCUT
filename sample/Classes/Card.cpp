@@ -54,12 +54,30 @@ cocos2d::Sprite* Card::getSprite() const
     return _sprite;
 }
 
-void Card::addEffect(std::shared_ptr<Effect> effect)
-{
-    _effects.push_back(effect);
+// 添加效果 - 现在接受效果类型、等级和时长
+void Card::addEffect(Effect::Type type, int level, int duration) {
+    _effectInfos.push_back(EffectInfo(type, level, duration));
 }
 
-const std::vector<std::shared_ptr<Effect>>& Card::getEffects() const
-{
-    return _effects;
+// 获取效果信息列表
+const std::vector<EffectInfo>& Card::getEffectInfos() const {
+    return _effectInfos;
+}
+
+// 创建并获取效果对象 - 根据存储的效果信息创建实际的 Effect 对象
+std::vector<std::shared_ptr<Effect>> Card::createEffects() const {
+    std::vector<std::shared_ptr<Effect>> effects;
+
+    for (const auto& info : _effectInfos) {
+        // 根据效果类型创建对应的具体效果对象
+        if (info.type == Effect::Type::Strength) {
+            effects.push_back(std::make_shared<Buff>(info.type, info.level, info.duration));
+        }
+        else if (info.type == Effect::Type::Vulnerable) {
+            effects.push_back(std::make_shared<Debuff>(info.type, info.level, info.duration));
+        }
+        // 如果有其他类型的效果，可以在这里添加更多的条件分支
+    }
+
+    return effects;
 }

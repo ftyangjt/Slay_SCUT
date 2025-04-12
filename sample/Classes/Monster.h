@@ -24,6 +24,7 @@ public:
 	// 效果操作接口
     void addEffect(std::shared_ptr<Effect> effect);
     const std::vector<std::shared_ptr<Effect>>& getEffects() const;
+    void updateEffects(); // 更新效果，移除持续时间为 0 的效果
 
 private:
     int _health;

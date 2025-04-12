@@ -4,6 +4,17 @@
 #include "cocos2d.h"
 #include "Effect.h"
 
+// 定义存储效果信息的结构体
+struct EffectInfo {
+    Effect::Type type;       // 效果类型
+    int level;               // 效果等级
+    int duration;            // 效果持续时间
+
+    EffectInfo(Effect::Type t, int lvl, int dur) :
+        type(t), level(lvl), duration(dur) {
+    }
+};
+
 class Card
 {
 public:
@@ -41,11 +52,14 @@ public:
     // 获取卡牌精灵
     cocos2d::Sprite* getSprite() const;
 
-    // 添加效果
-    void addEffect(std::shared_ptr<Effect> effect);
+    // 添加效果 - 现在接受效果类型、等级和时长
+    void addEffect(Effect::Type type, int level, int duration = -1);
 
     // 获取效果列表
-    const std::vector<std::shared_ptr<Effect>>& getEffects() const;
+    const std::vector<EffectInfo>& getEffectInfos() const;
+
+    // 创建并获取效果对象
+    std::vector<std::shared_ptr<Effect>> createEffects() const;
 
 private:
     std::string _name;
@@ -56,7 +70,7 @@ private:
     int _attack;
     int _block;
     cocos2d::Sprite* _sprite; // 添加卡牌精灵成员变量
-    std::vector<std::shared_ptr<Effect>> _effects; // 添加效果列表
+    std::vector<EffectInfo> _effectInfos; // 使用新的结构体存储效果信息
 };
 
 #endif // __CARD_H__

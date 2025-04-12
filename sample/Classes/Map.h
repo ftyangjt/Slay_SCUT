@@ -15,12 +15,19 @@ namespace MyGame {
         BATTLE,
         QUESTION,
         REST,
-        BOSS  // 添加 BOSS 类型
+        BOSS,// 添加 BOSS 类型
+        ELITE
     };
 
     struct Room {
         RoomType type;
         cocos2d::MenuItemImage* item;
+    };
+
+    // 连线信息结构体
+    struct ConnectionInfo {
+        cocos2d::Vec2 start;
+        cocos2d::Vec2 end;
     };
 
     class Map : public cocos2d::Scene
@@ -35,7 +42,7 @@ namespace MyGame {
         void menuQuestionCallback(cocos2d::Ref* pSender);
         void menuRestCallback(cocos2d::Ref* pSender);
         void menuBossCallback(cocos2d::Ref* pSender);  // 添加 BOSS 回调函数
-
+		void menuEliteCallback(cocos2d::Ref* pSender); // 添加 ELITE 回调函数
         RoomType getRandomRoomType();
         void generateRandomMap(int layers, int roomsPerLayer);
         void generateMapFromSavedInfo();

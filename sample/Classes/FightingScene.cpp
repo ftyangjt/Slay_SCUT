@@ -7,21 +7,21 @@
 
 USING_NS_CC;
 
-// ÒÔÏÂÎª³õÊ¼»¯º¯ÊıµÄÊµÏÖ
-// ´´½¨³¡¾°
+// ä»¥ä¸‹ä¸ºåˆå§‹åŒ–å‡½æ•°çš„å®ç°
+// åˆ›å»ºåœºæ™¯
 Scene* FightingScene::createScene()
 {
     return FightingScene::create();
 }
 
-// ¼ì²é¼ÓÔØ×ÊÔ´ÊÇ·ñ³ö´í
+// æ£€æŸ¥åŠ è½½èµ„æºæ˜¯å¦å‡ºé”™
 static void problemLoading(const char* filename)
 {
     printf("Error while loading: %s\n", filename);
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in FightingScene.cpp\n");
 }
 
-// ³õÊ¼»¯³¡¾°
+// åˆå§‹åŒ–åœºæ™¯
 bool FightingScene::init()
 {
     if (!Scene::init())
@@ -32,84 +32,105 @@ bool FightingScene::init()
     _visibleSize = Director::getInstance()->getVisibleSize();
     _origin = Director::getInstance()->getVisibleOrigin();
 
-    // ´´½¨±³¾°
+    // åˆ›å»ºèƒŒæ™¯
     createBackground();
 
-    // ´´½¨½ÇÉ«ºÍ¹ÖÎï
+    // åˆ›å»ºè§’è‰²å’Œæ€ªç‰©
     createCharacters();
 
-	// ÉèÖÃ³éÅÆ¶Ñ°´Å¥
+	// è®¾ç½®æŠ½ç‰Œå †æŒ‰é’®
     createDrawDeck();
 
-	//´´½¨ÆúÅÆ¶Ñ°´Å¥
+	//åˆ›å»ºå¼ƒç‰Œå †æŒ‰é’®
     createDiscardDeck();
 
 
-    // ³õÊ¼»¯³éÅÆ¶ÑºÍÆúÅÆ¶Ñ
+    // åˆå§‹åŒ–æŠ½ç‰Œå †å’Œå¼ƒç‰Œå †
     initializeDrawPile();
 
-    // ´´½¨ÑªÁ¿±êÇ©
+    // åˆ›å»ºè¡€é‡æ ‡ç­¾
     createHealthLabels();
 
-    // ´´½¨¸ñµ²±êÇ©
+    // åˆ›å»ºæ ¼æŒ¡æ ‡ç­¾
     createBlockLabels();
 
-	// ¸üĞÂÑªÁ¿±êÇ©
+	// åˆ›å»ºBUFFå’ŒDEBUFFæ ‡ç­¾
+    createBuffLabels();
+
+	// æ›´æ–°è¡€é‡æ ‡ç­¾
     updateHealthAndBlockLabels();
 
-	// ³õÊ¼»¯»ØºÏÊı
+	// åˆå§‹åŒ–å›åˆæ•°
     _turnCount = 1;
 
-	// ´´½¨»ØºÏÊı±êÇ©
+	// åˆ›å»ºå›åˆæ•°æ ‡ç­¾
     createTurnCountLabel();
 
     
 
-    // ¿ªÊ¼Íæ¼Ò»ØºÏ
+    // å¼€å§‹ç©å®¶å›åˆ
     startPlayerTurn();
 
     return true;
 }
 
-// ´´½¨ÑªÁ¿±êÇ©
+// åˆ›å»ºè¡€é‡æ ‡ç­¾
 void FightingScene::createHealthLabels()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    // ´´½¨Ó¢ĞÛÑªÁ¿±êÇ©
+    // åˆ›å»ºè‹±é›„è¡€é‡æ ‡ç­¾
     _heroHealthLabel = Label::createWithTTF("Hero Health: 100", "fonts/Marker Felt.ttf", 60);
-    _heroHealthLabel->setTextColor(Color4B::RED); // ÉèÖÃ±êÇ©ÑÕÉ«ÎªºìÉ«
+    _heroHealthLabel->setTextColor(Color4B::RED); // è®¾ç½®æ ‡ç­¾é¢œè‰²ä¸ºçº¢è‰²
     _heroHealthLabel->setPosition(Vec2(origin.x + visibleSize.width / 4, origin.y + visibleSize.height - _heroHealthLabel->getContentSize().height));
     this->addChild(_heroHealthLabel, 1);
 
-    // ´´½¨¹ÖÎïÑªÁ¿±êÇ©
+    // åˆ›å»ºæ€ªç‰©è¡€é‡æ ‡ç­¾
     _monsterHealthLabel = Label::createWithTTF("Monster Health: 100", "fonts/Marker Felt.ttf", 60);
-    _monsterHealthLabel->setTextColor(Color4B::RED); // ÉèÖÃ±êÇ©ÑÕÉ«ÎªºìÉ«
+    _monsterHealthLabel->setTextColor(Color4B::RED); // è®¾ç½®æ ‡ç­¾é¢œè‰²ä¸ºçº¢è‰²
     _monsterHealthLabel->setPosition(Vec2(origin.x + 3 * visibleSize.width / 4, origin.y + visibleSize.height - _monsterHealthLabel->getContentSize().height));
     this->addChild(_monsterHealthLabel, 1);
 }
 
-// ´´½¨¸ñµ²±êÇ©
+// åˆ›å»ºæ ¼æŒ¡æ ‡ç­¾
 void FightingScene::createBlockLabels()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    // ´´½¨Ó¢ĞÛ¸ñµ²±êÇ©
+    // åˆ›å»ºè‹±é›„æ ¼æŒ¡æ ‡ç­¾
     _heroBlockLabel = Label::createWithTTF("Hero Block: 0", "fonts/Marker Felt.ttf", 60);
-    _heroBlockLabel->setTextColor(Color4B::BLUE); // ÉèÖÃ±êÇ©ÑÕÉ«ÎªÀ¶É«
+    _heroBlockLabel->setTextColor(Color4B::BLUE); // è®¾ç½®æ ‡ç­¾é¢œè‰²ä¸ºè“è‰²
     _heroBlockLabel->setPosition(Vec2(origin.x + visibleSize.width / 4, origin.y + visibleSize.height - _heroHealthLabel->getContentSize().height - 70));
     this->addChild(_heroBlockLabel, 1);
 
-    // ´´½¨¹ÖÎï¸ñµ²±êÇ©
+    // åˆ›å»ºæ€ªç‰©æ ¼æŒ¡æ ‡ç­¾
     _monsterBlockLabel = Label::createWithTTF("Monster Block: 0", "fonts/Marker Felt.ttf", 60);
-    _monsterBlockLabel->setTextColor(Color4B::BLUE); // ÉèÖÃ±êÇ©ÑÕÉ«ÎªÀ¶É«
+    _monsterBlockLabel->setTextColor(Color4B::BLUE); // è®¾ç½®æ ‡ç­¾é¢œè‰²ä¸ºè“è‰²
     _monsterBlockLabel->setPosition(Vec2(origin.x + 3 * visibleSize.width / 4, origin.y + visibleSize.height - _monsterHealthLabel->getContentSize().height - 70));
     this->addChild(_monsterBlockLabel, 1);
 }
 
-// ´´½¨±³¾°
+// åˆ›å»º BUFF å’Œ DEBUFF æ ‡ç­¾
+void FightingScene::createBuffLabels() {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    // åˆ›å»ºè‹±é›„ BUFF æ ‡ç­¾
+    _heroBuffLabel = Label::createWithTTF("Hero Buffs: None", "fonts/Marker Felt.ttf", 40);
+    _heroBuffLabel->setTextColor(Color4B::YELLOW); // è®¾ç½®æ ‡ç­¾é¢œè‰²ä¸ºé»„è‰²
+    _heroBuffLabel->setPosition(Vec2(origin.x + visibleSize.width / 4, origin.y + visibleSize.height - _heroHealthLabel->getContentSize().height - 140));
+    this->addChild(_heroBuffLabel, 1);
+
+    // åˆ›å»ºæ€ªç‰© BUFF æ ‡ç­¾
+    _monsterBuffLabel = Label::createWithTTF("Monster Buffs: None", "fonts/Marker Felt.ttf", 40);
+    _monsterBuffLabel->setTextColor(Color4B::YELLOW); // è®¾ç½®æ ‡ç­¾é¢œè‰²ä¸ºé»„è‰²
+    _monsterBuffLabel->setPosition(Vec2(origin.x + 3 * visibleSize.width / 4, origin.y + visibleSize.height - _monsterHealthLabel->getContentSize().height - 140));
+    this->addChild(_monsterBuffLabel, 1);
+}
+
+// åˆ›å»ºèƒŒæ™¯
 void FightingScene::createBackground()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -126,26 +147,26 @@ void FightingScene::createBackground()
     this->addChild(background, 0);
 }
 
-// ´´½¨»ØºÏÊı±êÇ©
+// åˆ›å»ºå›åˆæ•°æ ‡ç­¾
 void FightingScene::createTurnCountLabel()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    // ´´½¨»ØºÏÊı±êÇ©
+    // åˆ›å»ºå›åˆæ•°æ ‡ç­¾
     _turnCountLabel = Label::createWithTTF("Turn: 1", "fonts/Marker Felt.ttf", 60);
-    _turnCountLabel->setTextColor(Color4B::GREEN); // ÉèÖÃ±êÇ©ÑÕÉ«ÎªÂÌÉ«
+    _turnCountLabel->setTextColor(Color4B::GREEN); // è®¾ç½®æ ‡ç­¾é¢œè‰²ä¸ºç»¿è‰²
     _turnCountLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - _turnCountLabel->getContentSize().height));
     this->addChild(_turnCountLabel, 1);
 }
 
-// ´´½¨½ÇÉ«ºÍ¹ÖÎï
+// åˆ›å»ºè§’è‰²å’Œæ€ªç‰©
 void FightingScene::createCharacters()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    // ´´½¨Ó¢ĞÛ
+    // åˆ›å»ºè‹±é›„
     _hero = Hero::create("hero.png");
     if (_hero == nullptr)
     {
@@ -156,7 +177,7 @@ void FightingScene::createCharacters()
     _hero->setPosition(Vec2(origin.x + _hero->getContentSize().width / 2, origin.y + visibleSize.height / 2));
     this->addChild(_hero, 1);
 
-    // ´´½¨¹ÖÎï
+    // åˆ›å»ºæ€ªç‰©
     _monster = Monster::create("monster.png");
     if (_monster == nullptr)
     {
@@ -168,17 +189,17 @@ void FightingScene::createCharacters()
     this->addChild(_monster, 1);
 }
 
-// ³õÊ¼»¯ÅÆ¶Ñ
+// åˆå§‹åŒ–ç‰Œå †
 void FightingScene::initializeDrawPile()
 {
-    // »ñÈ¡ Hero µÄ¿¨×é²¢ÉèÖÃÎª³éÅÆ¶Ñ
+    // è·å– Hero çš„å¡ç»„å¹¶è®¾ç½®ä¸ºæŠ½ç‰Œå †
     _drawPile = _hero->getDeck();
     shuffleDrawPile();
 }
 
 
-// ÒÔÏÂÎª»ØºÏÖÆÕ½¶·Âß¼­µÄÊµÏÖ
-// ¸üĞÂÑªÁ¿ºÍ¸ñµ²±êÇ©
+// ä»¥ä¸‹ä¸ºå›åˆåˆ¶æˆ˜æ–—é€»è¾‘çš„å®ç°
+// æ›´æ–°è¡€é‡å’Œæ ¼æŒ¡æ ‡ç­¾
 void FightingScene::updateHealthAndBlockLabels()
 {
     _heroHealthLabel->setString("Hero Health: " + std::to_string(_hero->getHealth()));
@@ -187,19 +208,52 @@ void FightingScene::updateHealthAndBlockLabels()
     _monsterBlockLabel->setString("Monster Block: " + std::to_string(_monster->getBlock()));
 }
 
-// ¿ªÊ¼Íæ¼Ò»ØºÏ(³éÅÆ¡¢Ìí¼Ó»ØºÏ½áÊø°´Å¥¡¢ÉèÖÃ°´Å¥Î»ÖÃ)
+// æ›´æ–° BUFF å’Œ DEBUFF æ ‡ç­¾
+void FightingScene::updateBuffLabels() {
+    // æ›´æ–°è‹±é›„ BUFF æ ‡ç­¾
+    const auto& heroEffects = _hero->getEffects();
+    if (heroEffects.empty()) {
+        _heroBuffLabel->setString("Hero Buffs: None");
+    }
+    else {
+        std::string heroBuffs = "Hero Buffs: ";
+        for (const auto& effect : heroEffects) {
+            heroBuffs += effect->getDescription() + " (" + std::to_string(effect->getRemainingTurns()) + " turns), ";
+        }
+        heroBuffs.pop_back(); // ç§»é™¤æœ€åä¸€ä¸ªé€—å·
+        heroBuffs.pop_back();
+        _heroBuffLabel->setString(heroBuffs);
+    }
+
+    // æ›´æ–°æ€ªç‰© BUFF æ ‡ç­¾
+    const auto& monsterEffects = _monster->getEffects();
+    if (monsterEffects.empty()) {
+        _monsterBuffLabel->setString("Monster Buffs: None");
+    }
+    else {
+        std::string monsterBuffs = "Monster Buffs: ";
+        for (const auto& effect : monsterEffects) {
+            monsterBuffs += effect->getDescription() + " (" + std::to_string(effect->getRemainingTurns()) + " turns), ";
+        }
+        monsterBuffs.pop_back(); // ç§»é™¤æœ€åä¸€ä¸ªé€—å·
+        monsterBuffs.pop_back();
+        _monsterBuffLabel->setString(monsterBuffs);
+    }
+}
+
+// å¼€å§‹ç©å®¶å›åˆ(æŠ½ç‰Œã€æ·»åŠ å›åˆç»“æŸæŒ‰é’®ã€è®¾ç½®æŒ‰é’®ä½ç½®)
 void FightingScene::startPlayerTurn()
 {
     _isPlayerTurn = true;
 
-	// ¸üĞÂ»ØºÏÊı±êÇ©
+	// æ›´æ–°å›åˆæ•°æ ‡ç­¾
     _turnCountLabel->setString("Turn: " + std::to_string(_turnCount));
 
     updateHandDisplay();
 
     drawSequentialCards(5);
 
-    // Ìí¼ÓÒ»¸ö°´Å¥À´ÊÖ¶¯½áÊø»ØºÏ
+    // æ·»åŠ ä¸€ä¸ªæŒ‰é’®æ¥æ‰‹åŠ¨ç»“æŸå›åˆ
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
@@ -211,9 +265,9 @@ void FightingScene::startPlayerTurn()
         return;
     }
 
-    endTurnButton->setScale(0.25f); // ½«°´Å¥ËõĞ¡µ½Ô­À´µÄ50%
+    endTurnButton->setScale(0.25f); // å°†æŒ‰é’®ç¼©å°åˆ°åŸæ¥çš„50%
 
-	// ÉèÖÃ°´Å¥Î»ÖÃ
+	// è®¾ç½®æŒ‰é’®ä½ç½®
     endTurnButton->setPosition(Vec2(origin.x + visibleSize.width - endTurnButton->getContentSize().width / 2,
         origin.y + visibleSize.width / 2 - endTurnButton->getContentSize().height / 2));
 
@@ -224,7 +278,7 @@ void FightingScene::startPlayerTurn()
     this->addChild(endTurnButton, 1);
 }
 
-// ÉèÖÃÆúÅÆ¶Ñ°´Å¥
+// è®¾ç½®å¼ƒç‰Œå †æŒ‰é’®
 void FightingScene::createDiscardDeck()
 {
     auto showDiscardDeckButton = MenuItemImage::create(
@@ -236,11 +290,11 @@ void FightingScene::createDiscardDeck()
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    // ÉèÖÃ°´Å¥Î»ÖÃÔÚ»­ÃæÓÒÏÂ½Ç
+    // è®¾ç½®æŒ‰é’®ä½ç½®åœ¨ç”»é¢å³ä¸‹è§’
     showDiscardDeckButton->setPosition(Vec2(origin.x + visibleSize.width - showDiscardDeckButton->getContentSize().width / 2,
         origin.y + showDiscardDeckButton->getContentSize().height / 2));
 
-    // ±£´æ°´Å¥Ö¸Õëµ½³ÉÔ±±äÁ¿ÖĞ
+    // ä¿å­˜æŒ‰é’®æŒ‡é’ˆåˆ°æˆå‘˜å˜é‡ä¸­
     _discardDeckButton = showDiscardDeckButton;
 
     auto buttonMenu = Menu::create(showDiscardDeckButton, nullptr);
@@ -250,8 +304,7 @@ void FightingScene::createDiscardDeck()
 
 
 
-// ÉèÖÃ³éÅÆ¶Ñ°´Å¥
-
+// è®¾ç½®æŠ½ç‰Œå †æŒ‰é’®
 void FightingScene::createDrawDeck()
 {
     auto showDrawDeckButton = MenuItemImage::create(
@@ -263,10 +316,10 @@ void FightingScene::createDrawDeck()
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    // ÉèÖÃ°´Å¥Î»ÖÃÔÚ»­Ãæ×óÏÂ½Ç
+    // è®¾ç½®æŒ‰é’®ä½ç½®åœ¨ç”»é¢å·¦ä¸‹è§’
     showDrawDeckButton->setPosition(Vec2(origin.x + showDrawDeckButton->getContentSize().width / 2,
         origin.y + showDrawDeckButton->getContentSize().height / 2));
-	// ±£´æ°´Å¥Ö¸Õëµ½³ÉÔ±±äÁ¿ÖĞ
+	// ä¿å­˜æŒ‰é’®æŒ‡é’ˆåˆ°æˆå‘˜å˜é‡ä¸­
 	_drawDeckButton = showDrawDeckButton;
     auto buttonMenu = Menu::create(showDrawDeckButton, nullptr);
     buttonMenu->setPosition(Vec2::ZERO);
@@ -274,17 +327,17 @@ void FightingScene::createDrawDeck()
 }
 
 
-// ¿ªÊ¼¹ÖÎï»ØºÏ
+// å¼€å§‹æ€ªç‰©å›åˆ
 void FightingScene::startMonsterTurn()
 {
     _isPlayerTurn = false;
-	// Ä¿Ç°¹ÖÎï»ØºÏ¶ÔÖ÷½ÇÔì³É10ÉËº¦²¢»ñµÃ5»¤¼×
+	// ç›®å‰æ€ªç‰©å›åˆå¯¹ä¸»è§’é€ æˆ10ä¼¤å®³å¹¶è·å¾—5æŠ¤ç”²
     int damage = 10;
     int block = 5;
 
 	_monster->setBlock(block);
 
-    // ´¦Àí¸ñµ²
+    // å¤„ç†æ ¼æŒ¡
     int heroBlock = _hero->getBlock();
     if (heroBlock > 0)
     {
@@ -300,7 +353,7 @@ void FightingScene::startMonsterTurn()
         }
     }
 
-    // ¹ÖÎï¶ÔÖ÷½ÇÔì³ÉÉËº¦
+    // æ€ªç‰©å¯¹ä¸»è§’é€ æˆä¼¤å®³
     int newHealth = _hero->getHealth() - damage;
     _hero->setHealth(newHealth);
     CCLOG("Hero Health: %d", _hero->getHealth());
@@ -308,28 +361,38 @@ void FightingScene::startMonsterTurn()
     endTurn();
 }
 
-// ½áÊø»ØºÏ
+// ç»“æŸå›åˆ
 void FightingScene::endTurn()
 {
     if (_isPlayerTurn)
     {
-        // ¶ªÆúËùÓĞÊÖÅÆÖÁÆúÅÆ¶Ñ
+        // ä¸¢å¼ƒæ‰€æœ‰æ‰‹ç‰Œè‡³å¼ƒç‰Œå †
         _discardPile.insert(_discardPile.end(), _cards.begin(), _cards.end());
         _cards.clear();
         Vec2 discardDeckPosition = _discardDeckButton->getPosition();
-		Vec2 drawDeckPosition = _drawDeckButton->getPosition();
+		    Vec2 drawDeckPosition = _drawDeckButton->getPosition();
         playDiscardToDrawMeteorEffect(discardDeckPosition,drawDeckPosition);
-        
+
+        updateHandDisplay(); // æ›´æ–°æ‰‹ç‰Œæ˜¾ç¤º
+
+		    // é‡ç½®æ€ªç‰©æ ¼æŒ¡
+        _monster->setBlock(0);
+		    updateHealthAndBlockLabels();
     }
 
     else
     {
-        // ¹ÖÎï»ØºÏ½áÊøÊ±£¬µİÔö»ØºÏ¼ÆÊıÆ÷
+        // æ€ªç‰©å›åˆç»“æŸæ—¶ï¼Œé€’å¢å›åˆè®¡æ•°å™¨
         _turnCount++;
 
-		// ÖØÖÃ¸ñµ²
+		// é‡ç½®è‹±é›„æ ¼æŒ¡
         _hero->setBlock(0);
-        _monster->setBlock(0);
+        updateHealthAndBlockLabels();
+
+        // æ›´æ–°æ•ˆæœæŒç»­æ—¶é—´
+        _hero->updateEffects(); // æ›´æ–°è‹±é›„çš„æ•ˆæœ
+        _monster->updateEffects(); // æ›´æ–°æ€ªç‰©çš„æ•ˆæœ
+		updateBuffLabels(); // æ›´æ–° BUFF å’Œ DEBUFF æ ‡ç­¾
     }
 
     checkBattleEnd();
@@ -342,27 +405,28 @@ void FightingScene::endTurn()
         startMonsterTurn();
     }
 }
-// ¼ì²éÕ½¶·ÊÇ·ñ½áÊø
+
+// æ£€æŸ¥æˆ˜æ–—æ˜¯å¦ç»“æŸ
 void FightingScene::checkBattleEnd()
 {
     if (_hero->getHealth() <= 0)
     {
         CCLOG("Hero is dead. Game Over.");
 
-        // ´´½¨Ê§°ÜĞÅÏ¢±êÇ©
+        // åˆ›å»ºå¤±è´¥ä¿¡æ¯æ ‡ç­¾
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-        auto defeatLabel = Label::createWithTTF("ÄãÒÑÕóÍö£¡", "fonts/Marker Felt.ttf", 80);
+        auto defeatLabel = Label::createWithTTF("ä½ å·²é˜µäº¡ï¼", "fonts/Marker Felt.ttf", 80);
         defeatLabel->setTextColor(Color4B::RED);
         defeatLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
         this->addChild(defeatLabel, 10);
 
-        // Ìí¼ÓÑÓ³Ù¶¯×÷£¬È»ºóÇĞ»»µ½Ê§°Ü³¡¾°
+        // æ·»åŠ å»¶è¿ŸåŠ¨ä½œï¼Œç„¶ååˆ‡æ¢åˆ°å¤±è´¥åœºæ™¯
         this->runAction(Sequence::create(
-            DelayTime::create(0.1f),  // ÑÓ³Ù2Ãë
+            DelayTime::create(0.1f),  // å»¶è¿Ÿ2ç§’
             CallFunc::create([]() {
-                // ÇĞ»»µ½Ê§°Ü³¡¾°
+                // åˆ‡æ¢åˆ°å¤±è´¥åœºæ™¯
                 auto failScene = FailScene::createScene();
                 Director::getInstance()->replaceScene(TransitionFade::create(0.5f, failScene));
                 }),
@@ -373,20 +437,20 @@ void FightingScene::checkBattleEnd()
     {
         CCLOG("Monster is dead. You Win!");
 
-        // ´´½¨Ê¤ÀûÏûÏ¢±êÇ©
+        // åˆ›å»ºèƒœåˆ©æ¶ˆæ¯æ ‡ç­¾
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-        auto victoryLabel = Label::createWithTTF("Õ½¶·Ê¤Àû£¡", "fonts/Marker Felt.ttf", 80);
+        auto victoryLabel = Label::createWithTTF("æˆ˜æ–—èƒœåˆ©ï¼", "fonts/Marker Felt.ttf", 80);
         victoryLabel->setTextColor(Color4B::YELLOW);
         victoryLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
         this->addChild(victoryLabel, 10);
 
-        // Ìí¼ÓÑÓ³Ù¶¯×÷£¬È»ºó·µ»ØµØÍ¼³¡¾°
+        // æ·»åŠ å»¶è¿ŸåŠ¨ä½œï¼Œç„¶åè¿”å›åœ°å›¾åœºæ™¯
         this->runAction(Sequence::create(
-            DelayTime::create(0.1f),  // ÑÓ³Ù2Ãë
+            DelayTime::create(0.1f),  // å»¶è¿Ÿ2ç§’
             CallFunc::create([]() {
-                // ·µ»Øµ½µØÍ¼³¡¾°
+                // è¿”å›åˆ°åœ°å›¾åœºæ™¯
                 auto mapScene = MyGame::Map::createScene();
                 Director::getInstance()->replaceScene(TransitionFade::create(0.5f, mapScene));
                 }),
@@ -395,12 +459,12 @@ void FightingScene::checkBattleEnd()
     }
 }
 
-// ÒÔÏÂÎª¿¨ÅÆÏµÍ³µÄÊµÏÖ
+// ä»¥ä¸‹ä¸ºå¡ç‰Œç³»ç»Ÿçš„å®ç°
 void FightingScene::drawCard()
 {
     if (_drawPile.empty())
     {
-        // Èô³éÅÆ¶ÑÎª¿Õ£¬½«ÆúÅÆ¶ÑÏ´»Ø³éÅÆ¶Ñ
+        // è‹¥æŠ½ç‰Œå †ä¸ºç©ºï¼Œå°†å¼ƒç‰Œå †æ´—å›æŠ½ç‰Œå †
         _drawPile = _discardPile;
         _discardPile.clear();
         shuffleDrawPile();
@@ -408,28 +472,28 @@ void FightingScene::drawCard()
 
     if (!_drawPile.empty())
     {
-        // ´Ó³éÅÆ¶ÑÈ¡¶¥
+        // ä»æŠ½ç‰Œå †å–é¡¶
         Card drawnCard = _drawPile.back();
         _drawPile.pop_back();
 
-        // ´´½¨ÁÙÊ±¾«Áé£¬´Ó³éÅÆ¶Ñ°´Å¥Î»ÖÃ³öÏÖ
+        // åˆ›å»ºä¸´æ—¶ç²¾çµï¼Œä»æŠ½ç‰Œå †æŒ‰é’®ä½ç½®å‡ºç°
         auto tempSprite = Sprite::create("cardBackground.jpg");
         tempSprite->setPosition(_drawDeckButton->getPosition());
         tempSprite->setScale(0.0f);
-        tempSprite->setLocalZOrder(9999); // ±£Ö¤ÏÔÊ¾ÔÚ×îÇ°
+        tempSprite->setLocalZOrder(9999); // ä¿è¯æ˜¾ç¤ºåœ¨æœ€å‰
         this->addChild(tempSprite);
 
-        // ¼ÆËã·ÉÍùÊÖÅÆ·ÅÖÃÎ»ÖÃ£¨¼òµ¥Ê¾Àı£ºÊÖÅÆÇøÓòÖĞĞÄ£©
+        // è®¡ç®—é£å¾€æ‰‹ç‰Œæ”¾ç½®ä½ç½®ï¼ˆç®€å•ç¤ºä¾‹ï¼šæ‰‹ç‰ŒåŒºåŸŸä¸­å¿ƒï¼‰
         auto visibleSize = Director::getInstance()->getVisibleSize();
         float targetX = visibleSize.width * 0.5f;
         float targetY = tempSprite->getContentSize().height / 3;
 
-        // ·ÉĞĞ²¢·Å´ó
+        // é£è¡Œå¹¶æ”¾å¤§
         auto moveAction = MoveTo::create(0.3f, Vec2(targetX, targetY));
         auto scaleAction = ScaleTo::create(0.3f, 1.0f);
         auto spawn = Spawn::create(moveAction, scaleAction, nullptr);
 
-        // ¶¯×÷½áÊøºó£¬½«¿¨ÅÆ¼ÓÈë _cards ²¢Ë¢ĞÂÊÖÅÆ
+        // åŠ¨ä½œç»“æŸåï¼Œå°†å¡ç‰ŒåŠ å…¥ _cards å¹¶åˆ·æ–°æ‰‹ç‰Œ
         auto finish = CallFunc::create([this, drawnCard, tempSprite]() {
             _cards.push_back(drawnCard);
             tempSprite->removeFromParent();
@@ -441,19 +505,19 @@ void FightingScene::drawCard()
 }
 
 
-// ÆúÒ»ÕÅÅÆ
+// å¼ƒä¸€å¼ ç‰Œ
 void FightingScene::discardCard(int index)
 {
     if (index >= 0 && index < _cards.size())
     {
-        // ½«¿¨ÅÆ·ÅÈëÆúÅÆ¶Ñ
+        // å°†å¡ç‰Œæ”¾å…¥å¼ƒç‰Œå †
         _discardPile.push_back(_cards[index]);
         _cards.erase(_cards.begin() + index);
-        updateHandDisplay(); // ¸üĞÂÊÖÅÆÏÔÊ¾
+        updateHandDisplay(); // æ›´æ–°æ‰‹ç‰Œæ˜¾ç¤º
     }
 }
 
-// Ï´ÅÆ
+// æ´—ç‰Œ
 void FightingScene::shuffleDrawPile()
 {
     std::random_device rd;
@@ -461,27 +525,27 @@ void FightingScene::shuffleDrawPile()
     std::shuffle(_drawPile.begin(), _drawPile.end(), g);
 }
 
-// ¸ø¿¨ÅÆÌí¼ÓĞ§¹û±êÇ©
+// ç»™å¡ç‰Œæ·»åŠ æ•ˆæœæ ‡ç­¾
 void FightingScene::addCardEffectLabel(cocos2d::Sprite* cardSprite, const std::string& effect)
 {
-    // »ñÈ¡¿¨ÅÆµÄ¿í¶È
+    // è·å–å¡ç‰Œçš„å®½åº¦
     float cardWidth = cardSprite->getContentSize().width;
 
-    // ´´½¨¶àĞĞ±êÇ©£¬²¢ÉèÖÃ×î´ó¿í¶ÈÎª¿¨ÅÆ¿í¶È
+    // åˆ›å»ºå¤šè¡Œæ ‡ç­¾ï¼Œå¹¶è®¾ç½®æœ€å¤§å®½åº¦ä¸ºå¡ç‰Œå®½åº¦
     auto effectLabel = Label::createWithTTF(effect, "fonts/Marker Felt.ttf", 48, Size(cardWidth, 0), TextHAlignment::CENTER);
     effectLabel->setColor(cocos2d::Color3B::BLACK);
 
-    // ÉèÖÃ±êÇ©Î»ÖÃÎª¿¨ÅÆÖĞĞÄ
+    // è®¾ç½®æ ‡ç­¾ä½ç½®ä¸ºå¡ç‰Œä¸­å¿ƒ
     effectLabel->setPosition(Vec2(cardSprite->getContentSize().width / 2, cardSprite->getContentSize().height / 2));
     cardSprite->addChild(effectLabel, 1);
 
 }
-// Ë¢ĞÂÊÖÅÆÏÔÊ¾
+// åˆ·æ–°æ‰‹ç‰Œæ˜¾ç¤º
 void FightingScene::updateHandDisplay()
 {
     size_t newCount = _cards.size();
 
-    // Çå³ıÏÖÓĞµÄËùÓĞ¿¨ÅÆ¾«Áé
+    // æ¸…é™¤ç°æœ‰çš„æ‰€æœ‰å¡ç‰Œç²¾çµ
     for (auto sprite : _cardSprites)
     {
         sprite->removeFromParent();
@@ -490,54 +554,54 @@ void FightingScene::updateHandDisplay()
     _lastClickTimes.clear();
 
     if (newCount == 0)
-        return;  // Ã»ÓĞ¿¨ÅÆÊ±Ö±½Ó·µ»Ø
+        return;  // æ²¡æœ‰å¡ç‰Œæ—¶ç›´æ¥è¿”å›
 
-    // ´´½¨ÁÙÊ±¾«ÁéÒÔ»ñÈ¡Êµ¼Ê³ß´ç
+    // åˆ›å»ºä¸´æ—¶ç²¾çµä»¥è·å–å®é™…å°ºå¯¸
     auto tempSprite = Sprite::create("cardBackground.jpg");
     float originalCardWidth = tempSprite->getContentSize().width;
     float originalCardHeight = tempSprite->getContentSize().height;
 
-    // ¼ÆËã×î´ó¿ÉÓÃ¿í¶È£¨¿¼ÂÇ±ßÔµ¼ä¾à£©
-    float availableWidth = _visibleSize.width * 0.9f;  // Áô³öÆÁÄ»±ßÔµ10%µÄ¿Õ¼ä
+    // è®¡ç®—æœ€å¤§å¯ç”¨å®½åº¦ï¼ˆè€ƒè™‘è¾¹ç¼˜é—´è·ï¼‰
+    float availableWidth = _visibleSize.width * 0.9f;  // ç•™å‡ºå±å¹•è¾¹ç¼˜10%çš„ç©ºé—´
 
-    // ¼ÆËãÃ¿ÕÅ¿¨ÅÆ×îĞ¡µÄË®Æ½¼ä¾à£¨¿É¸ù¾İĞèÒªµ÷Õû£©
+    // è®¡ç®—æ¯å¼ å¡ç‰Œæœ€å°çš„æ°´å¹³é—´è·ï¼ˆå¯æ ¹æ®éœ€è¦è°ƒæ•´ï¼‰
     float minCardSpacing = 10.0f;
 
-    // ¼ÆËã×î´ó¿ÉÄÜµÄ¿¨ÅÆ¿í¶È£¬Ê¹µÃËùÓĞ¿¨ÅÆÄÜ¹»ÏÔÊ¾
+    // è®¡ç®—æœ€å¤§å¯èƒ½çš„å¡ç‰Œå®½åº¦ï¼Œä½¿å¾—æ‰€æœ‰å¡ç‰Œèƒ½å¤Ÿæ˜¾ç¤º
     float maxCardWidth;
 
     if (newCount == 1) {
-        // Ö»ÓĞÒ»ÕÅ¿¨ÅÆÊ±£¬¿í¶È¿ÉÒÔÉÔ´ó
+        // åªæœ‰ä¸€å¼ å¡ç‰Œæ—¶ï¼Œå®½åº¦å¯ä»¥ç¨å¤§
         maxCardWidth = originalCardWidth * 0.8f;
     }
     else {
-        // ¼ÆËã×î´ó¿ÉÄÜµÄ¿¨ÅÆ¿í¶È£¬È·±£ËùÓĞ¿¨ÅÆ¶¼ÄÜÏÔÊ¾
+        // è®¡ç®—æœ€å¤§å¯èƒ½çš„å¡ç‰Œå®½åº¦ï¼Œç¡®ä¿æ‰€æœ‰å¡ç‰Œéƒ½èƒ½æ˜¾ç¤º
         float totalSpacing = (newCount - 1) * minCardSpacing;
         maxCardWidth = (availableWidth - totalSpacing) / newCount;
     }
 
-    // ¸ù¾İ×î´ó¿í¶È¼ÆËãËõ·ÅÒò×Ó
+    // æ ¹æ®æœ€å¤§å®½åº¦è®¡ç®—ç¼©æ”¾å› å­
     float scaleFactor = std::min(1.0f, maxCardWidth / originalCardWidth);
 
-    // ¼ÆËãÊµ¼Ê¿¨ÅÆ¿í¶ÈºÍ¸ß¶È
+    // è®¡ç®—å®é™…å¡ç‰Œå®½åº¦å’Œé«˜åº¦
     float actualCardWidth = originalCardWidth * scaleFactor;
     float actualCardHeight = originalCardHeight * scaleFactor;
 
-    // ¼ÆËã¿¨ÅÆÅÅÁĞµÄÆğÊ¼X×ø±ê£¨¾ÓÖĞÏÔÊ¾£©
+    // è®¡ç®—å¡ç‰Œæ’åˆ—çš„èµ·å§‹Xåæ ‡ï¼ˆå±…ä¸­æ˜¾ç¤ºï¼‰
     float totalWidth = newCount * actualCardWidth + (newCount - 1) * minCardSpacing;
     float startX = (_visibleSize.width - totalWidth) / 2 + actualCardWidth / 2;
 
-    // ĞŞ¸ÄÕâÀï£ºµ÷Õû¿¨ÅÆ´¹Ö±Î»ÖÃ£¬Ê¹Æä¸ü½Ó½üÆÁÄ»µ×²¿
-    // ½«¿¨ÅÆ·ÅÔÚ¸üµÍµÄÎ»ÖÃ£¬Ö»Â¶³ö²¿·Ö¸ß¶È
-    float cardY = _origin.y + actualCardHeight * 0.4f; // ¸ÄÎª0.4±¶¿¨ÅÆ¸ß¶È
+    // ä¿®æ”¹è¿™é‡Œï¼šè°ƒæ•´å¡ç‰Œå‚ç›´ä½ç½®ï¼Œä½¿å…¶æ›´æ¥è¿‘å±å¹•åº•éƒ¨
+    // å°†å¡ç‰Œæ”¾åœ¨æ›´ä½çš„ä½ç½®ï¼Œåªéœ²å‡ºéƒ¨åˆ†é«˜åº¦
+    float cardY = _origin.y + actualCardHeight * 0.4f; // æ”¹ä¸º0.4å€å¡ç‰Œé«˜åº¦
 
-    // ´´½¨²¢ÅÅÁĞ¿¨ÅÆ
+    // åˆ›å»ºå¹¶æ’åˆ—å¡ç‰Œ
     for (size_t i = 0; i < newCount; ++i)
     {
         auto sprite = Sprite::create("cardBackground.jpg");
         float posX = startX + i * (actualCardWidth + minCardSpacing);
 
-        // ÉèÖÃÎ»ÖÃºÍ³õÊ¼Ëõ·Å
+        // è®¾ç½®ä½ç½®å’Œåˆå§‹ç¼©æ”¾
         sprite->setPosition(Vec2(posX, cardY));
         sprite->setScale(scaleFactor);
 
@@ -545,10 +609,10 @@ void FightingScene::updateHandDisplay()
         _cardSprites.push_back(sprite);
         _lastClickTimes.push_back(std::chrono::steady_clock::now());
 
-        // Ìí¼Ó¿¨ÅÆĞ§¹û±êÇ©
+        // æ·»åŠ å¡ç‰Œæ•ˆæœæ ‡ç­¾
         addCardEffectLabel(sprite, _cards[i].getEffect());
 
-        // ×¢²á´¥ÃşÊÂ¼ş
+        // æ³¨å†Œè§¦æ‘¸äº‹ä»¶
         auto listener = EventListenerTouchOneByOne::create();
         listener->setSwallowTouches(true);
         listener->onTouchBegan = [this, i](Touch* touch, Event* event) -> bool {
@@ -563,15 +627,15 @@ void FightingScene::updateHandDisplay()
         _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, sprite);
     }
 
-    // ¼ì²é²¢¸ßÁÁÑ¡ÖĞµÄ¿¨ÅÆ
+    // æ£€æŸ¥å¹¶é«˜äº®é€‰ä¸­çš„å¡ç‰Œ
     if (_selectedCardIndex >= 0 && _selectedCardIndex < _cardSprites.size())
     {
         highlightSelectedCard();
     }
 }
 
-// Ó¦ÓÃBUFFºÍDEBUFF
-void FightingScene::applyEffects(int& damage, int& block, const std::vector<std::shared_ptr<Effect>>& effects, bool isTargetMonster)
+// åº”ç”¨BUFFå’ŒDEBUFF
+void FightingScene::applyEffects(int& damage, int& block, const std::vector<std::shared_ptr<Effect>>& effects, const Card::Type cardType, bool isTargetMonster)
 {
     for (const auto& effect : effects)
     {
@@ -580,7 +644,11 @@ void FightingScene::applyEffects(int& damage, int& block, const std::vector<std:
             switch (buff->getType())
             {
             case Effect::Type::Strength:
-                damage += buff->getLevel();
+                // åªæœ‰æ”»å‡»ç±»å‹çš„å¡ç‰Œæ‰ä¼šå—åˆ°åŠ›é‡æ•ˆæœçš„å½±å“
+                if (cardType == Card::Type::Attack)
+                {
+                    damage += buff->getLevel();
+                }
                 break;
             default:
                 break;
@@ -593,7 +661,7 @@ void FightingScene::applyEffects(int& damage, int& block, const std::vector<std:
             case Effect::Type::Vulnerable:
                 if (isTargetMonster)
                 {
-                    damage = static_cast<int>(damage * 1.5);
+                    damage = static_cast<int>(damage * 1.5); // æ˜“ä¼¤å¢åŠ ä¼¤å®³å€ç‡
                 }
                 break;
             default:
@@ -603,26 +671,30 @@ void FightingScene::applyEffects(int& damage, int& block, const std::vector<std:
     }
 }
 
-// Ó¦ÓÃ¿¨ÅÆĞ§¹û
+// åº”ç”¨å¡ç‰Œæ•ˆæœï¼ˆæ”»å‡»ã€æ ¼æŒ¡ã€æ·»åŠ BUFFï¼‰
 void FightingScene::applyCardEffects(const Card& card)
 {
     int damage = card.getAttack();
     int block = card.getBlock();
 
-    // Ó¦ÓÃÓ¢ĞÛµÄĞ§¹û
-    applyEffects(damage, block, _hero->getEffects(), false);
+    // åº”ç”¨è‹±é›„çš„æ•ˆæœ
+	// ä¾‹å¦‚ï¼Œå¦‚æœæœ‰åŠ›é‡æ•ˆæœï¼Œå¢åŠ æ”»å‡»ä¼¤å®³
+    applyEffects(damage, block, _hero->getEffects(), card.getType(), false);
 
-    // Ó¦ÓÃ¹ÖÎïµÄĞ§¹û
-    applyEffects(damage, block, _monster->getEffects(), true);
+    // åº”ç”¨æ€ªç‰©çš„æ•ˆæœ
+	// ä¾‹å¦‚ï¼Œå¦‚æœæœ‰æ˜“ä¼¤æ•ˆæœï¼Œå¢åŠ å¯¹å…¶é€ æˆçš„ä¼¤å®³
+    applyEffects(damage, block, _monster->getEffects(), card.getType(), true);
 
-    for (const auto& effect : card.getEffects())
+    std::vector<std::shared_ptr<Effect>> effects = card.createEffects();
+
+    for (const auto& effect : effects)
     {
         if (auto buff = dynamic_cast<Buff*>(effect.get()))
         {
             switch (buff->getType())
             {
             case Effect::Type::Strength:
-                _hero->addEffect(effect);
+                _hero->addEffect(effect); // åŠ›é‡æ•ˆæœåº”ç”¨åˆ°è‹±é›„
                 break;
             default:
                 break;
@@ -641,8 +713,13 @@ void FightingScene::applyCardEffects(const Card& card)
         }
     }
 
-    // ´¦Àí¹ÖÎïµÄ¸ñµ²
+    updateBuffLabels();
+
+    // å¤„ç†æ€ªç‰©çš„æ ¼æŒ¡
     int monsterBlock = _monster->getBlock();
+
+    CCLOG("Monster block: %d", monsterBlock);
+
     if (monsterBlock > 0)
     {
         if (monsterBlock >= damage)
@@ -657,12 +734,14 @@ void FightingScene::applyCardEffects(const Card& card)
         }
     }
 
-    // ´¦Àí¹ÖÎïµÄÉúÃüÖµ
+	CCLOG("Damage: %d", damage);
+
+    // å¤„ç†æ€ªç‰©çš„ç”Ÿå‘½å€¼
     int newHealth = _monster->getHealth() - damage;
     _monster->setHealth(newHealth);
     CCLOG("Monster Health: %d", _monster->getHealth());
 
-    // ´¦ÀíÓ¢ĞÛµÄ¸ñµ²
+    // å¤„ç†è‹±é›„çš„æ ¼æŒ¡
     if (block > 0)
     {
         int newBlock = _hero->getBlock() + block;
@@ -673,32 +752,31 @@ void FightingScene::applyCardEffects(const Card& card)
     updateHealthAndBlockLabels();
 }
 
-// ´ò³ö¿¨ÅÆ
+// æ‰“å‡ºå¡ç‰Œ
 
 void FightingScene::playCard(int index)
 {
     if (_isCooldown) {
-        return; // Èç¹û´¦ÓÚÀäÈ´×´Ì¬£¬Ö±½Ó·µ»Ø
+        return; // å¦‚æœå¤„äºå†·å´çŠ¶æ€ï¼Œç›´æ¥è¿”å›
     }
 
     if (index >= 0 && index < _cards.size()) {
-        // Ô­Âß¼­²»±ä
+        // åŸé€»è¾‘ä¸å˜
         Card playedCard = _cards[index];
         applyCardEffects(playedCard);
 
-        // »ñÈ¡¶ÔÓ¦¿¨ÅÆ¾«Áé
         auto cardSprite = _cardSprites[index];
 
-        // ÈÃ¸Ã¿¨ÅÆÓÅÏÈÏÔÊ¾
+        // è®©è¯¥å¡ç‰Œä¼˜å…ˆæ˜¾ç¤º
         cardSprite->setLocalZOrder(9999);
 
-        // Ä¿±êÎ»ÖÃ£ºÆúÅÆ¶Ñ°´Å¥
+        // ç›®æ ‡ä½ç½®ï¼šå¼ƒç‰Œå †æŒ‰é’®
         Vec2 discardPos = _discardDeckButton->getPosition();
         auto moveAction = MoveTo::create(0.3f, discardPos);
         auto scaleAction = ScaleTo::create(0.3f, 0.1f);
         auto moveAndScale = Spawn::create(moveAction, scaleAction, nullptr);
 
-        // ¶¯»­²¥·ÅÍêÔÙÒÆ³ı²¢¶ªÆú
+        // åŠ¨ç”»æ’­æ”¾å®Œå†ç§»é™¤å¹¶ä¸¢å¼ƒ
         auto finish = CallFunc::create([this, index, cardSprite]() {
             cardSprite->removeFromParent();
             discardCard(index);
@@ -708,7 +786,10 @@ void FightingScene::playCard(int index)
 
         cardSprite->runAction(Sequence::create(moveAndScale, finish, nullptr));
 
-        // ÉèÖÃÀäÈ´
+        // è®¾ç½®å†·å´
+		    checkBattleEnd();
+
+        // è®¾ç½®å†·å´çŠ¶æ€
         _isCooldown = true;
         this->runAction(Sequence::create(
             DelayTime::create(COOLDOWN_TIME),
@@ -719,29 +800,29 @@ void FightingScene::playCard(int index)
 }
 
 
-// ¸ßÁÁÑ¡ÖĞµÄ¿¨ÅÆ
+// é«˜äº®é€‰ä¸­çš„å¡ç‰Œ
 void FightingScene::highlightSelectedCard()
 {
     for (size_t i = 0; i < _cardSprites.size(); ++i)
     {
-        // È·±£¾«ÁéÓĞĞ§ÇÒÈÔÈ»ÔÚ³¡¾°ÖĞ
+        // ç¡®ä¿ç²¾çµæœ‰æ•ˆä¸”ä»ç„¶åœ¨åœºæ™¯ä¸­
         if (_cardSprites[i] && _cardSprites[i]->getParent())
         {
             if (i == _selectedCardIndex)
             {
-                // ¸ßÁÁÑ¡ÖĞµÄ¿¨ÅÆ
-                _cardSprites[i]->setColor(cocos2d::Color3B(255, 255, 0)); // »ÆÉ«
+                // é«˜äº®é€‰ä¸­çš„å¡ç‰Œ
+                _cardSprites[i]->setColor(cocos2d::Color3B(255, 255, 0)); // é»„è‰²
             }
             else
             {
-                // »Ö¸´Õı³£ÑÕÉ«
-                _cardSprites[i]->setColor(cocos2d::Color3B(255, 255, 255)); // °×É«
+                // æ¢å¤æ­£å¸¸é¢œè‰²
+                _cardSprites[i]->setColor(cocos2d::Color3B(255, 255, 255)); // ç™½è‰²
             }
         }
     }
 }
 
-// ´¦Àí¿¨ÅÆµã»÷ÊÂ¼ş
+// å¤„ç†å¡ç‰Œç‚¹å‡»äº‹ä»¶
 void FightingScene::handleCardTap(size_t cardIndex, cocos2d::Touch* touch)
 {
     auto now = std::chrono::steady_clock::now();
@@ -759,52 +840,54 @@ void FightingScene::handleCardTap(size_t cardIndex, cocos2d::Touch* touch)
     _lastClickTimes[cardIndex] = now;
 }
 
+// è¿›å…¥æŠ½ç‰Œå †åœºæ™¯
 void FightingScene::goToDrawDeck(Ref* sender)
 {
     auto drawDeckScene = DrawDeck::createScene(_drawPile);
     Director::getInstance()->pushScene(drawDeckScene);
 }
 
+// è¿›å…¥å¼ƒç‰Œå †åœºæ™¯
 void FightingScene::goToDiscardDeck(Ref* sender)
 {
     auto discardDeckScene = DiscardDeck::createScene(_discardPile);
     Director::getInstance()->pushScene(discardDeckScene);
 }
 
-// ¼ÙÉè discardPilePosition¡¢drawPilePosition ÎªÆúÅÆ¶ÑÓë³éÅÆ¶ÑµÄÆÁÄ»×ø±ê
+// å‡è®¾ discardPilePositionã€drawPilePosition ä¸ºå¼ƒç‰Œå †ä¸æŠ½ç‰Œå †çš„å±å¹•åæ ‡
 
 void FightingScene::playDiscardToDrawMeteorEffect(const Vec2& discardPilePosition, const Vec2& drawPilePosition)
 {
-    // ´´½¨Á÷ĞÇÁ£×Ó
+    // åˆ›å»ºæµæ˜Ÿç²’å­
     auto meteor = ParticleMeteor::create();
     meteor->setPosition(discardPilePosition);
-    meteor->setDuration(0.8f); // ×ÜÊ±³¤£¬¿É¸ù¾İĞèÒªµ÷Õû
+    meteor->setDuration(0.8f); // æ€»æ—¶é•¿ï¼Œå¯æ ¹æ®éœ€è¦è°ƒæ•´
 
-    // µ÷ÕûÁ£×ÓÑÕÉ«£¨¼ÓÉîÑÕÉ«£©
+    // è°ƒæ•´ç²’å­é¢œè‰²ï¼ˆåŠ æ·±é¢œè‰²ï¼‰
     Color4F currentColor = meteor->getStartColor();
     Color4F deepColor(currentColor.r * 0.5f, currentColor.g * 0.5f, currentColor.b * 0.5f, currentColor.a);
     meteor->setStartColor(deepColor);
-    // ÈçÓĞĞèÒª£¬Ò²¿ÉÒÔµ÷ÕûÖÕµãÑÕÉ«
+    // å¦‚æœ‰éœ€è¦ï¼Œä¹Ÿå¯ä»¥è°ƒæ•´ç»ˆç‚¹é¢œè‰²
     Color4F endColor = meteor->getEndColor();
     Color4F deepEndColor(endColor.r * 0.5f, endColor.g * 0.5f, endColor.b * 0.5f, endColor.a);
     meteor->setEndColor(deepEndColor);
 
-    // ´´½¨ÒÆ¶¯¶¯×÷
+    // åˆ›å»ºç§»åŠ¨åŠ¨ä½œ
     auto moveAction = MoveTo::create(0.8f, drawPilePosition);
     auto sequence = Sequence::create(
         moveAction,
         CallFunc::create([meteor]() {
-            meteor->removeFromParent(); // ÒÆ³ıÁ£×Ó
+            meteor->removeFromParent(); // ç§»é™¤ç²’å­
             }),
         nullptr);
 
-    // ÔËĞĞ¶¯×÷²¢Ìí¼Óµ½³¡¾°
+    // è¿è¡ŒåŠ¨ä½œå¹¶æ·»åŠ åˆ°åœºæ™¯
     meteor->runAction(sequence);
-    meteor->setAutoRemoveOnFinish(false); // ²»×Ô¶¯ÒÆ³ı£¬ÊÖ¶¯ÒÆ³ı
+    meteor->setAutoRemoveOnFinish(false); // ä¸è‡ªåŠ¨ç§»é™¤ï¼Œæ‰‹åŠ¨ç§»é™¤
     this->addChild(meteor, 10);
 }
 
-// µİ¹éÒÀ´Î³é¶àÕÅÅÆµÄº¯Êı
+// é€’å½’ä¾æ¬¡æŠ½å¤šå¼ ç‰Œçš„å‡½æ•°
 void FightingScene::drawSequentialCards(int count)
 {
     if (count <= 0) return;
@@ -818,23 +901,23 @@ void FightingScene::drawSequentialCards(int count)
 
     if (!_drawPile.empty())
     {
-        // ´Ó³éÅÆ¶ÑÈ¡¶¥
+        // ä»æŠ½ç‰Œå †å–é¡¶
         Card drawnCard = _drawPile.back();
         _drawPile.pop_back();
 
-        // ´´½¨ÁÙÊ±¾«Áé£¬´Ó³éÅÆ¶Ñ°´Å¥Î»ÖÃ³öÏÖ
+        // åˆ›å»ºä¸´æ—¶ç²¾çµï¼Œä»æŠ½ç‰Œå †æŒ‰é’®ä½ç½®å‡ºç°
         auto tempSprite = Sprite::create("cardBackground.jpg");
         tempSprite->setPosition(_drawDeckButton->getPosition());
         tempSprite->setScale(0.0f);
         tempSprite->setLocalZOrder(9999);
         this->addChild(tempSprite);
 
-        // ·ÉĞĞ²¢·Å´ó
+        // é£è¡Œå¹¶æ”¾å¤§
         auto moveAction = MoveTo::create(0.3f, Vec2(_visibleSize.width * 0.5f, tempSprite->getContentSize().height / 3));
         auto scaleAction = ScaleTo::create(0.3f, 1.0f);
         auto spawn = Spawn::create(moveAction, scaleAction, nullptr);
 
-        // ¶¯»­½áÊøºó£º¼ÓÈëµ½ÊÖÅÆ¡¢ÒÆ³ıÁÙÊ±¾«Áé²¢µİ¹éµ÷ÓÃÏÂÒ»ÕÅ
+        // åŠ¨ç”»ç»“æŸåï¼šåŠ å…¥åˆ°æ‰‹ç‰Œã€ç§»é™¤ä¸´æ—¶ç²¾çµå¹¶é€’å½’è°ƒç”¨ä¸‹ä¸€å¼ 
         auto finish = CallFunc::create([this, drawnCard, tempSprite, count]() {
             _cards.push_back(drawnCard);
             tempSprite->removeFromParent();
