@@ -54,6 +54,9 @@ bool FightingScene::init()
     // 创建格挡标签
     createBlockLabels();
 
+	// 创建BUFF和DEBUFF标签
+    createBuffLabels();
+
 	// 更新血量标签
     updateHealthAndBlockLabels();
 
@@ -107,6 +110,24 @@ void FightingScene::createBlockLabels()
     _monsterBlockLabel->setTextColor(Color4B::BLUE); // 设置标签颜色为蓝色
     _monsterBlockLabel->setPosition(Vec2(origin.x + 3 * visibleSize.width / 4, origin.y + visibleSize.height - _monsterHealthLabel->getContentSize().height - 70));
     this->addChild(_monsterBlockLabel, 1);
+}
+
+// 创建 BUFF 和 DEBUFF 标签
+void FightingScene::createBuffLabels() {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    // 创建英雄 BUFF 标签
+    _heroBuffLabel = Label::createWithTTF("Hero Buffs: None", "fonts/Marker Felt.ttf", 40);
+    _heroBuffLabel->setTextColor(Color4B::YELLOW); // 设置标签颜色为黄色
+    _heroBuffLabel->setPosition(Vec2(origin.x + visibleSize.width / 4, origin.y + visibleSize.height - _heroHealthLabel->getContentSize().height - 140));
+    this->addChild(_heroBuffLabel, 1);
+
+    // 创建怪物 BUFF 标签
+    _monsterBuffLabel = Label::createWithTTF("Monster Buffs: None", "fonts/Marker Felt.ttf", 40);
+    _monsterBuffLabel->setTextColor(Color4B::YELLOW); // 设置标签颜色为黄色
+    _monsterBuffLabel->setPosition(Vec2(origin.x + 3 * visibleSize.width / 4, origin.y + visibleSize.height - _monsterHealthLabel->getContentSize().height - 140));
+    this->addChild(_monsterBuffLabel, 1);
 }
 
 // 创建背景
@@ -187,6 +208,39 @@ void FightingScene::updateHealthAndBlockLabels()
     _monsterBlockLabel->setString("Monster Block: " + std::to_string(_monster->getBlock()));
 }
 
+// 更新 BUFF 和 DEBUFF 标签
+void FightingScene::updateBuffLabels() {
+    // 更新英雄 BUFF 标签
+    const auto& heroEffects = _hero->getEffects();
+    if (heroEffects.empty()) {
+        _heroBuffLabel->setString("Hero Buffs: None");
+    }
+    else {
+        std::string heroBuffs = "Hero Buffs: ";
+        for (const auto& effect : heroEffects) {
+            heroBuffs += effect->getDescription() + " (" + std::to_string(effect->getRemainingTurns()) + " turns), ";
+        }
+        heroBuffs.pop_back(); // 移除最后一个逗号
+        heroBuffs.pop_back();
+        _heroBuffLabel->setString(heroBuffs);
+    }
+
+    // 更新怪物 BUFF 标签
+    const auto& monsterEffects = _monster->getEffects();
+    if (monsterEffects.empty()) {
+        _monsterBuffLabel->setString("Monster Buffs: None");
+    }
+    else {
+        std::string monsterBuffs = "Monster Buffs: ";
+        for (const auto& effect : monsterEffects) {
+            monsterBuffs += effect->getDescription() + " (" + std::to_string(effect->getRemainingTurns()) + " turns), ";
+        }
+        monsterBuffs.pop_back(); // 移除最后一个逗号
+        monsterBuffs.pop_back();
+        _monsterBuffLabel->setString(monsterBuffs);
+    }
+}
+
 // 开始玩家回合(抽牌、添加回合结束按钮、设置按钮位置)
 void FightingScene::startPlayerTurn()
 {
@@ -246,7 +300,6 @@ void FightingScene::createDiscardDeck()
 
 
 // 设置抽牌堆按钮
-
 void FightingScene::createDrawDeck()
 {
     auto showDrawDeckButton = MenuItemImage::create(
@@ -310,6 +363,10 @@ void FightingScene::endTurn()
         _discardPile.insert(_discardPile.end(), _cards.begin(), _cards.end());
         _cards.clear();
         updateHandDisplay(); // 更新手牌显示
+
+		// 重置怪物格挡
+        _monster->setBlock(0);
+		updateHealthAndBlockLabels();
     }
 
     else
@@ -317,9 +374,14 @@ void FightingScene::endTurn()
         // 怪物回合结束时，递增回合计数器
         _turnCount++;
 
-		// 重置格挡
+		// 重置英雄格挡
         _hero->setBlock(0);
-        _monster->setBlock(0);
+        updateHealthAndBlockLabels();
+
+        // 更新效果持续时间
+        _hero->updateEffects(); // 更新英雄的效果
+        _monster->updateEffects(); // 更新怪物的效果
+		updateBuffLabels(); // 更新 BUFF 和 DEBUFF 标签
     }
 
     checkBattleEnd();
@@ -332,6 +394,7 @@ void FightingScene::endTurn()
         startMonsterTurn();
     }
 }
+
 // 检查战斗是否结束
 void FightingScene::checkBattleEnd()
 {
@@ -504,7 +567,7 @@ void FightingScene::updateHandDisplay()
 }
 
 // 应用BUFF和DEBUFF
-void FightingScene::applyEffects(int& damage, int& block, const std::vector<std::shared_ptr<Effect>>& effects, bool isTargetMonster)
+void FightingScene::applyEffects(int& damage, int& block, const std::vector<std::shared_ptr<Effect>>& effects, const Card::Type cardType, bool isTargetMonster)
 {
     for (const auto& effect : effects)
     {
@@ -513,7 +576,11 @@ void FightingScene::applyEffects(int& damage, int& block, const std::vector<std:
             switch (buff->getType())
             {
             case Effect::Type::Strength:
-                damage += buff->getLevel();
+                // 只有攻击类型的卡牌才会受到力量效果的影响
+                if (cardType == Card::Type::Attack)
+                {
+                    damage += buff->getLevel();
+                }
                 break;
             default:
                 break;
@@ -526,7 +593,7 @@ void FightingScene::applyEffects(int& damage, int& block, const std::vector<std:
             case Effect::Type::Vulnerable:
                 if (isTargetMonster)
                 {
-                    damage = static_cast<int>(damage * 1.5);
+                    damage = static_cast<int>(damage * 1.5); // 易伤增加伤害倍率
                 }
                 break;
             default:
@@ -536,26 +603,30 @@ void FightingScene::applyEffects(int& damage, int& block, const std::vector<std:
     }
 }
 
-// 应用卡牌效果
+// 应用卡牌效果（攻击、格挡、添加BUFF）
 void FightingScene::applyCardEffects(const Card& card)
 {
     int damage = card.getAttack();
     int block = card.getBlock();
 
     // 应用英雄的效果
-    applyEffects(damage, block, _hero->getEffects(), false);
+	// 例如，如果有力量效果，增加攻击伤害
+    applyEffects(damage, block, _hero->getEffects(), card.getType(), false);
 
     // 应用怪物的效果
-    applyEffects(damage, block, _monster->getEffects(), true);
+	// 例如，如果有易伤效果，增加对其造成的伤害
+    applyEffects(damage, block, _monster->getEffects(), card.getType(), true);
 
-    for (const auto& effect : card.getEffects())
+    std::vector<std::shared_ptr<Effect>> effects = card.createEffects();
+
+    for (const auto& effect : effects)
     {
         if (auto buff = dynamic_cast<Buff*>(effect.get()))
         {
             switch (buff->getType())
             {
             case Effect::Type::Strength:
-                _hero->addEffect(effect);
+                _hero->addEffect(effect); // 力量效果应用到英雄
                 break;
             default:
                 break;
@@ -574,8 +645,13 @@ void FightingScene::applyCardEffects(const Card& card)
         }
     }
 
+    updateBuffLabels();
+
     // 处理怪物的格挡
     int monsterBlock = _monster->getBlock();
+
+    CCLOG("Monster block: %d", monsterBlock);
+
     if (monsterBlock > 0)
     {
         if (monsterBlock >= damage)
@@ -589,6 +665,8 @@ void FightingScene::applyCardEffects(const Card& card)
             _monster->setBlock(0);
         }
     }
+
+	CCLOG("Damage: %d", damage);
 
     // 处理怪物的生命值
     int newHealth = _monster->getHealth() - damage;
@@ -619,6 +697,8 @@ void FightingScene::playCard(int index)
         // 执行打出卡牌的逻辑
         Card playedCard = _cards[index];
         applyCardEffects(playedCard);
+
+		checkBattleEnd();
 
         // 设置冷却状态
         _isCooldown = true;
@@ -679,12 +759,14 @@ void FightingScene::handleCardTap(size_t cardIndex, cocos2d::Touch* touch)
     _lastClickTimes[cardIndex] = now;
 }
 
+// 进入抽牌堆场景
 void FightingScene::goToDrawDeck(Ref* sender)
 {
     auto drawDeckScene = DrawDeck::createScene(_drawPile);
     Director::getInstance()->pushScene(drawDeckScene);
 }
 
+// 进入弃牌堆场景
 void FightingScene::goToDiscardDeck(Ref* sender)
 {
     auto discardDeckScene = DiscardDeck::createScene(_discardPile);

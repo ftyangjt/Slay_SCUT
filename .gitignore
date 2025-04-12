@@ -1,3 +1,7 @@
 **/.vs/
 **/.vscode
 sample/cocos2d
+sample/proj.android
+sample/proj.ios_mac
+sample/proj.linux
+sample/proj.win32/Debug.win32

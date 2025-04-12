@@ -1,1 +1,1 @@
-C:\game\sample_game\sample\proj.win32\Debug.win32\sample.exe
+C:\game\Slay_SCUT\sample\proj.win32\Debug.win32\sample.exe

@@ -25,7 +25,7 @@ bool Hero::init(const std::string& filename)
 
     // 初始化主角的属性
     _health = 100; // 默认生命值
-
+    _coins = 0;    // 默认金币数量
     // 创建默认的卡组
     createDefaultDeck();
 
@@ -73,6 +73,7 @@ void Hero::clearDeck()
 }
 
 // 初始化默认卡组
+// 初始化默认卡组
 void Hero::createDefaultDeck()
 {
     // 这里示例创建一个初始卡组，具体卡牌属性根据实际需求调整
@@ -85,15 +86,42 @@ void Hero::createDefaultDeck()
     addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
     addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
     addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
+
     // 创建 Bash 卡牌并添加易伤效果
     Card bashCard("Bash", Card::Type::Attack, 2, "Deal 8 damage and apply Vulnerable", "cardBackground.jpg", 8, 0);
-    bashCard.addEffect(std::make_shared<Debuff>(Effect::Type::Vulnerable, 1));
+    // 使用新方法添加效果：直接指定效果类型、等级和持续时间
+    bashCard.addEffect(Effect::Type::Vulnerable, 1, 3); // 1级易伤，持续3回合
     addCardToDeck(bashCard);
+
+    Card strengthCard("Strength", Card::Type::Power, 1, "Gain 2 Strength", "cardBackground.jpg");
+    strengthCard.addEffect(Effect::Type::Strength, 2, -1); // 2级力量，持续时间为永久
+    addCardToDeck(strengthCard);
 }
 
-// 添加效果
-void Hero::addEffect(std::shared_ptr<Effect> effect)
-{
+
+//  添加效果
+void Hero::addEffect(std::shared_ptr<Effect> effect) {
+    if (!effect) {
+        CCLOG("Error: Attempted to add a null effect.");
+        return; // 如果传入的 effect 是空指针，直接返回
+    }
+
+    for (auto& existingEffect : _effects) {
+        // 检查是否存在相同类型的效果
+        if (existingEffect->getType() == effect->getType()) {
+            if (effect->getType() == Effect::Type::Strength) {
+                // 力量效果：叠加等级
+                existingEffect->setLevel(existingEffect->getLevel() + effect->getLevel());
+            }
+            else if (effect->getType() == Effect::Type::Vulnerable) {
+                // 易伤效果：时长叠加
+                existingEffect->addRemainingTurns(effect->getRemainingTurns());
+            }
+            return; // 处理完成后直接返回
+        }
+    }
+
+    // 如果没有找到相同类型的效果，则添加新的效果
     _effects.push_back(effect);
 }
 
@@ -101,4 +129,17 @@ void Hero::addEffect(std::shared_ptr<Effect> effect)
 const std::vector<std::shared_ptr<Effect>>& Hero::getEffects() const
 {
     return _effects;
+}
+
+// 更新效果，移除持续时间为 0 的效果
+void Hero::updateEffects() {
+    for (auto it = _effects.begin(); it != _effects.end(); ) {
+        (*it)->reduceTurn();
+        if ((*it)->getRemainingTurns() == 0) {
+            it = _effects.erase(it); // 移除持续时间为 0 的效果
+        }
+        else {
+            ++it;
+        }
+    }
 }

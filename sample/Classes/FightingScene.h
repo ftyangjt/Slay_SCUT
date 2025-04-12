@@ -40,13 +40,15 @@ private:
     void initializeDrawPile(); // 初始化牌堆
     void createHealthLabels();
     void createBlockLabels();
+    void createBuffLabels();
+    void updateBuffLabels();
     void updateHandDisplay();
     void addCardEffectLabel(cocos2d::Sprite* cardSprite, const std::string& effect);
     void playCard(int index);
     void highlightSelectedCard();
     void handleCardTap(size_t cardIndex, cocos2d::Touch* touch); // 确保使用正确的类型
     void applyCardEffects(const Card& card);
-    void applyEffects(int& damage, int& block, const std::vector<std::shared_ptr<Effect>>& effects, bool isTargetMonster);
+    void FightingScene::applyEffects(int& damage, int& block, const std::vector<std::shared_ptr<Effect>>& effects, const Card::Type cardType, bool isTargetMonster);
     void createTurnCountLabel();
 	void goToDrawDeck(Ref* sender);// 前往抽牌堆
 	void goToDiscardDeck(Ref* sender);// 前往弃牌堆
@@ -69,6 +71,8 @@ private:
     std::vector<cocos2d::Sprite*> _cardSprites; // 卡牌精灵
     std::vector<std::chrono::steady_clock::time_point> _lastClickTimes; // 记录每张卡牌的上次点击时间
     cocos2d::Label* _turnCountLabel; // 声明回合数标签
+    cocos2d::Label* _heroBuffLabel;    // 英雄 BUFF 标签
+    cocos2d::Label* _monsterBuffLabel; // 怪物 BUFF 标签
 };
 
 #endif // __FIGHTING_SCENE_H__
