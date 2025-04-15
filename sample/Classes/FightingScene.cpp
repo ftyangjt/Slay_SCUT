@@ -225,6 +225,8 @@ void FightingScene::updateHealthAndBlockLabels()
     _monsterHealthLabel->setString("Monster Health: " + std::to_string(_monster->getHealth()));
     _heroBlockLabel->setString("Hero Block: " + std::to_string(_hero->getBlock()));
     _monsterBlockLabel->setString("Monster Block: " + std::to_string(_monster->getBlock()));
+
+
 }
 
 // 更新费用标签
@@ -359,11 +361,12 @@ void FightingScene::createDrawDeck()
 void FightingScene::startMonsterTurn()
 {
     _isPlayerTurn = false;
-	// 目前怪物回合对主角造成10伤害并获得5护甲
+    // 目前怪物回合对主角造成10伤害并获得5护甲
     int damage = 10;
     int block = 5;
+    playMonsterAttackAnimation();
+    _monster->setBlock(block);
 
-	_monster->setBlock(block);
 
     // 处理格挡
     int heroBlock = _hero->getBlock();
@@ -382,13 +385,18 @@ void FightingScene::startMonsterTurn()
     }
 
     // 怪物对主角造成伤害
+	if (damage > 0)
+	{
+    
+		playHeroHitAnimation();
+	}
     int newHealth = _hero->getHealth() - damage;
+	
     _hero->setHealth(newHealth);
     CCLOG("Hero Health: %d", _hero->getHealth());
     updateHealthAndBlockLabels();
     endTurn();
 }
-
 // 结束回合
 void FightingScene::endTurn()
 {
@@ -415,6 +423,7 @@ void FightingScene::endTurn()
 
 		// 重置英雄格挡
         _hero->setBlock(0);
+       
         updateHealthAndBlockLabels();
 
         // 更新效果持续时间
@@ -751,6 +760,7 @@ void FightingScene::applyCardEffects(const Card& card)
         else
         {
             damage -= monsterBlock;
+          
             _monster->setBlock(0);
         }
     }
@@ -758,7 +768,11 @@ void FightingScene::applyCardEffects(const Card& card)
 	CCLOG("Damage: %d", damage);
 
     // 处理怪物的生命值
+    
     int newHealth = _monster->getHealth() - damage;
+    if (damage > 0) {
+        playMonsterHitAnimation(); // 如果造成了伤害，播放怪物受击动画
+    }
     _monster->setHealth(newHealth);
     CCLOG("Monster Health: %d", _monster->getHealth());
 
@@ -784,9 +798,9 @@ void FightingScene::playCard(int index)
     if (index >= 0 && index < _cards.size()) {
         // 原逻辑不变
         Card playedCard = _cards[index];
-        
+
         int cost = playedCard.getCost();
-		// 检查能量是否足够
+        // 检查能量是否足够
         if (cost > _currentCost)
         {
             CCLOG("Energy not enough to play this card!");
@@ -796,8 +810,15 @@ void FightingScene::playCard(int index)
         _currentCost -= cost;
         updateCostLabel();
 
-		// 处理卡牌精灵
+        // 处理卡牌精灵
         auto cardSprite = _cardSprites[index];
+
+        // 如果是攻击类型的卡牌，播放英雄的挥刀动画
+        if (playedCard.getType() == Card::Type::Attack) {
+            // 播放英雄的挥刀动画
+            playHeroAttackAnimation();
+        }
+
         applyCardEffects(playedCard);
         // 让该卡牌优先显示
         cardSprite->setLocalZOrder(9999);
@@ -819,7 +840,7 @@ void FightingScene::playCard(int index)
         cardSprite->runAction(Sequence::create(moveAndScale, finish, nullptr));
 
         // 设置冷却
-		    checkBattleEnd();
+        checkBattleEnd();
 
         // 设置冷却状态
         _isCooldown = true;
@@ -970,3 +991,146 @@ void FightingScene::drawSequentialCards(int count)
         tempSprite->runAction(Sequence::create(spawn, finish, nullptr));
     }
 }
+
+void FightingScene::playHeroAttackAnimation()
+{
+    if (!_hero) return;
+
+    // 保存英雄原始位置
+    Vec2 originalPos = _hero->getPosition();
+
+    // 计算向怪物方向冲锋的目标位置
+    Vec2 monsterPos = _monster->getPosition();
+    Vec2 direction = monsterPos - originalPos;
+    direction.normalize();
+
+    // 冲刺距离，可以调整以得到最佳效果
+    float dashDistance = 150.0f;
+    Vec2 dashPos = originalPos + direction * dashDistance;
+
+    // 创建动作序列：
+    // 1. 快速冲向前方
+    // 2. 短暂停顿
+    // 3. 返回原位
+    auto dashForward = EaseSineOut::create(MoveTo::create(0.1f, dashPos));
+    auto pause = DelayTime::create(0.1f);
+    auto dashBack = EaseSineIn::create(MoveTo::create(0.1f, originalPos));
+
+    
+    // 组合动作
+    auto dashAction = Sequence::create(
+        Spawn::create(dashForward, nullptr),
+        pause,
+        Spawn::create(dashBack, nullptr),
+        nullptr
+    );
+
+    // 执行动画
+    _hero->runAction(dashAction);
+
+    // 添加攻击音效
+    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/sword_swing.mp3");
+}
+
+
+void FightingScene::playMonsterAttackAnimation()
+{
+    if (!_monster) return;
+
+    // 保存怪物原始位置
+    Vec2 originalPos = _monster->getPosition();
+
+    // 计算向英雄方向冲锋的目标位置
+    Vec2 heroPos = _hero->getPosition();
+    Vec2 direction = heroPos - originalPos;
+    direction.normalize();
+
+    // 冲刺距离，可以调整以得到最佳效果
+    float dashDistance = 150.0f;
+    Vec2 dashPos = originalPos + direction * dashDistance;
+
+    // 创建动作序列：
+    // 1. 快速冲向英雄
+    // 2. 短暂停顿
+    // 3. 返回原位
+    auto dashForward = EaseSineOut::create(MoveTo::create(0.1f, dashPos));
+    auto pause = DelayTime::create(0.1f);
+    auto dashBack = EaseSineIn::create(MoveTo::create(0.1f, originalPos));
+
+    // 组合动作
+    auto dashAction = Sequence::create(
+        Spawn::create(dashForward, nullptr),
+        pause,
+        Spawn::create(dashBack, nullptr),
+        nullptr
+    );
+
+    // 执行动画
+    _monster->runAction(dashAction);
+
+    // 添加攻击音效
+    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/monster_attack.mp3");
+}
+
+void FightingScene::playHeroHitAnimation()
+{
+    if (!_hero) return;
+
+    // 保存英雄的原始位置
+    Vec2 originalPos = _hero->getPosition();
+
+    // 定义左右摇晃的偏移量
+    float shakeOffset = 20.0f;
+
+    // 创建左右摇晃的动作序列
+    auto moveLeft = MoveTo::create(0.05f, Vec2(originalPos.x - shakeOffset, originalPos.y));
+    auto moveRight = MoveTo::create(0.05f, Vec2(originalPos.x + shakeOffset, originalPos.y));
+    auto moveBack = MoveTo::create(0.05f, originalPos);
+
+    // 重复左右摇晃几次
+    auto shakeSequence = Sequence::create(moveLeft, moveRight, nullptr);
+    auto repeatShake = Repeat::create(shakeSequence, 3);
+
+    // 最后回到原始位置
+    auto resetPosition = MoveTo::create(0.05f, originalPos);
+
+    // 组合动作
+    auto hitAction = Sequence::create(repeatShake, resetPosition, nullptr);
+
+    // 执行动作
+    _hero->runAction(hitAction);
+}
+
+void FightingScene::playMonsterHitAnimation()
+{
+    if (!_monster) return;
+
+    // 保存怪物的原始位置
+    Vec2 originalPos = _monster->getPosition();
+
+    // 定义左右摇晃的偏移量
+    float shakeOffset = 20.0f;
+
+    // 创建左右摇晃的动作序列
+    auto moveLeft = MoveTo::create(0.05f, Vec2(originalPos.x - shakeOffset, originalPos.y));
+    auto moveRight = MoveTo::create(0.05f, Vec2(originalPos.x + shakeOffset, originalPos.y));
+    auto moveBack = MoveTo::create(0.05f, originalPos);
+
+    // 重复左右摇晃几次
+    auto shakeSequence = Sequence::create(moveLeft, moveRight, nullptr);
+    auto repeatShake = Repeat::create(shakeSequence, 3);
+
+    // 最后回到原始位置
+    auto resetPosition = MoveTo::create(0.05f, originalPos);
+
+    // 组合动作
+    auto hitAction = Sequence::create(repeatShake, resetPosition, nullptr);
+
+    // 执行动作
+    _monster->runAction(hitAction);
+}
+
+
+
+
+

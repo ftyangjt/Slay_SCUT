@@ -56,6 +56,10 @@ private:
     void playDiscardToDrawMeteorEffect(const cocos2d::Vec2& discardPilePosition, const cocos2d::Vec2& drawPilePosition);
     void drawSequentialCards(int count);
     void updateCostLabel();
+    void playHeroAttackAnimation();
+    void playMonsterAttackAnimation();
+    void playHeroHitAnimation();
+    void playMonsterHitAnimation();
     cocos2d::Size _visibleSize;
     cocos2d::Vec2 _origin;
     bool _isCooldown = false; // 表示出牌是否处于冷却状态
@@ -69,6 +73,7 @@ private:
     cocos2d::Sprite* _selectedCard; // 选中的卡牌
     Hero* _hero; // 英雄对象
     Monster* _monster; // 怪物对象
+   
     cocos2d::Label* _costLabel; // 显示当前费用的UI
     cocos2d::Label* _heroHealthLabel; // 显示英雄血量的标签
     cocos2d::Label* _monsterHealthLabel; // 显示怪物血量的标签
