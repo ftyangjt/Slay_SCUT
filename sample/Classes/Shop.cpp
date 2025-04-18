@@ -383,7 +383,7 @@ namespace MyGame {
             });
 
         if (closeButton) {
-            closeButton->setPosition(Vec2(goodsCenter.x, goodsCenter.y - goodsSize.height / 2 + 20));
+            closeButton->setPosition(Vec2(goodsCenter.x, 0));
 
             auto menu = Menu::create(closeButton, nullptr);
             menu->setPosition(Vec2::ZERO);

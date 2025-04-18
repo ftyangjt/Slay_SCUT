@@ -735,6 +735,8 @@ namespace MyGame {
         // 记录当前房间位置
         currentRoomPosition = item->getPosition();
 
+        currentRoomType = RoomType::BATTLE;
+
         // 标记为已完成房间
         roomCompleted = true;
 
@@ -852,6 +854,8 @@ namespace MyGame {
         // 记录当前房间位置
         currentRoomPosition = item->getPosition();
 
+		currentRoomType = RoomType::BOSS;
+
         // 标记为已完成房间
         roomCompleted = true;
 
@@ -890,6 +894,8 @@ namespace MyGame {
 
         // 记录当前房间位置
         currentRoomPosition = item->getPosition();
+
+        currentRoomType = RoomType::ELITE;
 
         // 标记为已完成房间
         roomCompleted = true;
