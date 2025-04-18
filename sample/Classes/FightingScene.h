@@ -7,6 +7,7 @@
 #include "Monster.h"
 #include "DiscardDeck.h"
 #include "DrawDeck.h"
+#include "ui/CocosGUI.h"
 
 // 常量定义
 const int DOUBLE_CLICK_THRESHOLD = 300;  // 毫秒
@@ -63,6 +64,8 @@ private:
     cocos2d::Size _visibleSize;
     cocos2d::Vec2 _origin;
     bool _isCooldown = false; // 表示出牌是否处于冷却状态
+	bool _isEndTurnButtonEnabled = true; //表示结束回合按钮是否可用
+	bool _isDrawingCards = false; // 是否正在抽牌
     int _selectedCardIndex = -1; // -1 表示没有选中的卡牌
     int _currentCost;         // 当前可用费用
     std::vector<Card> _drawPile; // 抽牌堆
@@ -83,9 +86,11 @@ private:
     std::vector<std::chrono::steady_clock::time_point> _lastClickTimes; // 记录每张卡牌的上次点击时间
     cocos2d::Label* _turnCountLabel; // 声明回合数标签
     cocos2d::MenuItemImage* _discardDeckButton;
-	  cocos2d::MenuItemImage* _drawDeckButton;
+	cocos2d::MenuItemImage* _drawDeckButton;
     cocos2d::Label* _heroBuffLabel;    // 英雄 BUFF 标签
     cocos2d::Label* _monsterBuffLabel; // 怪物 BUFF 标签
+    cocos2d::ui::Button* _endTurnButton = nullptr; // 结束回合按钮
+
 };
 
 #endif // __FIGHTING_SCENE_H__
