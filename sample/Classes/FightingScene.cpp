@@ -1,4 +1,4 @@
-﻿#include "FightingScene.h"
+#include "FightingScene.h"
 #include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
 #include "Map.h"
@@ -7,7 +7,6 @@
 
 USING_NS_CC;
 
-// 以下为初始化函数的实现
 // 创建场景
 Scene* FightingScene::createScene()
 {
@@ -276,41 +275,96 @@ void FightingScene::updateBuffLabels() {
 void FightingScene::startPlayerTurn()
 {
     _isPlayerTurn = true;
-	// 重置费用
     _currentCost = 3;
-	// 更新回合数标签
+    _selectedCardIndex = -1; // 确保重置选中卡牌
     _turnCountLabel->setString("Turn: " + std::to_string(_turnCount));
-
-	_costLabel->setString("Cost: " + std::to_string(_currentCost));
-
+    _costLabel->setString("Cost: " + std::to_string(_currentCost));
     updateHandDisplay();
 
-    drawSequentialCards(5);
+    // 禁用结束回合按钮，因为将要开始抽牌
+    _isEndTurnButtonEnabled = false;
 
-    // 添加一个按钮来手动结束回合
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    auto endTurnButton = ui::Button::create("button.png", "button_selected.png");
-
-    if (endTurnButton == nullptr)
+    // 如果按钮不存在，创建它
+    if (_endTurnButton == nullptr)
     {
-        problemLoading("'buttonNormal.png' or 'buttonSelected.png'");
-        return;
+        _endTurnButton = cocos2d::ui::Button::create("button.png", "button_selected.png");
+        if (_endTurnButton == nullptr)
+        {
+            problemLoading("'buttonNormal.png' or 'buttonSelected.png'");
+            return;
+        }
+
+        _endTurnButton->setScale(0.25f);
+        _endTurnButton->setPosition(Vec2(origin.x + visibleSize.width - _endTurnButton->getContentSize().width / 2,
+            origin.y + visibleSize.width / 2 - _endTurnButton->getContentSize().height / 2));
+
+        // 添加点击事件监听器
+        _endTurnButton->addClickEventListener([this](Ref* sender) {
+            // 严格检查冷却状态
+            if (!_isEndTurnButtonEnabled) {
+                return; // 如果处于冷却状态，直接返回不执行任何操作
+            }
+
+            // 立即设置冷却状态以防止连续点击
+            _isEndTurnButtonEnabled = false;
+
+            // 获取按钮对象并禁用它
+            auto button = static_cast<ui::Button*>(sender);
+            button->setEnabled(false);
+
+            // 视觉反馈 - 可选：改变按钮颜色为灰色
+            button->setColor(Color3B(150, 150, 150));
+
+            // 创建一个动作序列，延迟后重新启用按钮
+            this->runAction(Sequence::create(
+                DelayTime::create(1.0f),
+                CallFunc::create([this, button]() {
+                    // 只有在玩家回合时才重新启用按钮
+                    if (_isPlayerTurn && _selectedCardIndex == -1) {
+                        _isEndTurnButtonEnabled = true;
+                        button->setEnabled(true);
+                        button->setColor(Color3B::WHITE); // 恢复原色
+                    }
+                    }),
+                nullptr
+            ));
+
+            // 最后调用回合结束函数
+            this->endTurn();
+            });
+
+        this->addChild(_endTurnButton, 1);
+    }
+    else
+    {
+        _endTurnButton->setVisible(true);
+        _endTurnButton->setEnabled(false); // 初始禁用
+        _endTurnButton->setColor(Color3B(150, 150, 150)); // 灰色
     }
 
+    // 开始抽牌
+    drawSequentialCards(5);
     endTurnButton->setScale(0.25f); // 将按钮缩小到原来的50%
 
-	// 设置按钮位置
+    // 设置按钮位置
     endTurnButton->setPosition(Vec2(origin.x + visibleSize.width - endTurnButton->getContentSize().width / 2,
         origin.y + visibleSize.width / 2 - endTurnButton->getContentSize().height / 2));
 
     endTurnButton->addClickEventListener([this](Ref* sender) {
-        this->endTurn();
+        auto delay = DelayTime::create(0.0f);
+        auto endTurnAction = CallFunc::create([=]() {
+            this->endTurn();
+            });
+        this->runAction(Sequence::create(delay, endTurnAction, nullptr));
         });
 
     this->addChild(endTurnButton, 1);
 }
+
+
 
 // 设置弃牌堆按钮
 void FightingScene::createDiscardDeck()
@@ -336,8 +390,6 @@ void FightingScene::createDiscardDeck()
     this->addChild(buttonMenu, 4);
 }
 
-
-
 // 设置抽牌堆按钮
 void FightingScene::createDrawDeck()
 {
@@ -360,47 +412,56 @@ void FightingScene::createDrawDeck()
     this->addChild(buttonMenu, 4);
 }
 
-
 // 开始怪物回合
 void FightingScene::startMonsterTurn()
 {
     _isPlayerTurn = false;
-    // 目前怪物回合对主角造成10伤害并获得5护甲
-    int damage = 10;
-    int block = 5;
-    playMonsterAttackAnimation();
-    _monster->setBlock(block);
 
+    // 创建一个3秒延迟后执行怪物回合的序列
+    auto delay = DelayTime::create(1.0f);
+    auto monsterAction = CallFunc::create([=]() {
 
-    // 处理格挡
-    int heroBlock = _hero->getBlock();
-    if (heroBlock > 0)
-    {
-        if (heroBlock >= damage)
+        // 以下是原来的怪物回合逻辑
+        int damage = 10;
+        int block = 5;
+        playMonsterAttackAnimation();
+        _monster->setBlock(block);
+
+        // 处理格挡
+        int heroBlock = _hero->getBlock();
+        if (heroBlock > 0)
         {
-            _hero->setBlock(heroBlock - damage);
-            damage = 0;
+            if (heroBlock >= damage)
+            {
+                _hero->setBlock(heroBlock - damage);
+                damage = 0;
+            }
+            else
+            {
+                damage -= heroBlock;
+                _hero->setBlock(0);
+            }
         }
-        else
-        {
-            damage -= heroBlock;
-            _hero->setBlock(0);
-        }
-    }
 
-    // 怪物对主角造成伤害
-	if (damage > 0)
-	{
-    
-		playHeroHitAnimation();
-	}
-    int newHealth = _hero->getHealth() - damage;
-	
-    _hero->setHealth(newHealth);
-    CCLOG("Hero Health: %d", _hero->getHealth());
-    updateHealthAndBlockLabels();
-    endTurn();
+        // 怪物对主角造成伤害
+        if (damage > 0)
+        {
+            playHeroHitAnimation();
+        }
+        int newHealth = _hero->getHealth() - damage;
+
+        _hero->setHealth(newHealth);
+        CCLOG("Hero Health: %d", _hero->getHealth());
+        updateHealthAndBlockLabels();
+        
+        });
+	auto endTurnAction = CallFunc::create([this]() {
+		this->endTurn();
+		});
+    // 执行延迟和回合逻辑的序列
+    this->runAction(Sequence::create(monsterAction, delay, endTurnAction, nullptr));
 }
+
 // 结束回合
 void FightingScene::endTurn()
 {
@@ -499,8 +560,18 @@ void FightingScene::checkBattleEnd()
 }
 
 // 以下为卡牌系统的实现
+
+
+// 单张抽牌函数 - 修改版
 void FightingScene::drawCard()
 {
+    // 开始抽牌时禁用结束回合按钮
+    _isEndTurnButtonEnabled = false;
+    if (_endTurnButton) {
+        _endTurnButton->setEnabled(false);
+        _endTurnButton->setColor(Color3B(150, 150, 150));
+    }
+
     if (_drawPile.empty())
     {
         // 若抽牌堆为空，将弃牌堆洗回抽牌堆
@@ -537,12 +608,30 @@ void FightingScene::drawCard()
             _cards.push_back(drawnCard);
             tempSprite->removeFromParent();
             updateHandDisplay();
+
+            // 抽牌结束后，只有在没有选中卡牌时才启用结束回合按钮
+            if (_selectedCardIndex == -1) {
+                _isEndTurnButtonEnabled = true;
+                if (_endTurnButton) {
+                    _endTurnButton->setEnabled(true);
+                    _endTurnButton->setColor(Color3B::WHITE);
+                }
+            }
             });
 
         tempSprite->runAction(Sequence::create(spawn, finish, nullptr));
     }
+    else {
+        // 如果没有卡牌可抽，也要恢复按钮状态
+        if (_selectedCardIndex == -1) {
+            _isEndTurnButtonEnabled = true;
+            if (_endTurnButton) {
+                _endTurnButton->setEnabled(true);
+                _endTurnButton->setColor(Color3B::WHITE);
+            }
+        }
+    }
 }
-
 
 // 弃一张牌
 void FightingScene::discardCard(int index)
@@ -581,8 +670,6 @@ cocos2d::Label* FightingScene::addCardEffectLabel(cocos2d::Sprite* cardSprite, c
     return effectLabel; // 返回效果标签
 }
 
-
-// 刷新手牌显示
 // 刷新手牌显示
 void FightingScene::updateHandDisplay()
 {
@@ -662,9 +749,6 @@ void FightingScene::updateHandDisplay()
         highlightSelectedCard();
     }
 }
-
-
-
 
 // 应用BUFF和DEBUFF
 void FightingScene::applyEffects(int& damage, int& block, const std::vector<std::shared_ptr<Effect>>& effects, const Card::Type cardType, bool isTargetMonster)
@@ -790,7 +874,6 @@ void FightingScene::applyCardEffects(const Card& card)
 }
 
 // 打出卡牌
-
 void FightingScene::playCard(int index)
 {
     if (_isCooldown) {
@@ -835,8 +918,17 @@ void FightingScene::playCard(int index)
         auto finish = CallFunc::create([this, index, cardSprite]() {
             cardSprite->removeFromParent();
             discardCard(index);
-            _selectedCardIndex = -1;
+            _selectedCardIndex = -1; // 重置选中的卡牌
             highlightSelectedCard();
+
+            // 打出卡牌后，如果没有选中的卡牌，则启用结束回合按钮
+            if (_selectedCardIndex == -1) {
+                _isEndTurnButtonEnabled = true;
+                if (_endTurnButton) {
+                    _endTurnButton->setEnabled(true);
+                    _endTurnButton->setColor(Color3B::WHITE);
+                }
+            }
             });
 
         cardSprite->runAction(Sequence::create(moveAndScale, finish, nullptr));
@@ -853,7 +945,6 @@ void FightingScene::playCard(int index)
         ));
     }
 }
-
 
 // 高亮选中的卡牌
 void FightingScene::highlightSelectedCard()
@@ -919,8 +1010,6 @@ void FightingScene::goToDiscardDeck(Ref* sender)
     Director::getInstance()->pushScene(discardDeckScene);
 }
 
-// 假设 discardPilePosition、drawPilePosition 为弃牌堆与抽牌堆的屏幕坐标
-
 void FightingScene::playDiscardToDrawMeteorEffect(const Vec2& discardPilePosition, const Vec2& drawPilePosition)
 {
     // 创建流星粒子
@@ -952,48 +1041,90 @@ void FightingScene::playDiscardToDrawMeteorEffect(const Vec2& discardPilePositio
     this->addChild(meteor, 10);
 }
 
-// 递归依次抽多张牌的函数
+// 递归依次抽多张牌的函数 - 修改版（移除选中卡牌的条件判断）
 void FightingScene::drawSequentialCards(int count)
 {
-    if (count <= 0) return;
+    // 第一次调用时初始化
+    if (count > 0 && !_isDrawingCards) {
+        _isDrawingCards = true;
 
-    if (_drawPile.empty())
-    {
+        // 禁用结束回合按钮
+        _isEndTurnButtonEnabled = false;
+        if (_endTurnButton) {
+            _endTurnButton->setEnabled(false);
+            _endTurnButton->setColor(Color3B(150, 150, 150)); // 灰色表示禁用
+        }
+    }
+
+    // 若抽牌结束
+    if (count <= 0) {
+        // 抽牌过程完全结束时重置标志并启用按钮
+        if (_isDrawingCards) {
+            _isDrawingCards = false;
+            _isEndTurnButtonEnabled = true;
+            _endTurnButton->setEnabled(true);
+            _endTurnButton->setColor(Color3B(255, 255, 255));
+        }
+        return;
+    }
+
+    // 处理抽牌逻辑
+    if (_drawPile.empty()) {
         _drawPile = _discardPile;
         _discardPile.clear();
         shuffleDrawPile();
     }
 
-    if (!_drawPile.empty())
-    {
-        // 从抽牌堆取顶
+    if (!_drawPile.empty()) {
+        // 从抽牌堆取一张牌
         Card drawnCard = _drawPile.back();
         _drawPile.pop_back();
 
-        // 创建临时精灵，从抽牌堆按钮位置出现
+        // 创建临时精灵显示抽牌动画
         auto tempSprite = Sprite::create("cardBackground.jpg");
         tempSprite->setPosition(_drawDeckButton->getPosition());
         tempSprite->setScale(0.0f);
         tempSprite->setLocalZOrder(9999);
         this->addChild(tempSprite);
 
-        // 飞行并放大
+        // 飞行并放大的动画
         auto moveAction = MoveTo::create(0.3f, Vec2(_visibleSize.width * 0.5f, tempSprite->getContentSize().height / 3));
         auto scaleAction = ScaleTo::create(0.3f, 1.0f);
         auto spawn = Spawn::create(moveAction, scaleAction, nullptr);
 
-        // 动画结束后：加入到手牌、移除临时精灵并递归调用下一张
+        // 动画结束后的回调函数
         auto finish = CallFunc::create([this, drawnCard, tempSprite, count]() {
+            // 添加到手牌并移除临时精灵
             _cards.push_back(drawnCard);
             tempSprite->removeFromParent();
+
+            // 确保更新手牌时按钮状态保持禁用
+            bool oldState = _isEndTurnButtonEnabled;
+            _isEndTurnButtonEnabled = false;
+
             updateHandDisplay();
+
+            // 恢复按钮禁用状态，确保在整个抽牌过程中按钮都保持禁用
+            _isEndTurnButtonEnabled = oldState;
+            if (_endTurnButton) {
+                _endTurnButton->setEnabled(false);
+                _endTurnButton->setColor(Color3B(150, 150, 150));
+            }
+
+            // 继续抽下一张牌
             drawSequentialCards(count - 1);
             });
 
+        // 执行动画序列
         tempSprite->runAction(Sequence::create(spawn, finish, nullptr));
+    }
+    else {
+        // 如果没有牌可抽，也要结束递归
+        drawSequentialCards(0);
     }
 }
 
+// 英雄和怪物的攻击动画
 void FightingScene::playHeroAttackAnimation()
 {
     if (!_hero) return;
@@ -1034,7 +1165,6 @@ void FightingScene::playHeroAttackAnimation()
     CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/sword_swing.mp3");
 }
 
-
 void FightingScene::playMonsterAttackAnimation()
 {
     if (!_monster) return;
@@ -1074,6 +1204,7 @@ void FightingScene::playMonsterAttackAnimation()
     CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/monster_attack.mp3");
 }
 
+// 英雄和怪物受击动画
 void FightingScene::playHeroHitAnimation()
 {
     if (!_hero) return;
@@ -1131,8 +1262,4 @@ void FightingScene::playMonsterHitAnimation()
     // 执行动作
     _monster->runAction(hitAction);
 }
-
-
-
-
-
+    
