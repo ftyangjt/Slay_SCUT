@@ -20,6 +20,9 @@ namespace MyGame {
         SHOP
     };
 
+    // 添加静态变量来存储当前房间类型
+    static RoomType currentRoomType = RoomType::BATTLE;
+
     struct Room {
         RoomType type;
         cocos2d::MenuItemImage* item;
@@ -43,8 +46,8 @@ namespace MyGame {
         void menuQuestionCallback(cocos2d::Ref* pSender);
         void menuRestCallback(cocos2d::Ref* pSender);
         void menuBossCallback(cocos2d::Ref* pSender);  // 添加 BOSS 回调函数
-		void menuEliteCallback(cocos2d::Ref* pSender); // 添加 ELITE 回调函数
-		void menuShopCallback(cocos2d::Ref* pSender); // 添加 SHOP 回调函数
+        void menuEliteCallback(cocos2d::Ref* pSender); // 添加 ELITE 回调函数
+        void menuShopCallback(cocos2d::Ref* pSender); // 添加 SHOP 回调函数
         RoomType getRandomRoomType();
         void generateRandomMap(int layers, int roomsPerLayer);
         void generateMapFromSavedInfo();
