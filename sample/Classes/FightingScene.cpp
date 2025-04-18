@@ -1,4 +1,4 @@
-#include "FightingScene.h"
+﻿#include "FightingScene.h"
 #include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
 #include "Map.h"
@@ -343,21 +343,6 @@ void FightingScene::startPlayerTurn()
 
     // 开始抽牌
     drawSequentialCards(5);
-    endTurnButton->setScale(0.25f); // 将按钮缩小到原来的50%
-
-    // 设置按钮位置
-    endTurnButton->setPosition(Vec2(origin.x + visibleSize.width - endTurnButton->getContentSize().width / 2,
-        origin.y + visibleSize.width / 2 - endTurnButton->getContentSize().height / 2));
-
-    endTurnButton->addClickEventListener([this](Ref* sender) {
-        auto delay = DelayTime::create(0.0f);
-        auto endTurnAction = CallFunc::create([=]() {
-            this->endTurn();
-            });
-        this->runAction(Sequence::create(delay, endTurnAction, nullptr));
-        });
-
-    this->addChild(endTurnButton, 1);
 }
 
 
