@@ -7,7 +7,6 @@
 
 USING_NS_CC;
 
-// 以下为初始化函数的实现
 // 创建场景
 Scene* FightingScene::createScene()
 {
@@ -272,12 +271,12 @@ void FightingScene::updateBuffLabels() {
 void FightingScene::startPlayerTurn()
 {
     _isPlayerTurn = true;
-	// 重置费用
+    // 重置费用
     _currentCost = 3;
-	// 更新回合数标签
+    // 更新回合数标签
     _turnCountLabel->setString("Turn: " + std::to_string(_turnCount));
 
-	_costLabel->setString("Cost: " + std::to_string(_currentCost));
+    _costLabel->setString("Cost: " + std::to_string(_currentCost));
 
     updateHandDisplay();
 
@@ -297,12 +296,16 @@ void FightingScene::startPlayerTurn()
 
     endTurnButton->setScale(0.25f); // 将按钮缩小到原来的50%
 
-	// 设置按钮位置
+    // 设置按钮位置
     endTurnButton->setPosition(Vec2(origin.x + visibleSize.width - endTurnButton->getContentSize().width / 2,
         origin.y + visibleSize.width / 2 - endTurnButton->getContentSize().height / 2));
 
     endTurnButton->addClickEventListener([this](Ref* sender) {
-        this->endTurn();
+        auto delay = DelayTime::create(0.0f);
+        auto endTurnAction = CallFunc::create([=]() {
+            this->endTurn();
+            });
+        this->runAction(Sequence::create(delay, endTurnAction, nullptr));
         });
 
     this->addChild(endTurnButton, 1);
@@ -332,8 +335,6 @@ void FightingScene::createDiscardDeck()
     this->addChild(buttonMenu, 4);
 }
 
-
-
 // 设置抽牌堆按钮
 void FightingScene::createDrawDeck()
 {
@@ -356,47 +357,57 @@ void FightingScene::createDrawDeck()
     this->addChild(buttonMenu, 4);
 }
 
-
 // 开始怪物回合
 void FightingScene::startMonsterTurn()
 {
     _isPlayerTurn = false;
-    // 目前怪物回合对主角造成10伤害并获得5护甲
-    int damage = 10;
-    int block = 5;
-    playMonsterAttackAnimation();
-    _monster->setBlock(block);
 
+    // 创建一个3秒延迟后执行怪物回合的序列
+    auto delay = DelayTime::create(1.0f);
+    auto monsterAction = CallFunc::create([=]() {
 
-    // 处理格挡
-    int heroBlock = _hero->getBlock();
-    if (heroBlock > 0)
-    {
-        if (heroBlock >= damage)
+        // 以下是原来的怪物回合逻辑
+        int damage = 10;
+        int block = 5;
+        playMonsterAttackAnimation();
+        _monster->setBlock(block);
+
+        // 处理格挡
+        int heroBlock = _hero->getBlock();
+        if (heroBlock > 0)
         {
-            _hero->setBlock(heroBlock - damage);
-            damage = 0;
+            if (heroBlock >= damage)
+            {
+                _hero->setBlock(heroBlock - damage);
+                damage = 0;
+            }
+            else
+            {
+                damage -= heroBlock;
+                _hero->setBlock(0);
+            }
         }
-        else
-        {
-            damage -= heroBlock;
-            _hero->setBlock(0);
-        }
-    }
 
-    // 怪物对主角造成伤害
-	if (damage > 0)
-	{
-    
-		playHeroHitAnimation();
-	}
-    int newHealth = _hero->getHealth() - damage;
-	
-    _hero->setHealth(newHealth);
-    CCLOG("Hero Health: %d", _hero->getHealth());
-    updateHealthAndBlockLabels();
-    endTurn();
+        // 怪物对主角造成伤害
+        if (damage > 0)
+        {
+            playHeroHitAnimation();
+        }
+        int newHealth = _hero->getHealth() - damage;
+
+        _hero->setHealth(newHealth);
+        CCLOG("Hero Health: %d", _hero->getHealth());
+        updateHealthAndBlockLabels();
+        
+        });
+	auto endTurnAction = CallFunc::create([this]() {
+		this->endTurn();
+		});
+    // 执行延迟和回合逻辑的序列
+    this->runAction(Sequence::create(monsterAction, delay, endTurnAction, nullptr));
 }
+
+
 // 结束回合
 void FightingScene::endTurn()
 {
@@ -541,7 +552,6 @@ void FightingScene::drawCard()
     }
 }
 
-
 // 弃一张牌
 void FightingScene::discardCard(int index)
 {
@@ -579,8 +589,6 @@ cocos2d::Label* FightingScene::addCardEffectLabel(cocos2d::Sprite* cardSprite, c
     return effectLabel; // 返回效果标签
 }
 
-
-// 刷新手牌显示
 // 刷新手牌显示
 void FightingScene::updateHandDisplay()
 {
@@ -660,9 +668,6 @@ void FightingScene::updateHandDisplay()
         highlightSelectedCard();
     }
 }
-
-
-
 
 // 应用BUFF和DEBUFF
 void FightingScene::applyEffects(int& damage, int& block, const std::vector<std::shared_ptr<Effect>>& effects, const Card::Type cardType, bool isTargetMonster)
@@ -992,6 +997,7 @@ void FightingScene::drawSequentialCards(int count)
     }
 }
 
+// 英雄和怪物的攻击动画
 void FightingScene::playHeroAttackAnimation()
 {
     if (!_hero) return;
@@ -1032,7 +1038,6 @@ void FightingScene::playHeroAttackAnimation()
     CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/sword_swing.mp3");
 }
 
-
 void FightingScene::playMonsterAttackAnimation()
 {
     if (!_monster) return;
@@ -1072,6 +1077,7 @@ void FightingScene::playMonsterAttackAnimation()
     CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/monster_attack.mp3");
 }
 
+// 英雄和怪物受击动画
 void FightingScene::playHeroHitAnimation()
 {
     if (!_hero) return;
@@ -1129,8 +1135,3 @@ void FightingScene::playMonsterHitAnimation()
     // 执行动作
     _monster->runAction(hitAction);
 }
-
-
-
-
-
