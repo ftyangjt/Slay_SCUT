@@ -499,6 +499,27 @@ void FightingScene::checkBattleEnd()
     if (_hero->getHealth() <= 0)
     {
         // 现有失败处理代码保持不变...
+        CCLOG("Hero is dead. Game Over.");
+
+        // 创建失败信息标签
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+        auto defeatLabel = Label::createWithTTF("你已阵亡！", "fonts/Marker Felt.ttf", 80);
+        defeatLabel->setTextColor(Color4B::RED);
+        defeatLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+        this->addChild(defeatLabel, 10);
+
+        // 添加延迟动作，然后切换到失败场景
+        this->runAction(Sequence::create(
+            DelayTime::create(0.1f),  // 延迟0.1秒
+            CallFunc::create([]() {
+                // 切换到失败场景
+                auto failScene = FailScene::createScene();
+                Director::getInstance()->replaceScene(TransitionFade::create(0.5f, failScene));
+                }),
+            nullptr
+        ));
     }
     else if (_monster->getHealth() <= 0)
     {
