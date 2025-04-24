@@ -6,6 +6,23 @@ USING_NS_CC;
 // 添加静态变量来存储英雄的健康值和金币
 static int heroHealth = 100; // 默认生命值为100
 static int heroCoins = 100; // 默认金币为100
+// 添加一个静态变量来存储英雄的最大生命值上限
+static int heroMaxHealth = Hero::MAX_HEALTH;
+
+// 获取当前最大生命值上限
+int Hero::getMaxHealth()
+{
+    return heroMaxHealth;
+}
+
+// 增加最大生命值上限
+void Hero::increaseMaxHealth(int amount)
+{
+    heroMaxHealth += amount;
+    // 同时增加当前生命值
+    healHealth(amount);
+    updateStatusDisplayStatic(); // 更新显示
+}
 
 // 初始化静态标签
 cocos2d::Label* Hero::s_statusLabel = nullptr;
@@ -32,7 +49,8 @@ int Hero::getCurrentHealth()
 // 恢复指定数量的生命值，不超过上限
 void Hero::healHealth(int amount)
 {
-    heroHealth = std::min(heroHealth + amount, MAX_HEALTH);
+    // 修改这里：使用动态的 heroMaxHealth 而不是静态常量 MAX_HEALTH
+    heroHealth = std::min(heroHealth + amount, heroMaxHealth);
     updateStatusDisplayStatic(); // 更新显示
 }
 
@@ -64,7 +82,6 @@ void Hero::resetCoins()
 }
 
 // 初始化状态显示
-
 void Hero::initStatusDisplay()
 {
     // 先释放可能已经存在的标签
@@ -76,9 +93,9 @@ void Hero::initStatusDisplay()
         s_statusLabel = nullptr;
     }
 
-    // 创建状态显示标签
+    // 创建状态显示标签，修改显示格式为当前生命值/最大生命值
     s_statusLabel = Label::createWithTTF("Coins: " + std::to_string(heroCoins) +
-        " Health: " + std::to_string(heroHealth),
+        " Health: " + std::to_string(heroHealth) + "/" + std::to_string(heroMaxHealth),
         "fonts/Marker Felt.ttf", 24);
     if (s_statusLabel == nullptr) {
         CCLOG("Error: Failed to create status label");
@@ -124,9 +141,9 @@ void Hero::updateStatusDisplayStatic()
         return;
     }
 
-    // 更新标签文本
+    // 更新标签文本，修改显示格式为当前生命值/最大生命值
     s_statusLabel->setString("Coins: " + std::to_string(heroCoins) +
-        " Health: " + std::to_string(heroHealth));
+        " Health: " + std::to_string(heroHealth) + "/" + std::to_string(heroMaxHealth));
 
     // 检查标签是否在当前场景中
     Scene* currentScene = Director::getInstance()->getRunningScene();
@@ -177,7 +194,8 @@ int Hero::getHealth() const
 // 重置健康值（可以在游戏重新开始时调用）
 void Hero::resetHealth()
 {
-    heroHealth = MAX_HEALTH;  // 重置静态变量
+    // 修改这里：使用heroMaxHealth而不是MAX_HEALTH
+    heroHealth = heroMaxHealth;  // 重置为当前最大生命值
     updateStatusDisplayStatic(); // 使用静态方法更新
 }
 

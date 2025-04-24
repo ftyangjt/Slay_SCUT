@@ -22,7 +22,7 @@ bool Monster::init(const std::string& filename)
     }
 
     // 初始化怪物的属性
-    _health = 100; // 默认生命值
+    _health = 20; // 默认生命值
 
     return true;
 }

@@ -79,7 +79,7 @@ namespace MyGame {
         std::string healText = "+" + std::to_string(actualHealed);
         auto label = Label::createWithTTF(healText, "fonts/Marker Felt.ttf", 24);
         label->setPosition(Vec2(Director::getInstance()->getVisibleSize().width / 2,
-            Director::getInstance()->getVisibleSize().height / 2));
+            Director::getInstance()->getVisibleSize().height / 2+200));
         label->setScale(3.0);
         this->addChild(label, 1);
 
