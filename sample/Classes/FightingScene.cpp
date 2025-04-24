@@ -724,12 +724,6 @@ cocos2d::Label* FightingScene::addCardEffectLabel(cocos2d::Sprite* cardSprite, c
         effectLabel->setScale(scale);
     }
 
-    // 添加调试信息（可选，发布时可删除）
-    CCLOG("Card Effect: '%s', Length: %d, Font Size: %d", effect.c_str(), effect.length(), fontSize);
-    CCLOG("Label Size: %.1f x %.1f, Card Size: %.1f x %.1f",
-        effectLabel->getContentSize().width, effectLabel->getContentSize().height,
-        cardWidth, cardHeight);
-
     cardSprite->addChild(effectLabel, 1);
 
     return effectLabel;
