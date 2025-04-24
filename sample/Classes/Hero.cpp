@@ -229,6 +229,10 @@ void Hero::createDefaultDeck()
     bashCard.addEffect(Effect::Type::Vulnerable, 1, 3); // 1级易伤，持续3回合
     addCardToDeck(bashCard);
 
+    Card shrugItOff("Shrug It Off", Card::Type::Skill, 1, "Gain 8 Block, draw 1 card", "cardBackground.jpg", 0, 8);
+    shrugItOff.setSpecialEffect(Card::SpecialEffect::DrawCard, 1); // 抽1张牌
+    addCardToDeck(shrugItOff);
+
     Card pommelStrike("Pommel Strike", Card::Type::Attack, 1, "Deal 5 damage and draw 1 card", "cardBackground.jpg", 5, 0);
     pommelStrike.setSpecialEffect(Card::SpecialEffect::DrawCard, 1); // 抽1张牌
     addCardToDeck(pommelStrike);
@@ -252,6 +256,9 @@ void Hero::createDefaultDeck()
         sacrifice.setSpecialEffect(effect.first, effect.second);
     }
     addCardToDeck(sacrifice);
+
+    addCardToDeck(Card("Bludgeon", Card::Type::Attack, 3, "Deal 32 damage", "cardBackground.jpg", 32, 0));
+
 }
 
 //  添加效果
