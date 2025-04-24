@@ -25,6 +25,24 @@ public:
         Power
     };
 
+    enum class SpecialEffect {
+        None,
+        DrawCard,
+        GainEnergy,
+        DiscardCard,
+        LoseHealth,
+        // 可以添加更多特殊效果
+    };
+
+    // 添加获取特殊效果的方法
+    SpecialEffect getSpecialEffect() const;
+
+    // 添加特殊效果数值的getter，如抽几张牌等
+    int getSpecialEffectValue() const;
+
+    // 设置特殊效果
+    void setSpecialEffect(SpecialEffect effect, int value = 1);
+
     Card(const std::string& name, Type type, int cost, const std::string& effect, const std::string& backgroundFile, int attack = 0, int defense = 0);
     ~Card();
 
@@ -61,6 +79,10 @@ public:
     // 创建并获取效果对象
     std::vector<std::shared_ptr<Effect>> createEffects() const;
 
+    int getSpecialEffectValue(SpecialEffect effect) const;
+    bool hasSpecialEffect(SpecialEffect effect) const;
+
+
 private:
     std::string _name;
     Type _type;
@@ -71,6 +93,8 @@ private:
     int _block;
     cocos2d::Sprite* _sprite; // 添加卡牌精灵成员变量
     std::vector<EffectInfo> _effectInfos; // 使用新的结构体存储效果信息
+    std::vector<std::pair<SpecialEffect, int>> _specialEffects;
+
 };
 
 #endif // __CARD_H__

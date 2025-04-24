@@ -81,3 +81,37 @@ std::vector<std::shared_ptr<Effect>> Card::createEffects() const {
 
     return effects;
 }
+
+// 设置特殊效果
+void Card::setSpecialEffect(SpecialEffect effect, int value) {
+    // 检查是否已有相同类型的效果
+    for (auto& pair : _specialEffects) {
+        if (pair.first == effect) {
+            // 如果有，更新值
+            pair.second = value;
+            return;
+        }
+    }
+    // 如果没有，添加新效果
+    _specialEffects.emplace_back(effect, value);
+}
+
+// 获取特殊效果值
+int Card::getSpecialEffectValue(SpecialEffect effect) const {
+    for (const auto& pair : _specialEffects) {
+        if (pair.first == effect) {
+            return pair.second;
+        }
+    }
+    return 0; // 如果没有找到效果，返回0
+}
+
+// 判断是否有特定效果
+bool Card::hasSpecialEffect(SpecialEffect effect) const {
+    for (const auto& pair : _specialEffects) {
+        if (pair.first == effect) {
+            return true;
+        }
+    }
+    return false;
+}

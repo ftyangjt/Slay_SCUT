@@ -641,20 +641,41 @@ void FightingScene::shuffleDrawPile()
 // 给卡牌添加效果标签
 cocos2d::Label* FightingScene::addCardEffectLabel(cocos2d::Sprite* cardSprite, const std::string& effect)
 {
-    // 获取卡牌的宽度
+    // 获取卡牌的宽度和高度
     float cardWidth = cardSprite->getContentSize().width;
+    float cardHeight = cardSprite->getContentSize().height;
 
-    // 创建多行标签，并设置最大宽度为卡牌宽度
-    auto effectLabel = Label::createWithTTF(effect, "fonts/Marker Felt.ttf", 48, Size(cardWidth, 0), TextHAlignment::CENTER);
+    // 根据文本长度自动调整字体大小 - 更积极的调整
+    int fontSize = 48;
+
+    // 创建多行标签，设置最大宽度为卡牌宽度的85%
+    auto effectLabel = Label::createWithTTF(effect, "fonts/Marker Felt.ttf", fontSize,
+        Size(cardWidth * 0.85f, 0), TextHAlignment::CENTER);
     effectLabel->setColor(cocos2d::Color3B::BLACK);
 
-    // 设置标签位置为卡牌中心
-    effectLabel->setPosition(Vec2(cardSprite->getContentSize().width / 2, cardSprite->getContentSize().height / 2));
+    // 将文本位置稍微向上移动，使其更适合卡牌布局
+    float yPosition = cardSprite->getContentSize().height / 2 + 10;
+
+    effectLabel->setPosition(Vec2(cardWidth / 2, yPosition));
+
+    // 添加自动缩放功能，确保文本不会超出卡牌可用区域的50%
+    float maxHeight = cardHeight * 0.5f; // 限制文本高度为卡牌高度的50%
+    if (effectLabel->getContentSize().height > maxHeight) {
+        float scale = maxHeight / effectLabel->getContentSize().height;
+        effectLabel->setScale(scale);
+    }
+
+    // 添加调试信息（可选，发布时可删除）
+    CCLOG("Card Effect: '%s', Length: %d, Font Size: %d", effect.c_str(), effect.length(), fontSize);
+    CCLOG("Label Size: %.1f x %.1f, Card Size: %.1f x %.1f",
+        effectLabel->getContentSize().width, effectLabel->getContentSize().height,
+        cardWidth, cardHeight);
+
     cardSprite->addChild(effectLabel, 1);
 
-    return effectLabel; // 返回效果标签
-}
+    return effectLabel;
 
+}
 // 刷新手牌显示
 void FightingScene::updateHandDisplay()
 {
@@ -779,11 +800,11 @@ void FightingScene::applyCardEffects(const Card& card)
     int block = card.getBlock();
 
     // 应用英雄的效果
-	// 例如，如果有力量效果，增加攻击伤害
+    // 例如，如果有力量效果，增加攻击伤害
     applyEffects(damage, block, _hero->getEffects(), card.getType(), false);
 
     // 应用怪物的效果
-	// 例如，如果有易伤效果，增加对其造成的伤害
+    // 例如，如果有易伤效果，增加对其造成的伤害
     applyEffects(damage, block, _monster->getEffects(), card.getType(), true);
 
     std::vector<std::shared_ptr<Effect>> effects = card.createEffects();
@@ -814,6 +835,69 @@ void FightingScene::applyCardEffects(const Card& card)
         }
     }
 
+    // 处理特殊卡牌效果 - 修改为处理多种特殊效果
+
+    // 处理抽牌效果
+    if (card.hasSpecialEffect(Card::SpecialEffect::DrawCard)) {
+        int cardsToDraw = card.getSpecialEffectValue(Card::SpecialEffect::DrawCard);
+        CCLOG("Drawing %d card(s) from special effect", cardsToDraw);
+        for (int i = 0; i < cardsToDraw; i++) {
+            this->runAction(cocos2d::Sequence::create(
+                cocos2d::DelayTime::create(0.3f + i * 0.2f),
+                cocos2d::CallFunc::create([this]() {
+                    this->drawCard();
+                    }),
+                nullptr
+            ));
+        }
+    }
+
+    // 处理失去生命效果
+    if (card.hasSpecialEffect(Card::SpecialEffect::LoseHealth)) {
+        int healthLoss = card.getSpecialEffectValue(Card::SpecialEffect::LoseHealth);
+        CCLOG("Losing %d health from card effect", healthLoss);
+
+        // 播放英雄受击动画
+        playHeroHitAnimation();
+
+        // 减少英雄生命值
+        int currentHealth = _hero->getHealth();
+        int newHealth = currentHealth - healthLoss;
+
+        // 设置新的生命值
+        _hero->setHealth(newHealth);
+
+        // 更新UI
+        updateHealthAndBlockLabels();
+
+        // 检查战斗是否结束（玩家是否死亡）
+        checkBattleEnd();
+    }
+
+    // 处理获得能量效果
+    if (card.hasSpecialEffect(Card::SpecialEffect::GainEnergy)) {
+        int energyGain = card.getSpecialEffectValue(Card::SpecialEffect::GainEnergy);
+        CCLOG("Gaining %d energy from card effect", energyGain);
+
+        // 增加当前能量
+        _currentCost += energyGain;
+
+        // 更新能量显示
+        updateCostLabel();
+    }
+
+    // 处理弃牌效果
+    if (card.hasSpecialEffect(Card::SpecialEffect::DiscardCard)) {
+        int cardsToDiscard = card.getSpecialEffectValue(Card::SpecialEffect::DiscardCard);
+        CCLOG("Discarding %d card(s) from special effect", cardsToDiscard);
+
+        // 实现弃牌逻辑 - 可以让玩家选择弃哪些牌，或随机弃牌
+        // 这里简单实现为弃掉手牌中的前N张，如果有足够的牌
+        for (int i = 0; i < cardsToDiscard && !_cards.empty(); i++) {
+            discardCard(0); // 弃掉第一张牌
+        }
+    }
+
     updateBuffLabels();
 
     // 处理怪物的格挡
@@ -831,15 +915,14 @@ void FightingScene::applyCardEffects(const Card& card)
         else
         {
             damage -= monsterBlock;
-          
+
             _monster->setBlock(0);
         }
     }
 
-	CCLOG("Damage: %d", damage);
+    CCLOG("Damage: %d", damage);
 
     // 处理怪物的生命值
-    
     int newHealth = _monster->getHealth() - damage;
     if (damage > 0) {
         playMonsterHitAnimation(); // 如果造成了伤害，播放怪物受击动画
