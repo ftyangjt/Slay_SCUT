@@ -23,6 +23,7 @@ static void problemLoading(const char* filename)
 // 初始化场景
 bool FightingScene::init()
 {
+  
     if (!Scene::init())
     {
         return false;
@@ -37,6 +38,11 @@ bool FightingScene::init()
     // 创建角色和怪物
     createCharacters();
 
+    // 确保英雄和怪物对象都创建成功
+    if (!_hero || !_monster) {
+        CCLOG("Failed to create hero or monster, aborting scene initialization");
+        return false;
+    }
 	// 设置抽牌堆按钮
     createDrawDeck();
 
@@ -182,6 +188,7 @@ void FightingScene::createTurnCountLabel()
     this->addChild(_turnCountLabel, 1);
 }
 
+
 // 创建角色和怪物
 void FightingScene::createCharacters()
 {
@@ -200,16 +207,43 @@ void FightingScene::createCharacters()
     this->addChild(_hero, 1);
 
     // 创建怪物
-    _monster = Monster::create("monster.png");
-    if (_monster == nullptr)
+    // 尝试根据当前房间类型创建相应的怪物
+    Monster* monster = nullptr;
+
+    try {
+        if (MyGame::currentRoomType == MyGame::RoomType::BOSS) {
+            monster = Monster::createRandom(true, false); // 创建Boss怪物
+        }
+        else if (MyGame::currentRoomType == MyGame::RoomType::ELITE) {
+            monster = Monster::createRandom(false, true); // 创建精英怪物
+        }
+        else {
+            monster = Monster::createRandom(); // 创建普通怪物
+        }
+    }
+    catch (const std::exception& e) {
+        CCLOG("Exception creating monster: %s", e.what());
+    }
+
+    // 如果随机创建失败，使用默认怪物作为后备方案
+    if (monster == nullptr)
+    {
+        CCLOG("Random monster creation failed, falling back to default monster");
+        monster = Monster::create("monster.png");
+    }
+
+    // 如果仍然失败，报错并返回
+    if (monster == nullptr)
     {
         problemLoading("'monster.png'");
         return;
     }
 
+    _monster = monster;
     _monster->setPosition(Vec2(origin.x + visibleSize.width - _monster->getContentSize().width / 2, origin.y + visibleSize.height / 2));
     this->addChild(_monster, 1);
 }
+
 
 // 初始化牌堆
 void FightingScene::initializeDrawPile()
@@ -220,17 +254,21 @@ void FightingScene::initializeDrawPile()
 }
 
 
-// 以下为回合制战斗逻辑的实现
-// 更新血量和格挡标签
+// 在updateHealthAndBlockLabels函数中添加安全检查
 void FightingScene::updateHealthAndBlockLabels()
 {
+    // 确保英雄和怪物对象都有效
+    if (!_hero || !_monster) {
+        CCLOG("Warning: Hero or Monster is nullptr in updateHealthAndBlockLabels");
+        return;
+    }
+
     _heroHealthLabel->setString("Hero Health: " + std::to_string(_hero->getHealth()));
     _monsterHealthLabel->setString("Monster Health: " + std::to_string(_monster->getHealth()));
     _heroBlockLabel->setString("Hero Block: " + std::to_string(_hero->getBlock()));
     _monsterBlockLabel->setString("Monster Block: " + std::to_string(_monster->getBlock()));
-
-
 }
+
 
 // 更新费用标签
 void FightingScene::updateCostLabel()
