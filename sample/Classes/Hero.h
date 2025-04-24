@@ -8,6 +8,10 @@
 class Hero : public cocos2d::Sprite
 {
 public:
+    // Hero.h 中添加
+    static void increaseMaxHealth(int amount); // 增加最大生命值上限
+    static int getMaxHealth(); // 获取当前最大生命值上限
+
     // 健康相关
     static int getCurrentHealth(); // 获取当前健康值
     static void healHealth(int amount); // 恢复指定数量的生命值，不超过上限

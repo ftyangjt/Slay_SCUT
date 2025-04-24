@@ -402,7 +402,7 @@ void FightingScene::createDiscardDeck()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     // 设置按钮位置在画面右下角
-    showDiscardDeckButton->setPosition(Vec2(origin.x + visibleSize.width - showDiscardDeckButton->getContentSize().width / 2,
+    showDiscardDeckButton->setPosition(Vec2(origin.x + visibleSize.width - showDiscardDeckButton->getContentSize().width / 2+200,
         origin.y + showDiscardDeckButton->getContentSize().height * 1.4));
 
     // 保存按钮指针到成员变量中
