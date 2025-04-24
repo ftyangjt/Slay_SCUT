@@ -247,9 +247,29 @@ void Hero::createDefaultDeck()
     bashCard.addEffect(Effect::Type::Vulnerable, 1, 3); // 1级易伤，持续3回合
     addCardToDeck(bashCard);
 
+    Card pommelStrike("Pommel Strike", Card::Type::Attack, 1, "Deal 5 damage and draw 1 card", "cardBackground.jpg", 5, 0);
+    pommelStrike.setSpecialEffect(Card::SpecialEffect::DrawCard, 1); // 抽1张牌
+    addCardToDeck(pommelStrike);
+
     Card strengthCard("Strength", Card::Type::Power, 1, "Gain 2 Strength", "cardBackground.jpg");
     strengthCard.addEffect(Effect::Type::Strength, 2, -1); // 2级力量，持续时间为永久
     addCardToDeck(strengthCard);
+
+    Card adrenalineRush("Adrenaline Rush", Card::Type::Skill, 0, "Lose 3 HP, gain 2 Energy", "cardBackground.jpg");
+    adrenalineRush.setSpecialEffect(Card::SpecialEffect::LoseHealth, 3); // 失去3点HP
+    adrenalineRush.setSpecialEffect(Card::SpecialEffect::GainEnergy, 2); // 获得2点能量
+    addCardToDeck(adrenalineRush);
+
+    Card sacrifice("Sacrifice", Card::Type::Skill, 0, "Lose 6HP,gain 2 energy,draw 3 cards", "cardBackground.jpg");
+    std::vector<std::pair<Card::SpecialEffect, int>> sacrificeEffects;
+    sacrificeEffects.push_back(std::make_pair(Card::SpecialEffect::LoseHealth, 6));
+    sacrificeEffects.push_back(std::make_pair(Card::SpecialEffect::GainEnergy, 2));
+    sacrificeEffects.push_back(std::make_pair(Card::SpecialEffect::DrawCard, 3));
+    // 添加每个效果
+    for (const auto& effect : sacrificeEffects) {
+        sacrifice.setSpecialEffect(effect.first, effect.second);
+    }
+    addCardToDeck(sacrifice);
 }
 
 //  添加效果
