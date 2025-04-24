@@ -3,16 +3,16 @@
 
 USING_NS_CC;
 
-// ³õÊ¼»¯¾²Ì¬³ÉÔ±
+// åˆå§‹åŒ–é™æ€æˆå‘˜
 std::unordered_map<MonsterType, MonsterData> Monster::_monsterLibrary;
 std::mt19937 Monster::_rng(static_cast<unsigned int>(time(nullptr)));
 
 void Monster::initMonsterLibrary() {
     if (!_monsterLibrary.empty()) {
-        return; // ÒÑ¾­³õÊ¼»¯¹ı
+        return; // å·²ç»åˆå§‹åŒ–è¿‡
     }
 
-    // ¶¨ÒåËùÓĞ¹ÖÎïÊı¾İ
+    // å®šä¹‰æ‰€æœ‰æ€ªç‰©æ•°æ®
     _monsterLibrary[MonsterType::SLIME] = MonsterData(
         "slime",
         "slime.png",
@@ -87,7 +87,7 @@ void Monster::initMonsterLibrary() {
         10,
         { Effect::Type::Strength },
         false,
-        true // ¾«Ó¢¹Ö
+        true // ç²¾è‹±æ€ª
     );
 
     _monsterLibrary[MonsterType::GOLEM] = MonsterData(
@@ -98,7 +98,7 @@ void Monster::initMonsterLibrary() {
         15,
         { Effect::Type::Strength, Effect::Type::Vulnerable },
         false,
-        true // ¾«Ó¢¹Ö
+        true // ç²¾è‹±æ€ª
     );
 
     _monsterLibrary[MonsterType::DRAGON] = MonsterData(
@@ -109,10 +109,10 @@ void Monster::initMonsterLibrary() {
         12,
         { Effect::Type::Strength, Effect::Type::Vulnerable },
         false,
-        true // ¾«Ó¢¹Ö
+        true // ç²¾è‹±æ€ª
     );
 
-    // Boss¹ÖÎï
+    // Bossæ€ªç‰©
     _monsterLibrary[MonsterType::BOSS_KNIGHT] = MonsterData(
         "dark_knight",
         "dark_knight.png",
@@ -149,7 +149,7 @@ void Monster::initMonsterLibrary() {
 
 Monster* Monster::create(const std::string& filename)
 {
-    // Èç¹ûÎ´Ö¸¶¨ÎÄ¼şÃû£¬ÔòËæ»ú´´½¨Ò»¸ö¹ÖÎï
+    // å¦‚æœæœªæŒ‡å®šæ–‡ä»¶åï¼Œåˆ™éšæœºåˆ›å»ºä¸€ä¸ªæ€ªç‰©
     if (filename.empty()) {
         return createRandom();
     }
@@ -166,13 +166,13 @@ Monster* Monster::create(const std::string& filename)
 
 Monster* Monster::createWithType(MonsterType type)
 {
-    // ³õÊ¼»¯¹ÖÎï¿â
+    // åˆå§‹åŒ–æ€ªç‰©åº“
     initMonsterLibrary();
 
-    // ¼ì²éÖ¸¶¨ÀàĞÍÊÇ·ñ´æÔÚÓÚ¿âÖĞ
+    // æ£€æŸ¥æŒ‡å®šç±»å‹æ˜¯å¦å­˜åœ¨äºåº“ä¸­
     if (_monsterLibrary.find(type) == _monsterLibrary.end()) {
         CCLOG("Monster type not found in library, creating default monster.");
-        return create("monster.png"); // Ê¹ÓÃÄ¬ÈÏ¹ÖÎïÍ¼Ïñ
+        return create("monster.png"); // ä½¿ç”¨é»˜è®¤æ€ªç‰©å›¾åƒ
     }
 
     const MonsterData& data = _monsterLibrary[type];
@@ -187,13 +187,13 @@ Monster* Monster::createWithType(MonsterType type)
     return nullptr;
 }
 
-// Ìí¼Óµ½Monster.cpp
+// æ·»åŠ åˆ°Monster.cpp
 Monster* Monster::createRandom(bool isBoss, bool isElite)
 {
-    // ³õÊ¼»¯¹ÖÎï¿â
+    // åˆå§‹åŒ–æ€ªç‰©åº“
     initMonsterLibrary();
 
-    // ÕÒ³ö·ûºÏÌõ¼şµÄ¹ÖÎïÀàĞÍ
+    // æ‰¾å‡ºç¬¦åˆæ¡ä»¶çš„æ€ªç‰©ç±»å‹
     std::vector<MonsterType> candidates;
     for (const auto& pair : _monsterLibrary) {
         if ((isBoss && pair.second.isBoss) ||
@@ -203,7 +203,7 @@ Monster* Monster::createRandom(bool isBoss, bool isElite)
         }
     }
 
-    // Èç¹ûÃ»ÓĞ·ûºÏÌõ¼şµÄ¹ÖÎï£¬Ê¹ÓÃÄ¬ÈÏ·½Ê½´´½¨
+    // å¦‚æœæ²¡æœ‰ç¬¦åˆæ¡ä»¶çš„æ€ªç‰©ï¼Œä½¿ç”¨é»˜è®¤æ–¹å¼åˆ›å»º
     Monster* monster = nullptr;
 
     if (candidates.empty()) {
@@ -211,14 +211,14 @@ Monster* Monster::createRandom(bool isBoss, bool isElite)
         monster = Monster::create("monster.png");
     }
     else {
-        // Ëæ»úÑ¡ÔñÒ»¸ö¹ÖÎïÀàĞÍ
+        // éšæœºé€‰æ‹©ä¸€ä¸ªæ€ªç‰©ç±»å‹
         std::uniform_int_distribution<> dist(0, candidates.size() - 1);
         MonsterType selectedType = candidates[dist(_rng)];
 
         monster = createWithType(selectedType);
     }
 
-    // Èç¹û´´½¨Ê§°Ü£¬»ØÍËµ½Ä¬ÈÏ¹ÖÎï
+    // å¦‚æœåˆ›å»ºå¤±è´¥ï¼Œå›é€€åˆ°é»˜è®¤æ€ªç‰©
     if (monster == nullptr) {
         CCLOG("Failed to create random monster, falling back to default monster.");
         monster = Monster::create("monster.png");
@@ -235,25 +235,25 @@ bool Monster::init(const std::string& filename)
         return false;
     }
 
-    // ³õÊ¼»¯¹ÖÎïµÄ»ù±¾ÊôĞÔ
-    _health = 20; // Ä¬ÈÏÉúÃüÖµ
-    _block = 0;    // Ä¬ÈÏ¸ñµ²Öµ
-    _attackDamage = 10; // Ä¬ÈÏ¹¥»÷Á¦
-    _type = MonsterType::SLIME; // Ä¬ÈÏÀàĞÍ
+    // åˆå§‹åŒ–æ€ªç‰©çš„åŸºæœ¬å±æ€§
+    _health = 20; // é»˜è®¤ç”Ÿå‘½å€¼
+    _block = 0;    // é»˜è®¤æ ¼æŒ¡å€¼
+    _attackDamage = 10; // é»˜è®¤æ”»å‡»åŠ›
+    _type = MonsterType::SLIME; // é»˜è®¤ç±»å‹
 
     return true;
 }
 
 bool Monster::initWithMonsterData(const MonsterData& data)
 {
-    // ¼ÓÔØ¹ÖÎïÍ¼Ïñ
+    // åŠ è½½æ€ªç‰©å›¾åƒ
     if (!Sprite::initWithFile(data.sprite))
     {
         CCLOG("Failed to load monster sprite: %s", data.sprite.c_str());
         return false;
     }
 
-    // ÉèÖÃ¹ÖÎïÊôĞÔ
+    // è®¾ç½®æ€ªç‰©å±æ€§
     _data = data;
     _health = data.baseHealth;
     _block = data.baseBlockAmount;
@@ -269,10 +269,10 @@ void Monster::setHealth(int health)
 
 int Monster::getHealth() const
 {
-    // °²È«¼ì²é£ºÈ·±£thisÖ¸ÕëÓĞĞ§
+    // å®‰å…¨æ£€æŸ¥ï¼šç¡®ä¿thisæŒ‡é’ˆæœ‰æ•ˆ
     if (this == nullptr) {
         CCLOG("Error: Called getHealth() on a nullptr Monster object!");
-        return 0; // ·µ»ØÄ¬ÈÏÖµ¶ø²»ÊÇ±ÀÀ£
+        return 0; // è¿”å›é»˜è®¤å€¼è€Œä¸æ˜¯å´©æºƒ
     }
 
     return _health;
@@ -316,23 +316,23 @@ const MonsterData& Monster::getMonsterData() const
 void Monster::applyRandomEffect()
 {
     if (_data.possibleEffects.empty()) {
-        return; // Ã»ÓĞ¿ÉÓÃµÄĞ§¹û
+        return; // æ²¡æœ‰å¯ç”¨çš„æ•ˆæœ
     }
 
-    // Ëæ»úÑ¡ÔñÒ»¸öĞ§¹û
+    // éšæœºé€‰æ‹©ä¸€ä¸ªæ•ˆæœ
     std::uniform_int_distribution<> dist(0, _data.possibleEffects.size() - 1);
     Effect::Type effectType = _data.possibleEffects[dist(_rng)];
 
-    // Ëæ»ú¾ö¶¨Ğ§¹ûÇ¿¶ÈºÍ³ÖĞøÊ±¼ä
-    std::uniform_int_distribution<> levelDist(1, 3);  // Ğ§¹ûÇ¿¶È1-3
-    std::uniform_int_distribution<> durationDist(1, 3);  // ³ÖĞø1-3»ØºÏ
+    // éšæœºå†³å®šæ•ˆæœå¼ºåº¦å’ŒæŒç»­æ—¶é—´
+    std::uniform_int_distribution<> levelDist(1, 3);  // æ•ˆæœå¼ºåº¦1-3
+    std::uniform_int_distribution<> durationDist(1, 3);  // æŒç»­1-3å›åˆ
     int level = levelDist(_rng);
     int duration = durationDist(_rng);
 
-    // ´´½¨Ğ§¹û¶ÔÏó
+    // åˆ›å»ºæ•ˆæœå¯¹è±¡
     std::shared_ptr<Effect> effect;
 
-    // ¸ù¾İĞ§¹ûÀàĞÍ´´½¨²»Í¬µÄĞ§¹û¶ÔÏó
+    // æ ¹æ®æ•ˆæœç±»å‹åˆ›å»ºä¸åŒçš„æ•ˆæœå¯¹è±¡
     if (effectType == Effect::Type::Strength) {
         effect = std::make_shared<Buff>(effectType, level, duration);
     }
@@ -340,7 +340,7 @@ void Monster::applyRandomEffect()
         effect = std::make_shared<Debuff>(effectType, level, duration);
     }
 
-    // Ó¦ÓÃĞ§¹û
+    // åº”ç”¨æ•ˆæœ
     if (effect) {
         addEffect(effect);
     }
@@ -349,25 +349,25 @@ void Monster::applyRandomEffect()
 void Monster::addEffect(std::shared_ptr<Effect> effect) {
     if (!effect) {
         CCLOG("Error: Attempted to add a null effect.");
-        return; // Èç¹û´«ÈëµÄ effect ÊÇ¿ÕÖ¸Õë£¬Ö±½Ó·µ»Ø
+        return; // å¦‚æœä¼ å…¥çš„ effect æ˜¯ç©ºæŒ‡é’ˆï¼Œç›´æ¥è¿”å›
     }
 
     for (auto& existingEffect : _effects) {
-        // ¼ì²éÊÇ·ñ´æÔÚÏàÍ¬ÀàĞÍµÄĞ§¹û
+        // æ£€æŸ¥æ˜¯å¦å­˜åœ¨ç›¸åŒç±»å‹çš„æ•ˆæœ
         if (existingEffect->getType() == effect->getType()) {
             if (effect->getType() == Effect::Type::Strength) {
-                // Á¦Á¿Ğ§¹ûµş¼ÓµÈ¼¶
+                // åŠ›é‡æ•ˆæœå åŠ ç­‰çº§
                 existingEffect->setLevel(existingEffect->getLevel() + effect->getLevel());
             }
             else if (effect->getType() == Effect::Type::Vulnerable) {
-                // Ò×ÉËĞ§¹ûÑÓ³¤»ØºÏÊı
+                // æ˜“ä¼¤æ•ˆæœå»¶é•¿å›åˆæ•°
                 existingEffect->addRemainingTurns(effect->getRemainingTurns());
             }
-            return; // ´¦ÀíÍê³ÉºóÖ±½Ó·µ»Ø
+            return; // å¤„ç†å®Œæˆåç›´æ¥è¿”å›
         }
     }
 
-    // Èç¹ûÃ»ÓĞÕÒµ½ÏàÍ¬ÀàĞÍµÄĞ§¹û£¬Ìí¼ÓĞÂµÄĞ§¹û
+    // å¦‚æœæ²¡æœ‰æ‰¾åˆ°ç›¸åŒç±»å‹çš„æ•ˆæœï¼Œæ·»åŠ æ–°çš„æ•ˆæœ
     _effects.push_back(effect);
 }
 
@@ -380,7 +380,7 @@ void Monster::updateEffects() {
     for (auto it = _effects.begin(); it != _effects.end(); ) {
         (*it)->reduceTurn();
         if ((*it)->getRemainingTurns() == 0) {
-            it = _effects.erase(it); // ÒÆ³ı³ÖĞøÊ±¼äÎª 0 µÄĞ§¹û
+            it = _effects.erase(it); // ç§»é™¤æŒç»­æ—¶é—´ä¸º 0 çš„æ•ˆæœ
         }
         else {
             ++it;
