@@ -1,5 +1,6 @@
 #include "Rest.h"
 #include "Map.h"  // 添加对 Map 场景的引用
+#include "Hero.h" // 添加对 Hero 类的引用
 
 USING_NS_CC;
 
@@ -28,7 +29,7 @@ namespace MyGame {
             this->addChild(background, 0);  // 将背景图片添加到最底层
         }
 
-        // 创建“恢复”按钮
+        // 创建"恢复"按钮
         auto restoreItem = MenuItemImage::create(
             "recover.jpg",  // 正常状态的图片
             "restore_selected.png",  // 选中状态的图片
@@ -43,7 +44,7 @@ namespace MyGame {
             restoreItem->setScale(0.5);  // 调整按钮大小
         }
 
-        // 创建“返回”按钮
+        // 创建"返回"按钮
         auto returnItem = MenuItemImage::create(
             "up.jpg",  // 正常状态的图片
             "return_selected.png",  // 选中状态的图片
@@ -68,8 +69,15 @@ namespace MyGame {
 
     void Rest::menuRestoreCallback(Ref* pSender)
     {
-        // 显示恢复信息
-        auto label = Label::createWithTTF("+30", "fonts/Marker Felt.ttf", 24);
+        // 恢复英雄30点血量
+        int healAmount = 30;
+        int oldHealth = Hero::getCurrentHealth();
+        Hero::healHealth(healAmount);
+        int actualHealed = Hero::getCurrentHealth() - oldHealth;
+
+        // 显示恢复信息，显示实际恢复的血量
+        std::string healText = "+" + std::to_string(actualHealed);
+        auto label = Label::createWithTTF(healText, "fonts/Marker Felt.ttf", 24);
         label->setPosition(Vec2(Director::getInstance()->getVisibleSize().width / 2,
             Director::getInstance()->getVisibleSize().height / 2));
         label->setScale(3.0);
@@ -94,4 +102,3 @@ namespace MyGame {
     }
 
 } // namespace MyGame
-

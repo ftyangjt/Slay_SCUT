@@ -1,4 +1,5 @@
 #include "MainMenu.h"
+#include "Hero.h"
 #include "Map.h"  // 引入地图场景头文件
 
 USING_NS_CC;
@@ -65,12 +66,20 @@ bool MainMenu::init()
     return true;
 }
 
-void MainMenu::menuStartCallback(Ref* pSender)
+void MainMenu::menuStartCallback(cocos2d::Ref* pSender)
 {
+    // 重置游戏状态
+    MyGame::resetGameState();
+
+    // 重置英雄血量和金币
+    Hero::resetHealth();
+    Hero::resetCoins();
+
     // 切换到地图场景
     auto scene = MyGame::Map::createScene();
     Director::getInstance()->replaceScene(scene);
 }
+
 
 void MainMenu::menuCloseCallback(Ref* pSender)
 {
