@@ -29,18 +29,10 @@ namespace CardLibrary {
         Card counterAttack("Counter", Card::Type::Attack, 2, "Gain 5 Block, then deal 5 damage", "cardBackground.jpg", 5, 5);
         allCards.push_back(counterAttack);
 
-		// 添加Bludgeon卡牌
-        allCards.push_back(Card("Bludgeon", Card::Type::Attack, 3, "Deal 32 damage", "cardBackground.jpg", 32, 0));
-
         // 技能牌、能力牌
 
 		// 添加Defend卡牌
         allCards.push_back(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
-
-		// 添加Shrug It Off卡牌
-        Card shrugItOff("Shrug It Off", Card::Type::Skill, 1, "Gain 8 Block, draw 1 card", "cardBackground.jpg", 0, 8);
-        shrugItOff.setSpecialEffect(Card::SpecialEffect::DrawCard, 1); // 抽1张牌
-        allCards.push_back(shrugItOff);
 
         // 添加Strength卡牌
         Card strengthPower("Strength", Card::Type::Power, 1, "Gain 2 Strength", "cardBackground.jpg");
