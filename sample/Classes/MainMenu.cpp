@@ -75,10 +75,16 @@ void MainMenu::menuStartCallback(cocos2d::Ref* pSender)
     Hero::resetHealth();
     Hero::resetCoins();
 
-    // 切换到地图场景
+    // 创建地图场景
     auto scene = MyGame::Map::createScene();
-    Director::getInstance()->replaceScene(scene);
+
+    // 使用淡入淡出过渡效果，持续1秒
+    auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // 黑色淡入淡出
+
+    // 切换到带过渡效果的地图场景
+    Director::getInstance()->replaceScene(transition);
 }
+
 
 
 void MainMenu::menuCloseCallback(Ref* pSender)

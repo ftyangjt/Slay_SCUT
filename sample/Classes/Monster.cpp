@@ -4,384 +4,136 @@
 USING_NS_CC;
 
 // 初始化静态成员
-std::unordered_map<MonsterType, MonsterData> Monster::_monsterLibrary;
 std::mt19937 Monster::_rng(static_cast<unsigned int>(time(nullptr)));
 
-void Monster::initMonsterLibrary() {
-    if (!_monsterLibrary.empty()) {
-        return; // 已经初始化过
-    }
 
-    // 定义所有怪物数据
-    _monsterLibrary[MonsterType::SLIME] = MonsterData(
-        "slime",
-        "slime.png",
-        20,
-        5,
-        3,
-        {},
-        false,
-        false
-    );
-
-    _monsterLibrary[MonsterType::GOBLIN] = MonsterData(
-        "goblin",
-        "goblin.png",
-        30,
-        8,
-        5,
-        { Effect::Type::Strength },
-        false,
-        false
-    );
-
-    _monsterLibrary[MonsterType::SKELETON] = MonsterData(
-        "skeleton",
-        "skeleton.png",
-        30,
-        10,
-        8,
-        { Effect::Type::Strength },
-        false,
-        false
-    );
-
-    _monsterLibrary[MonsterType::BAT] = MonsterData(
-        "bat",
-        "bat.png",
-        30,
-        7,
-        2,
-        {},
-        false,
-        false
-    );
-
-    _monsterLibrary[MonsterType::SNAKE] = MonsterData(
-        "snake",
-        "snake.png",
-        45,
-        3,
-        4,
-        { Effect::Type::Vulnerable },
-        false,
-        false
-    );
-
-    _monsterLibrary[MonsterType::GHOST] = MonsterData(
-        "ghost",
-        "ghost.png",
-        65,
-        9,
-        7,
-        { Effect::Type::Vulnerable },
-        false,
-        false
-    );
-
-    _monsterLibrary[MonsterType::ORC] = MonsterData(
-        "orc",
-        "orc.png",
-        85,
-        12,
-        10,
-        { Effect::Type::Strength },
-        false,
-        true // 精英怪
-    );
-
-    _monsterLibrary[MonsterType::GOLEM] = MonsterData(
-        "golem",
-        "golem.png",
-        80,
-        15,
-        15,
-        { Effect::Type::Strength, Effect::Type::Vulnerable },
-        false,
-        true // 精英怪
-    );
-
-    _monsterLibrary[MonsterType::DRAGON] = MonsterData(
-        "dragon",
-        "dragon.png",
-        100,
-        10,
-        12,
-        { Effect::Type::Strength, Effect::Type::Vulnerable },
-        false,
-        true // 精英怪
-    );
-
-    // Boss怪物
-    _monsterLibrary[MonsterType::BOSS_KNIGHT] = MonsterData(
-        "dark_knight",
-        "dark_knight.png",
-        200,
-        25,
-        20,
-        { Effect::Type::Strength, Effect::Type::Vulnerable },
-        true,
-        false
-    );
-
-    _monsterLibrary[MonsterType::BOSS_WIZARD] = MonsterData(
-        "evil_wizard",
-        "evil_wizard.png",
-        100,
-        50,
-        15,
-        { Effect::Type::Strength, Effect::Type::Vulnerable },
-        true,
-        false
-    );
-
-    _monsterLibrary[MonsterType::BOSS_DRAGON] = MonsterData(
-        "ancient_dragon",
-        "ancient_dragon.png",
-        300,
-        15,
-        25,
-        { Effect::Type::Strength, Effect::Type::Vulnerable },
-        true,
-        false
-    );
-}
-
-Monster* Monster::create(const std::string& filename)
-{
-    // 如果未指定文件名，则随机创建一个怪物
-    if (filename.empty()) {
-        return createRandom();
-    }
-
-    Monster* monster = new (std::nothrow) Monster();
-    if (monster && monster->init(filename))
-    {
-        monster->autorelease();
-        return monster;
-    }
-    CC_SAFE_DELETE(monster);
-    return nullptr;
-}
-
-Monster* Monster::createWithType(MonsterType type)
-{
-    // 初始化怪物库
-    initMonsterLibrary();
-
-    // 检查指定类型是否存在于库中
-    if (_monsterLibrary.find(type) == _monsterLibrary.end()) {
-        CCLOG("Monster type not found in library, creating default monster.");
-        return create("monster.png"); // 使用默认怪物图像
-    }
-
-    const MonsterData& data = _monsterLibrary[type];
-
-    Monster* monster = new (std::nothrow) Monster();
-    if (monster && monster->initWithMonsterData(data))
-    {
-        monster->autorelease();
-        return monster;
-    }
-    CC_SAFE_DELETE(monster);
-    return nullptr;
-}
-
-// 添加到Monster.cpp
-Monster* Monster::createRandom(bool isBoss, bool isElite)
-{
-    // 初始化怪物库
-    initMonsterLibrary();
-
-    // 找出符合条件的怪物类型
-    std::vector<MonsterType> candidates;
-    for (const auto& pair : _monsterLibrary) {
-        if ((isBoss && pair.second.isBoss) ||
-            (isElite && pair.second.isElite) ||
-            (!isBoss && !isElite && !pair.second.isBoss && !pair.second.isElite)) {
-            candidates.push_back(pair.first);
-        }
-    }
-
-    // 如果没有符合条件的怪物，使用默认方式创建
+// 工厂方法，根据类名创建具体怪物实例
+Monster* Monster::createFactory(const std::string& monsterClassName) {
     Monster* monster = nullptr;
 
-    if (candidates.empty()) {
-        CCLOG("No suitable monsters found in library, creating default monster.");
-        monster = Monster::create("monster.png");
+    // 普通怪物
+    if (monsterClassName == "SlimeMonster") {
+        monster = SlimeMonster::create();
     }
+    else if (monsterClassName == "GoblinMonster") {
+        monster = GoblinMonster::create();
+    }
+    else if (monsterClassName == "SnakeMonster") {
+        monster = SnakeMonster::create();
+    }
+    // 精英怪物
+    else if (monsterClassName == "OrcMonster") {
+        monster = OrcMonster::create();
+    }
+    else if (monsterClassName == "GolemMonster") {
+        monster = GolemMonster::create();
+    }
+    // Boss怪物
+    else if (monsterClassName == "KnightBossMonster") {
+        monster = KnightBossMonster::create();
+    }
+    else if (monsterClassName == "DragonBossMonster") {
+        monster = DragonBossMonster::create();
+    }
+    // 默认情况下创建史莱姆
     else {
-        // 随机选择一个怪物类型
-        std::uniform_int_distribution<> dist(0, candidates.size() - 1);
-        MonsterType selectedType = candidates[dist(_rng)];
-
-        monster = createWithType(selectedType);
-    }
-
-    // 如果创建失败，回退到默认怪物
-    if (monster == nullptr) {
-        CCLOG("Failed to create random monster, falling back to default monster.");
-        monster = Monster::create("monster.png");
+        monster = SlimeMonster::create();
     }
 
     return monster;
 }
 
-bool Monster::init(const std::string& filename)
-{
-    if (!Sprite::initWithFile(filename))
-    {
-        return false;
+// 随机创建怪物
+Monster* Monster::createRandom(bool isBoss, bool isElite) {
+    std::vector<std::string> candidates;
+
+    if (isBoss) {
+        candidates = { "KnightBossMonster", "DragonBossMonster" };
+    }
+    else if (isElite) {
+        candidates = { "OrcMonster", "GolemMonster" };
+    }
+    else {
+        candidates = { "SlimeMonster", "GoblinMonster", "SnakeMonster" };
     }
 
-    // 初始化怪物的基本属性
-    _health = 20; // 默认生命值
-    _block = 0;    // 默认格挡值
-    _attackDamage = 10; // 默认攻击力
-    _type = MonsterType::SLIME; // 默认类型
-    _currentTurn = 0; // 初始回合数
+    std::uniform_int_distribution<> dist(0, candidates.size() - 1);
+    std::string selectedType = candidates[dist(_rng)];
 
-    // 初始化行为模式
-    initActionPattern();
+    return createFactory(selectedType);
+}
+
+// 基础初始化
+bool Monster::init() {
+    _health = 20;      // 默认生命值
+    _block = 0;        // 默认格挡值
+    _attackDamage = 5; // 默认攻击力
+    _currentTurn = 0;  // 初始回合数
 
     return true;
 }
 
-bool Monster::initWithMonsterData(const MonsterData& data)
-{
-    // 加载怪物图像
-    if (!Sprite::initWithFile(data.sprite))
-    {
-        CCLOG("Failed to load monster sprite: %s", data.sprite.c_str());
+bool Monster::initWithSprite(const std::string& spritePath) {
+    if (!Sprite::initWithFile(spritePath)) {
+        CCLOG("Failed to load sprite: %s", spritePath.c_str());
         return false;
     }
 
-    // 设置怪物属性
-    _data = data;
-    _health = data.baseHealth;
-    _block = data.baseBlockAmount;
-    _attackDamage = data.baseAttackDamage;
-    _currentTurn = 0;
-
-    // 初始化行为模式
-    initActionPattern();
-
-    return true;
+    return true; // 不再调用 init()
 }
 
-
-
-void Monster::setHealth(int health)
-{
+// 各类getter和setter方法
+void Monster::setHealth(int health) {
     _health = health;
 }
 
-int Monster::getHealth() const
-{
-    // 安全检查：确保this指针有效
+int Monster::getHealth() const {
     if (this == nullptr) {
         CCLOG("Error: Called getHealth() on a nullptr Monster object!");
-        return 0; // 返回默认值而不是崩溃
+        return 0;
     }
-
     return _health;
 }
 
-void Monster::setBlock(int block)
-{
+void Monster::setBlock(int block) {
     _block = block;
 }
 
-int Monster::getBlock() const
-{
+int Monster::getBlock() const {
     return _block;
 }
 
-void Monster::setAttackDamage(int damage)
-{
+void Monster::setAttackDamage(int damage) {
     _attackDamage = damage;
 }
 
-int Monster::getAttackDamage() const
-{
+int Monster::getAttackDamage() const {
     return _attackDamage;
 }
 
-void Monster::setMonsterType(MonsterType type)
-{
-    _type = type;
-}
-
-MonsterType Monster::getMonsterType() const
-{
-    return _type;
-}
-
-const MonsterData& Monster::getMonsterData() const
-{
-    return _data;
-}
-
-void Monster::applyRandomEffect()
-{
-    if (_data.possibleEffects.empty()) {
-        return; // 没有可用的效果
-    }
-
-    // 随机选择一个效果
-    std::uniform_int_distribution<> dist(0, _data.possibleEffects.size() - 1);
-    Effect::Type effectType = _data.possibleEffects[dist(_rng)];
-
-    // 随机决定效果强度和持续时间
-    std::uniform_int_distribution<> levelDist(1, 3);  // 效果强度1-3
-    std::uniform_int_distribution<> durationDist(1, 3);  // 持续1-3回合
-    int level = levelDist(_rng);
-    int duration = durationDist(_rng);
-
-    // 创建效果对象
-    std::shared_ptr<Effect> effect;
-
-    // 根据效果类型创建不同的效果对象
-    if (effectType == Effect::Type::Strength) {
-        effect = std::make_shared<Buff>(effectType, level, duration);
-    }
-    else if (effectType == Effect::Type::Vulnerable) {
-        effect = std::make_shared<Debuff>(effectType, level, duration);
-    }
-
-    // 应用效果
-    if (effect) {
-        addEffect(effect);
-    }
-}
-
+// 添加效果
 void Monster::addEffect(std::shared_ptr<Effect> effect) {
     if (!effect) {
         CCLOG("Error: Attempted to add a null effect.");
-        return; // 如果传入的 effect 是空指针，直接返回
+        return;
     }
 
     for (auto& existingEffect : _effects) {
-        // 检查是否存在相同类型的效果
         if (existingEffect->getType() == effect->getType()) {
             if (effect->getType() == Effect::Type::Strength) {
-                // 力量效果叠加等级
                 existingEffect->setLevel(existingEffect->getLevel() + effect->getLevel());
             }
             else if (effect->getType() == Effect::Type::Vulnerable) {
-                // 易伤效果延长回合数
                 existingEffect->addRemainingTurns(effect->getRemainingTurns());
             }
-            return; // 处理完成后直接返回
+            return;
         }
     }
 
-    // 如果没有找到相同类型的效果，添加新的效果
     _effects.push_back(effect);
 }
 
-const std::vector<std::shared_ptr<Effect>>& Monster::getEffects() const
-{
+const std::vector<std::shared_ptr<Effect>>& Monster::getEffects() const {
     return _effects;
 }
 
@@ -389,7 +141,7 @@ void Monster::updateEffects() {
     for (auto it = _effects.begin(); it != _effects.end(); ) {
         (*it)->reduceTurn();
         if ((*it)->getRemainingTurns() == 0) {
-            it = _effects.erase(it); // 移除持续时间为 0 的效果
+            it = _effects.erase(it);
         }
         else {
             ++it;
@@ -397,111 +149,9 @@ void Monster::updateEffects() {
     }
 }
 
-// 初始化怪物的行为模式
-void Monster::initActionPattern() {
-    _actionPattern.clear();
-    _currentTurn = 0;
-
-    switch (_type) {
-    case MonsterType::SLIME:
-        // 史莱姆的三回合循环模式
-        _actionPattern.push_back(MonsterAction(
-            MonsterActionType::DEFEND,
-            5,                        // 5点防御值
-            Effect::Type::Strength,   // 未使用
-            0, 0,                     // 未使用
-            "deffend+5"                  // 描述
-        ));
-
-        _actionPattern.push_back(MonsterAction(
-            MonsterActionType::BUFF,
-            0,                        // 未使用
-            Effect::Type::Strength,   // 力量效果
-            1, -1,                     // 1点力量，持续3回合
-            "power+1"                  // 描述
-        ));
-
-        _actionPattern.push_back(MonsterAction(
-            MonsterActionType::ATTACK,
-            _attackDamage,           // 使用基础攻击力
-            Effect::Type::Strength,   // 未使用
-            0, 0,                     // 未使用
-            "attack" + std::to_string(_attackDamage) // 描述
-        ));
-        break;
-
-    case MonsterType::SNAKE:
-        // 蛇的行为模式：两回合攻击，一回合防御
-        _actionPattern.push_back(MonsterAction(
-            MonsterActionType::ATTACK,
-            _attackDamage,
-            Effect::Type::Strength,
-            0, 0,
-            "attack" + std::to_string(_attackDamage)
-        ));
-
-        _actionPattern.push_back(MonsterAction(
-            MonsterActionType::ATTACK,
-            _attackDamage,
-            Effect::Type::Strength,
-            0, 0,
-            "attack" + std::to_string(_attackDamage)
-        ));
-
-        _actionPattern.push_back(MonsterAction(
-            MonsterActionType::DEFEND,
-            8,
-            Effect::Type::Strength,
-            0, 0,
-            "deffend+10"
-        ));
-        break;
-
-        // 为其他怪物添加行为模式...
-    case MonsterType::SKELETON:
-        // 骷髅的行为模式：攻击，增益，强力攻击
-        _actionPattern.push_back(MonsterAction(
-            MonsterActionType::ATTACK,
-            _attackDamage,
-            Effect::Type::Strength,
-            0, 0,
-            "attack" + std::to_string(_attackDamage)
-        ));
-
-        _actionPattern.push_back(MonsterAction(
-            MonsterActionType::BUFF,
-            0,
-            Effect::Type::Strength,
-            2, -1,
-            "power+2"
-        ));
-
-        _actionPattern.push_back(MonsterAction(
-            MonsterActionType::ATTACK,
-            _attackDamage * 1.5,
-            Effect::Type::Strength,
-            0, 0,
-            "attack strongly" + std::to_string(static_cast<int>(_attackDamage * 1.5))
-        ));
-        break;
-
-    default:
-        // 默认行为模式(简单攻击)
-        _actionPattern.push_back(MonsterAction(
-            MonsterActionType::ATTACK,
-            _attackDamage,
-            Effect::Type::Strength,
-            0, 0,
-            "attack" + std::to_string(_attackDamage)
-        ));
-        break;
-    }
-}
-
-// 获取当前回合的行为
+// 获取当前行为
 MonsterAction Monster::getCurrentAction() {
     if (_actionPattern.empty()) {
-        // 如果没有行为模式，返回默认攻击
         return MonsterAction(
             MonsterActionType::ATTACK,
             _attackDamage,
@@ -511,12 +161,11 @@ MonsterAction Monster::getCurrentAction() {
         );
     }
 
-    // 计算当前行为索引(循环行为模式)
     int actionIndex = _currentTurn % _actionPattern.size();
     return _actionPattern[actionIndex];
 }
 
-// 执行当前回合的行为
+// 执行当前行为
 void Monster::executeCurrentAction(Hero* target) {
     if (!target) {
         CCLOG("Error: Target is nullptr in executeCurrentAction!");
@@ -528,7 +177,7 @@ void Monster::executeCurrentAction(Hero* target) {
     switch (action.type) {
     case MonsterActionType::ATTACK:
     {
-        // 计算最终伤害(考虑增益效果)
+        // 计算最终伤害
         int finalDamage = action.value;
 
         // 应用力量效果
@@ -564,7 +213,6 @@ void Monster::executeCurrentAction(Hero* target) {
 
     case MonsterActionType::DEFEND:
     {
-        // 增加格挡
         int newBlock = _block + action.value;
         setBlock(newBlock);
         CCLOG("Monster gained %d block", action.value);
@@ -573,7 +221,6 @@ void Monster::executeCurrentAction(Hero* target) {
 
     case MonsterActionType::BUFF:
     {
-        // 给自己增加Buff
         auto effect = std::make_shared<Buff>(
             action.effectType,
             action.effectLevel,
@@ -586,7 +233,6 @@ void Monster::executeCurrentAction(Hero* target) {
 
     case MonsterActionType::DEBUFF:
     {
-        // 给目标增加Debuff
         auto effect = std::make_shared<Debuff>(
             action.effectType,
             action.effectLevel,
@@ -598,28 +244,405 @@ void Monster::executeCurrentAction(Hero* target) {
     break;
 
     case MonsterActionType::SPECIAL:
-        // 特殊行为，根据具体怪物实现
         CCLOG("Monster used special action");
         break;
     }
 
-    // 准备下一回合
     prepareNextTurn();
 }
 
-// 准备下一回合的行为
+// 准备下一回合
 void Monster::prepareNextTurn() {
     _currentTurn++;
 }
 
-// 获取下一回合行为的描述
+// 获取下一回合行为描述
 std::string Monster::getNextActionDescription() const {
     if (_actionPattern.empty()) {
         return "攻击";
     }
 
-    // 计算下一回合的行为索引
     int nextActionIndex = (_currentTurn + 1) % _actionPattern.size();
     return _actionPattern[nextActionIndex].description;
 }
 
+// 三种基本怪物类的初始化
+bool NormalMonster::init() {
+    if (!Monster::init()) {
+        return false;
+    }
+
+    // 普通怪物特有的初始化逻辑
+    _health = 25;
+    _attackDamage = 7;
+    return true;
+}
+
+bool EliteMonster::init() {
+    if (!Monster::init()) {
+        return false;
+    }
+
+    // 精英怪物特有的初始化逻辑
+    _health = 70;
+    _attackDamage = 12;
+    return true;
+}
+
+bool BossMonster::init() {
+    if (!Monster::init()) {
+        return false;
+    }
+
+    // Boss怪物特有的初始化逻辑
+    _health = 150;
+    _attackDamage = 20;
+    return true;
+}
+
+// 具体怪物类的实现
+
+// 史莱姆
+bool SlimeMonster::init() {
+    if (!NormalMonster::init()) {
+        return false;
+    }
+
+    if (!initWithSprite("slime.png")) {
+        return false;
+    }
+
+    _health = 20;
+    _attackDamage = 5;
+    _block = 3;
+
+    initActionPattern();
+    return true;
+}
+
+void SlimeMonster::initActionPattern() {
+    _actionPattern.clear();
+
+    // 史莱姆的三回合循环模式
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::DEFEND,
+        5,
+        Effect::Type::Strength,
+        0, 0,
+        "防御+5"
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::BUFF,
+        0,
+        Effect::Type::Strength,
+        1, 3,
+        "力量+1"
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::ATTACK,
+        _attackDamage,
+        Effect::Type::Strength,
+        0, 0,
+        "攻击" + std::to_string(_attackDamage)
+    ));
+}
+
+// 哥布林
+bool GoblinMonster::init() {
+    if (!NormalMonster::init()) {
+        return false;
+    }
+
+    if (!initWithSprite("goblin.png")) {
+        return false;
+    }
+
+    _health = 30;
+    _attackDamage = 8;
+    _block = 5;
+
+    initActionPattern();
+    return true;
+}
+
+void GoblinMonster::initActionPattern() {
+    _actionPattern.clear();
+
+    // 哥布林的行为模式
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::ATTACK,
+        _attackDamage,
+        Effect::Type::Strength,
+        0, 0,
+        "攻击" + std::to_string(_attackDamage)
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::DEFEND,
+        7,
+        Effect::Type::Strength,
+        0, 0,
+        "防御+7"
+    ));
+}
+
+// 蛇
+bool SnakeMonster::init() {
+    if (!NormalMonster::init()) {
+        return false;
+    }
+
+    if (!initWithSprite("snake.png")) {
+        return false;
+    }
+
+    _health = 45;
+    _attackDamage = 3;
+    _block = 4;
+
+    initActionPattern();
+    return true;
+}
+
+void SnakeMonster::initActionPattern() {
+    _actionPattern.clear();
+
+    // 蛇的行为模式：两回合攻击，一回合防御
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::ATTACK,
+        _attackDamage,
+        Effect::Type::Strength,
+        0, 0,
+        "攻击" + std::to_string(_attackDamage)
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::ATTACK,
+        _attackDamage,
+        Effect::Type::Strength,
+        0, 0,
+        "攻击" + std::to_string(_attackDamage)
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::DEBUFF,
+        0,
+        Effect::Type::Vulnerable,
+        2, 2,
+        "施加易伤"
+    ));
+}
+
+// 兽人（精英）
+bool OrcMonster::init() {
+    if (!EliteMonster::init()) {
+        return false;
+    }
+
+    if (!initWithSprite("orc.png")) {
+        return false;
+    }
+
+    _health = 85;
+    _attackDamage = 12;
+    _block = 10;
+
+    initActionPattern();
+    return true;
+}
+
+void OrcMonster::initActionPattern() {
+    _actionPattern.clear();
+
+    // 兽人的行为模式
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::ATTACK,
+        _attackDamage,
+        Effect::Type::Strength,
+        0, 0,
+        "攻击" + std::to_string(_attackDamage)
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::BUFF,
+        0,
+        Effect::Type::Strength,
+        2, 3,
+        "力量+2"
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::ATTACK,
+        _attackDamage * 1.5,
+        Effect::Type::Strength,
+        0, 0,
+        "重击" + std::to_string(static_cast<int>(_attackDamage * 1.5))
+    ));
+}
+
+// 魔像（精英）
+bool GolemMonster::init() {
+    if (!EliteMonster::init()) {
+        return false;
+    }
+
+    if (!initWithSprite("golem.png")) {
+        return false;
+    }
+
+    _health = 80;
+    _attackDamage = 15;
+    _block = 15;
+
+    initActionPattern();
+    return true;
+}
+
+void GolemMonster::initActionPattern() {
+    _actionPattern.clear();
+
+    // 魔像的行为模式
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::DEFEND,
+        20,
+        Effect::Type::Strength,
+        0, 0,
+        "防御+20"
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::ATTACK,
+        _attackDamage,
+        Effect::Type::Strength,
+        0, 0,
+        "攻击" + std::to_string(_attackDamage)
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::DEFEND,
+        10,
+        Effect::Type::Strength,
+        0, 0,
+        "防御+10"
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::ATTACK,
+        _attackDamage * 2,
+        Effect::Type::Strength,
+        0, 0,
+        "大力砸击" + std::to_string(static_cast<int>(_attackDamage * 2))
+    ));
+}
+
+// 黑暗骑士（Boss）
+bool KnightBossMonster::init() {
+    if (!BossMonster::init()) {
+        return false;
+    }
+
+    if (!initWithSprite("dark_knight.png")) {
+        return false;
+    }
+
+    _health = 200;
+    _attackDamage = 25;
+    _block = 20;
+
+    initActionPattern();
+    return true;
+}
+
+void KnightBossMonster::initActionPattern() {
+    _actionPattern.clear();
+
+    // 黑暗骑士的行为模式
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::ATTACK,
+        _attackDamage,
+        Effect::Type::Strength,
+        0, 0,
+        "斩击" + std::to_string(_attackDamage)
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::DEFEND,
+        25,
+        Effect::Type::Strength,
+        0, 0,
+        "盾牌格挡+25"
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::BUFF,
+        0,
+        Effect::Type::Strength,
+        3, 2,
+        "力量积蓄+3"
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::ATTACK,
+        _attackDamage * 2,
+        Effect::Type::Strength,
+        0, 0,
+        "致命重击" + std::to_string(static_cast<int>(_attackDamage * 2))
+    ));
+}
+
+// 远古巨龙（Boss）
+bool DragonBossMonster::init() {
+    if (!BossMonster::init()) {
+        return false;
+    }
+
+    if (!initWithSprite("ancient_dragon.png")) {
+        return false;
+    }
+
+    _health = 300;
+    _attackDamage = 15;
+    _block = 25;
+
+    initActionPattern();
+    return true;
+}
+
+void DragonBossMonster::initActionPattern() {
+    _actionPattern.clear();
+
+    // 远古巨龙的行为模式
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::DEBUFF,
+        0,
+        Effect::Type::Vulnerable,
+        3, 3,
+        "龙息（施加易伤）"
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::DEFEND,
+        30,
+        Effect::Type::Strength,
+        0, 0,
+        "龙鳞防御+30"
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::ATTACK,
+        _attackDamage * 1.5,
+        Effect::Type::Strength,
+        0, 0,
+        "龙爪撕裂" + std::to_string(static_cast<int>(_attackDamage * 1.5))
+    ));
+
+    _actionPattern.push_back(MonsterAction(
+        MonsterActionType::SPECIAL,
+        _attackDamage * 3,
+        Effect::Type::Strength,
+        0, 0,
+        "灭世龙息"
+    ));
+}

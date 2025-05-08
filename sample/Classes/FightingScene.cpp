@@ -207,18 +207,40 @@ void FightingScene::createCharacters()
     this->addChild(_hero, 1);
 
     // 创建怪物
-    // 尝试根据当前房间类型创建相应的怪物
+    // 添加详细日志，输出当前房间类型
+    CCLOG("Current Room Type in createCharacters(): %d", static_cast<int>(MyGame::currentRoomType));
     Monster* monster = nullptr;
 
     try {
+        // 修改判断逻辑，先打印出房间类型，再进行判断
+        int roomTypeInt = static_cast<int>(MyGame::currentRoomType);
+        CCLOG("Room type as integer: %d", roomTypeInt);
+
         if (MyGame::currentRoomType == MyGame::RoomType::BOSS) {
+            CCLOG("Creating BOSS monster");
             monster = Monster::createRandom(true, false); // 创建Boss怪物
         }
         else if (MyGame::currentRoomType == MyGame::RoomType::ELITE) {
+            CCLOG("Creating ELITE monster");
             monster = Monster::createRandom(false, true); // 创建精英怪物
         }
         else {
-            monster = Monster::createRandom(); // 创建普通怪物
+            CCLOG("Creating NORMAL monster for room type: %d", roomTypeInt);
+            monster = Monster::createRandom(false, false); // 显式传递参数，创建普通怪物
+        }
+
+        // 验证创建的怪物类型
+        if (monster) {
+            CCLOG("Created monster type: %s", monster->getMonsterName().c_str());
+            if (monster->isBoss()) {
+                CCLOG("Confirmed: It's a BOSS monster");
+            }
+            else if (monster->isElite()) {
+                CCLOG("Confirmed: It's an ELITE monster");
+            }
+            else {
+                CCLOG("Confirmed: It's a NORMAL monster");
+            }
         }
     }
     catch (const std::exception& e) {
@@ -229,13 +251,13 @@ void FightingScene::createCharacters()
     if (monster == nullptr)
     {
         CCLOG("Random monster creation failed, falling back to default monster");
-        monster = Monster::create("monster.png");
+        monster = SlimeMonster::create(); // 使用史莱姆作为默认怪物
     }
 
     // 如果仍然失败，报错并返回
     if (monster == nullptr)
     {
-        problemLoading("'monster.png'");
+        problemLoading("Unable to create any monster");
         return;
     }
 

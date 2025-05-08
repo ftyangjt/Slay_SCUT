@@ -21,7 +21,7 @@ namespace MyGame {
     };
 
     // 添加静态变量来存储当前房间类型
-    static RoomType currentRoomType = RoomType::BATTLE;
+    static RoomType currentRoomType;
 
     struct Room {
         RoomType type;
