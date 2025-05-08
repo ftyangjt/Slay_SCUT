@@ -533,7 +533,9 @@ void FightingScene::endTurn()
 
 // 检查战斗是否结束
 void FightingScene::checkBattleEnd()
-{
+{    // 在函数开始时添加这一行
+    CCLOG("checkBattleEnd - Current Room Type: %d", static_cast<int>(MyGame::currentRoomType));
+
     if (_hero->getHealth() <= 0)
     {
         // 现有失败处理代码保持不变...

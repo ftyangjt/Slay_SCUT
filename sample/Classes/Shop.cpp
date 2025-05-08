@@ -32,7 +32,7 @@ namespace MyGame {
             msg->setColor(Color3B(255, 105, 180)); // 粉色
 
             Size winSize = director->getWinSize();
-            msg->setPosition(Vec2(winSize.width / 2, winSize.height / 2 + 50));
+            msg->setPosition(Vec2(winSize.width / 2, winSize.height / 2 + 250));
 
             director->getRunningScene()->addChild(msg, 2001);
 
@@ -217,7 +217,7 @@ namespace MyGame {
         }
 
         if (returnItem) {
-            returnItem->setPosition(Vec2(winSize.width - 150, 0));
+            returnItem->setPosition(Vec2(winSize.width - 150, 50));
             returnItem->setScale(0.5f);  // 调整按钮大小
 
             auto menu = Menu::create(returnItem, nullptr);

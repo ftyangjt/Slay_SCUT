@@ -9,6 +9,8 @@
 USING_NS_CC;
 
 namespace MyGame {
+    // 实际定义和初始化静态变量
+    RoomType currentRoomType = RoomType::BATTLE;
 
     // 存储地图数据（房间类型和位置信息，但不存储指针）
     struct RoomInfo {
@@ -776,6 +778,9 @@ namespace MyGame {
         // 记录当前房间位置
         currentRoomPosition = item->getPosition();
 
+        // 添加这一行
+        currentRoomType = RoomType::QUESTION;
+
         // 标记为已完成房间
         roomCompleted = true;
 
@@ -814,6 +819,9 @@ namespace MyGame {
 
         // 记录当前房间位置
         currentRoomPosition = item->getPosition();
+
+        // 添加这一行
+        currentRoomType = RoomType::REST;
 
         // 标记为已完成房间
         roomCompleted = true;
@@ -935,6 +943,9 @@ namespace MyGame {
 
         // 记录当前房间位置
         currentRoomPosition = item->getPosition();
+
+        // 添加这一行
+        currentRoomType = RoomType::SHOP;
 
         // 标记为已完成房间
         roomCompleted = true;

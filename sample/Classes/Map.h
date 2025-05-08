@@ -19,10 +19,8 @@ namespace MyGame {
         ELITE,
         SHOP
     };
-
-    // 添加静态变量来存储当前房间类型
-    static RoomType currentRoomType = RoomType::BATTLE;
-
+    // 仅声明不初始化
+    extern RoomType currentRoomType;
     struct Room {
         RoomType type;
         cocos2d::MenuItemImage* item;
