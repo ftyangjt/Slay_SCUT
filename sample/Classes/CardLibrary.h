@@ -22,6 +22,8 @@ namespace CardLibrary {
 
     // 按类型获取卡牌
     std::vector<Card> getCardsByType(Card::Type type);
+
+    Card getRandomNonInitialNonCurseCard();
 }
 
 #endif // __CARD_LIBRARY_H__

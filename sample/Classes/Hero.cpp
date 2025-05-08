@@ -1,5 +1,6 @@
 // Hero.cpp
 #include "Hero.h"
+#include "CardLibrary.h"
 
 USING_NS_CC;
 
@@ -8,6 +9,8 @@ static int heroHealth = 100; // 默认生命值为100
 static int heroCoins = 100; // 默认金币为100
 // 添加一个静态变量来存储英雄的最大生命值上限
 static int heroMaxHealth = Hero::MAX_HEALTH;
+static bool _isDeckInitialized = false; // 声明静态变量
+std::vector<Card> Hero::_deck; // 定义静态变量
 
 // 获取当前最大生命值上限
 int Hero::getMaxHealth()
@@ -230,53 +233,62 @@ void Hero::clearDeck()
 // 初始化默认卡组
 void Hero::createDefaultDeck()
 {
+    if (_isDeckInitialized) {
+        CCLOG("Deck is already initialized. Skipping initialization.");
+        return;
+    }
     // 这里示例创建一个初始卡组，具体卡牌属性根据实际需求调整
     clearDeck();
 
-    // 添加示例卡牌（假设 Card 构造函数：Card(name, type, cost, effect, background, attack, defense)）
-    addCardToDeck(Card("Strike", Card::Type::Attack, 1, "Deal 6 damage", "cardBackground.jpg", 6, 0));
-    addCardToDeck(Card("Strike", Card::Type::Attack, 1, "Deal 6 damage", "cardBackground.jpg", 6, 0));
-    addCardToDeck(Card("Strike", Card::Type::Attack, 1, "Deal 6 damage", "cardBackground.jpg", 6, 0));
-    addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
-    addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
-    addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
+    //// 添加示例卡牌（假设 Card 构造函数：Card(name, type, cost, effect, background, attack, defense)）
+    //addCardToDeck(Card("Strike", Card::Type::Attack, 1, "Deal 6 damage", "cardBackground.jpg", 6, 0));
+    //addCardToDeck(Card("Strike", Card::Type::Attack, 1, "Deal 6 damage", "cardBackground.jpg", 6, 0));
+    //addCardToDeck(Card("Strike", Card::Type::Attack, 1, "Deal 6 damage", "cardBackground.jpg", 6, 0));
+    //addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
+    //addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
+    //addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
 
-    // 创建 Bash 卡牌并添加易伤效果
-    Card bashCard("Bash", Card::Type::Attack, 2, "Deal 8 damage and apply Vulnerable", "cardBackground.jpg", 8, 0);
-    // 使用新方法添加效果：直接指定效果类型、等级和持续时间
-    bashCard.addEffect(Effect::Type::Vulnerable, 1, 3); // 1级易伤，持续3回合
-    addCardToDeck(bashCard);
+    //// 创建 Bash 卡牌并添加易伤效果
+    //Card bashCard("Bash", Card::Type::Attack, 2, "Deal 8 damage and apply Vulnerable", "cardBackground.jpg", 8, 0);
+    //// 使用新方法添加效果：直接指定效果类型、等级和持续时间
+    //bashCard.addEffect(Effect::Type::Vulnerable, 1, 3); // 1级易伤，持续3回合
+    //addCardToDeck(bashCard);
 
-    Card shrugItOff("Shrug It Off", Card::Type::Skill, 1, "Gain 8 Block, draw 1 card", "cardBackground.jpg", 0, 8);
-    shrugItOff.setSpecialEffect(Card::SpecialEffect::DrawCard, 1); // 抽1张牌
-    addCardToDeck(shrugItOff);
+    //Card shrugItOff("Shrug It Off", Card::Type::Skill, 1, "Gain 8 Block, draw 1 card", "cardBackground.jpg", 0, 8);
+    //shrugItOff.setSpecialEffect(Card::SpecialEffect::DrawCard, 1); // 抽1张牌
+    //addCardToDeck(shrugItOff);
 
-    Card pommelStrike("Pommel Strike", Card::Type::Attack, 1, "Deal 5 damage and draw 1 card", "cardBackground.jpg", 5, 0);
-    pommelStrike.setSpecialEffect(Card::SpecialEffect::DrawCard, 1); // 抽1张牌
-    addCardToDeck(pommelStrike);
+    //Card pommelStrike("Pommel Strike", Card::Type::Attack, 1, "Deal 5 damage and draw 1 card", "cardBackground.jpg", 5, 0);
+    //pommelStrike.setSpecialEffect(Card::SpecialEffect::DrawCard, 1); // 抽1张牌
+    //addCardToDeck(pommelStrike);
 
-    Card strengthCard("Strength", Card::Type::Power, 1, "Gain 2 Strength", "cardBackground.jpg");
-    strengthCard.addEffect(Effect::Type::Strength, 2, -1); // 2级力量，持续时间为永久
-    addCardToDeck(strengthCard);
+    //Card strengthCard("Strength", Card::Type::Power, 1, "Gain 2 Strength", "cardBackground.jpg");
+    //strengthCard.addEffect(Effect::Type::Strength, 2, -1); // 2级力量，持续时间为永久
+    //addCardToDeck(strengthCard);
 
-    Card adrenalineRush("Adrenaline Rush", Card::Type::Skill, 0, "Lose 3 HP, gain 2 Energy", "cardBackground.jpg");
-    adrenalineRush.setSpecialEffect(Card::SpecialEffect::LoseHealth, 3); // 失去3点HP
-    adrenalineRush.setSpecialEffect(Card::SpecialEffect::GainEnergy, 2); // 获得2点能量
-    addCardToDeck(adrenalineRush);
+    //Card adrenalineRush("Adrenaline Rush", Card::Type::Skill, 0, "Lose 3 HP, gain 2 Energy", "cardBackground.jpg");
+    //adrenalineRush.setSpecialEffect(Card::SpecialEffect::LoseHealth, 3); // 失去3点HP
+    //adrenalineRush.setSpecialEffect(Card::SpecialEffect::GainEnergy, 2); // 获得2点能量
+    //addCardToDeck(adrenalineRush);
 
-    Card sacrifice("Sacrifice", Card::Type::Skill, 0, "Lose 6HP,gain 2 energy,draw 3 cards", "cardBackground.jpg");
-    std::vector<std::pair<Card::SpecialEffect, int>> sacrificeEffects;
-    sacrificeEffects.push_back(std::make_pair(Card::SpecialEffect::LoseHealth, 6));
-    sacrificeEffects.push_back(std::make_pair(Card::SpecialEffect::GainEnergy, 2));
-    sacrificeEffects.push_back(std::make_pair(Card::SpecialEffect::DrawCard, 3));
-    // 添加每个效果
-    for (const auto& effect : sacrificeEffects) {
-        sacrifice.setSpecialEffect(effect.first, effect.second);
-    }
-    addCardToDeck(sacrifice);
+    //Card sacrifice("Sacrifice", Card::Type::Skill, 0, "Lose 6HP,gain 2 energy,draw 3 cards", "cardBackground.jpg");
+    //std::vector<std::pair<Card::SpecialEffect, int>> sacrificeEffects;
+    //sacrificeEffects.push_back(std::make_pair(Card::SpecialEffect::LoseHealth, 6));
+    //sacrificeEffects.push_back(std::make_pair(Card::SpecialEffect::GainEnergy, 2));
+    //sacrificeEffects.push_back(std::make_pair(Card::SpecialEffect::DrawCard, 3));
+    //// 添加每个效果
+    //for (const auto& effect : sacrificeEffects) {
+    //    sacrifice.setSpecialEffect(effect.first, effect.second);
+    //}
+    //addCardToDeck(sacrifice);
 
-    addCardToDeck(Card("Bludgeon", Card::Type::Attack, 3, "Deal 32 damage", "cardBackground.jpg", 32, 0));
+    //Card curseCard("Curse", Card::Type::Curse, 0, "This card cannot be played and reduces your strength by 1", "curseBackground.jpg");
+    //curseCard.setPlayable(false); // 诅咒牌不能被打出
+    //addCardToDeck(curseCard);
 
+    //addCardToDeck(Card("Bludgeon", Card::Type::Attack, 3, "Deal 32 damage", "cardBackground.jpg", 32, 0));
+    _isDeckInitialized = true;
+    _deck = CardLibrary::getStarterDeck();
 }
 
 //  添加效果
@@ -328,4 +340,13 @@ void Hero::updateEffects() {
 // 更新状态显示 (实例方法)
 void Hero::updateStatusDisplay() {
     updateStatusDisplayStatic(); // 简单地调用静态方法
+}
+
+bool Hero::isDeckInitialized() const {
+    return _isDeckInitialized;
+}
+
+// 设置卡组初始化状态
+void Hero::setDeckInitialized(bool initialized) {
+    _isDeckInitialized = initialized;
 }

@@ -115,3 +115,11 @@ bool Card::hasSpecialEffect(SpecialEffect effect) const {
     }
     return false;
 }
+
+bool Card::isPlayable() const {
+    return _isPlayable;
+}
+
+void Card::setPlayable(bool playable) {
+    _isPlayable = playable;
+}

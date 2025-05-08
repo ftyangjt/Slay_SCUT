@@ -58,10 +58,14 @@ public:
     // 实例方法状态显示
     void updateStatusDisplay();
 
+	// 判断卡组是否已初始化
+    bool isDeckInitialized() const; // 判断卡组是否已初始化
+    void setDeckInitialized(bool initialized); // 设置卡组初始化状态
+
 private:
     int _health; // 生命值
     int _block; // 防御值
-    std::vector<Card> _deck; // 卡组
+    static std::vector<Card> _deck; // 卡组
     std::vector<std::shared_ptr<Effect>> _effects; // 效果
     cocos2d::Label* _statusLabel; // 状态显示标签
 

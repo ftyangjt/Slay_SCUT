@@ -22,7 +22,8 @@ public:
     {
         Attack,
         Skill,
-        Power
+        Power,
+        Curse
     };
 
     enum class SpecialEffect {
@@ -82,6 +83,8 @@ public:
     int getSpecialEffectValue(SpecialEffect effect) const;
     bool hasSpecialEffect(SpecialEffect effect) const;
 
+    bool isPlayable() const; // 获取卡牌是否可被打出
+    void setPlayable(bool playable); // 设置卡牌是否可被打出
 
 private:
     std::string _name;
@@ -94,6 +97,7 @@ private:
     cocos2d::Sprite* _sprite; // 添加卡牌精灵成员变量
     std::vector<EffectInfo> _effectInfos; // 使用新的结构体存储效果信息
     std::vector<std::pair<SpecialEffect, int>> _specialEffects;
+    bool _isPlayable = true;
 
 };
 

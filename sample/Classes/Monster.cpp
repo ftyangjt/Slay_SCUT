@@ -71,7 +71,7 @@ void Monster::initMonsterLibrary() {
     _monsterLibrary[MonsterType::GHOST] = MonsterData(
         "ghost",
         "ghost.png",
-        65,
+        32,
         9,
         7,
         { Effect::Type::Vulnerable },

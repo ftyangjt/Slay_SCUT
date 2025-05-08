@@ -8,6 +8,7 @@
 #include "DiscardDeck.h"
 #include "DrawDeck.h"
 #include "ui/CocosGUI.h"
+#include "CardLibrary.h"
 
 // 常量定义
 const int DOUBLE_CLICK_THRESHOLD = 300;  // 毫秒
@@ -61,6 +62,9 @@ private:
     void playMonsterAttackAnimation();
     void playHeroHitAnimation();
     void playMonsterHitAnimation();
+    std::vector<Card> generateRandomCards(int count);
+    void showCardSelectionWithCallback(const std::vector<Card>& cards, const std::function<void()>& onSelectionComplete);
+
     cocos2d::Size _visibleSize;
     cocos2d::Vec2 _origin;
     bool _isCooldown = false; // 表示出牌是否处于冷却状态
@@ -90,7 +94,6 @@ private:
     cocos2d::Label* _heroBuffLabel;    // 英雄 BUFF 标签
     cocos2d::Label* _monsterBuffLabel; // 怪物 BUFF 标签
     cocos2d::ui::Button* _endTurnButton = nullptr; // 结束回合按钮
-
 };
 
 #endif // __FIGHTING_SCENE_H__

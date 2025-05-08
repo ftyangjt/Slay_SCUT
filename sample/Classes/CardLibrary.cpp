@@ -70,6 +70,12 @@ namespace CardLibrary {
         }
         allCards.push_back(sacrifice);
 
+		// 诅咒牌
+        // 添加一张名为"Curse of Weakness"的诅咒牌
+        Card curseCard("Curse", Card::Type::Curse, 0, "This card cannot be played and reduces your strength by 1", "curseBackground.jpg");
+        curseCard.setPlayable(false); // 诅咒牌不能被打出
+        allCards.push_back(curseCard);
+
         return allCards;
     }
 
@@ -91,6 +97,8 @@ namespace CardLibrary {
         Card bashCard("Bash", Card::Type::Attack, 2, "Deal 8 damage and apply 2 Vulnerable", "cardBackground.jpg", 8, 0);
         bashCard.addEffect(Effect::Type::Vulnerable, 2, 2);
         starterDeck.push_back(bashCard);
+        
+        starterDeck.push_back(getCardByName("Curse"));
 
         return starterDeck;
     }
@@ -135,6 +143,34 @@ namespace CardLibrary {
         }
 
         return result;
+    }
+
+    Card getRandomNonInitialNonCurseCard() {
+        // 获取所有卡牌
+        std::vector<Card> allCards = getAllCards();
+
+        // 过滤掉初始牌和诅咒牌
+        std::vector<Card> filteredCards;
+        for (const auto& card : allCards) {
+            if (card.getName() != "Strike" &&
+                card.getName() != "Defend" &&
+                card.getName() != "Bash" &&
+                card.getType() != Card::Type::Curse) {
+                filteredCards.push_back(card);
+            }
+        }
+
+        // 如果没有符合条件的卡牌，返回一个默认卡牌
+        if (filteredCards.empty()) {
+            return Card("Unknown", Card::Type::Skill, 0, "No valid cards available", "cardBackground.jpg", 0, 0);
+        }
+
+        // 随机选择一张卡牌
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(0, filteredCards.size() - 1);
+
+        return filteredCards[dis(gen)];
     }
 
 } // namespace CardLibrary
