@@ -16,11 +16,12 @@ namespace MyGame {
         std::string image;     // 商品图片
         std::string description; // 商品描述
         std::function<void()> effect; // 购买后的效果
+        bool purchased = false; // 记录商品是否已被购买
     };
 
     // 定义商店商品
     static std::vector<ShopItem> shopItems = {
-        {"Life potion", 20, "life_potion.jpg", "Restore 20 health points", []() { Hero::healHealth(20); }},
+        {"Life potion", 20, "life_potion.jpg", "Restore 20 health points", []() { Hero::healHealth(20); }, false},
         // 修改 Shop.cpp 中的商品定义部分，替换神秘草莓的效果函数
         {"Mysterious strawberry", 100, "strawberry.jpg", "Increase maximum health by 10", []() {
             Hero::increaseMaxHealth(10);
@@ -32,7 +33,7 @@ namespace MyGame {
             msg->setColor(Color3B(255, 105, 180)); // 粉色
 
             Size winSize = director->getWinSize();
-            msg->setPosition(Vec2(winSize.width / 2, winSize.height / 2 + 50));
+            msg->setPosition(Vec2(winSize.width / 2, winSize.height / 2 + 250));
 
             director->getRunningScene()->addChild(msg, 2001);
 
@@ -40,7 +41,7 @@ namespace MyGame {
             auto fadeOut = FadeOut::create(2.0f);
             auto remove = RemoveSelf::create();
             msg->runAction(Sequence::create(fadeOut, remove, nullptr));
-        }}
+        }, false}
 ,
         {"Coin bag", 50, "coin_bag.png", "randomly gain 0-100 coins", []() {
             // 使用cocos2d-x的随机数函数
@@ -63,8 +64,8 @@ namespace MyGame {
             auto fadeOut = FadeOut::create(2.0f);
             auto remove = RemoveSelf::create();
             coinMsg->runAction(Sequence::create(fadeOut, remove, nullptr));
-        }},
-        {"神秘卷轴", 60, "mystery_scroll.png", "习得特殊技能", []() { /* 特殊技能效果 */ }}
+        }, false},
+        {"神秘卷轴", 60, "mystery_scroll.png", "习得特殊技能", []() { /* 特殊技能效果 */ }, false}
     };
 
 
@@ -217,7 +218,7 @@ namespace MyGame {
         }
 
         if (returnItem) {
-            returnItem->setPosition(Vec2(winSize.width - 150, 0));
+            returnItem->setPosition(Vec2(winSize.width - 150, 50));
             returnItem->setScale(0.5f);  // 调整按钮大小
 
             auto menu = Menu::create(returnItem, nullptr);
@@ -296,6 +297,9 @@ namespace MyGame {
         // 清空旧卡牌数据
         _cards.clear();
 
+        // 确保悬停卡牌指针置空
+        _hoveredCard = nullptr;
+
         // 新的卡牌布局参数
         const float CARD_SCALE = 0.5f;  // 增加卡牌大小
         const float HOVER_SCALE = 0.6f; // 悬停时的放大比例
@@ -306,17 +310,36 @@ namespace MyGame {
         const float START_X = goods->getPosition().x - HORIZONTAL_SPACING; // 起始X坐标
         const float START_Y = goods->getPosition().y + VERTICAL_SPACING * 0.5f; // 起始Y坐标
 
-        // 获取商品数量，最多显示6个
-        int itemCount = std::min((int)shopItems.size(), ITEMS_PER_ROW * ROWS);
+        // 获取可显示的未购买商品
+        std::vector<int> availableItems;
+        for (size_t i = 0; i < shopItems.size(); ++i) {
+            if (!shopItems[i].purchased) {
+                availableItems.push_back(i);
+            }
+        }
+
+        // 计算有多少个可用的商品
+        int itemCount = std::min((int)availableItems.size(), ITEMS_PER_ROW * ROWS);
+
+        // 如果没有可用商品，显示一个消息
+        if (itemCount == 0) {
+            auto noItemsLabel = Label::createWithTTF("No items available!", "fonts/Marker Felt.ttf", 60);
+            noItemsLabel->setColor(Color3B(255, 0, 0));
+            noItemsLabel->setPosition(Vec2(winSize.width * 0.5f, winSize.height / 2));
+            this->addChild(noItemsLabel, 1000);
+        }
 
         // 创建并布置卡牌
         for (int i = 0; i < itemCount; ++i) {
+            // 获取实际商品索引
+            int itemIndex = availableItems[i];
+
             // 计算行列位置
             int row = i / ITEMS_PER_ROW;
             int col = i % ITEMS_PER_ROW;
 
             // 创建商品卡牌
-            auto card = Sprite::create(shopItems[i].image);
+            auto card = Sprite::create(shopItems[itemIndex].image);
             if (!card) {
                 // 如果卡片图片加载失败，创建一个替代图形
                 card = Sprite::create();
@@ -340,24 +363,26 @@ namespace MyGame {
             float posY = START_Y - row * VERTICAL_SPACING;
             card->setPosition(Vec2(posX, posY));
 
-            card->setUserData(new int(i)); // 存储商品索引
-            card->setName("Item_" + std::to_string(i)); // 设置名称用于标识
+            // 使用智能指针管理索引内存
+            auto itemData = new int(itemIndex);
+            card->setUserData(itemData); // 存储商品索引
+            card->setName("Item_" + std::to_string(itemIndex)); // 设置名称用于标识
 
             // 添加商品名称
-            auto nameLabel = Label::createWithTTF(shopItems[i].name, "fonts/Marker Felt.ttf", 60);
+            auto nameLabel = Label::createWithTTF(shopItems[itemIndex].name, "fonts/Marker Felt.ttf", 60);
             nameLabel->setPosition(Vec2(0, 85));
             nameLabel->setColor(Color3B::BLACK);
             card->addChild(nameLabel);
 
             // 添加商品价格
-            auto priceLabel = Label::createWithTTF(StringUtils::format("%d Gold", shopItems[i].price),
+            auto priceLabel = Label::createWithTTF(StringUtils::format("%d Gold", shopItems[itemIndex].price),
                 "fonts/Marker Felt.ttf", 60);
             priceLabel->setPosition(Vec2(0, -85));
             priceLabel->setColor(Color3B(255, 215, 0)); // 金色
             card->addChild(priceLabel);
 
             // 添加商品描述
-            auto descLabel = Label::createWithTTF(shopItems[i].description, "fonts/Marker Felt.ttf", 50);
+            auto descLabel = Label::createWithTTF(shopItems[itemIndex].description, "fonts/Marker Felt.ttf", 50);
             descLabel->setPosition(Vec2(0, -150));
             descLabel->setColor(Color3B::BLACK);
             card->addChild(descLabel);
@@ -369,7 +394,7 @@ namespace MyGame {
             auto listener = EventListenerTouchOneByOne::create();
             listener->setSwallowTouches(true);
 
-            listener->onTouchBegan = [this, i](Touch* touch, Event* event) {
+            listener->onTouchBegan = [this, card](Touch* touch, Event* event) {
                 auto target = static_cast<Sprite*>(event->getCurrentTarget());
                 Vec2 locationInNode = target->convertToNodeSpace(touch->getLocation());
                 Size s = target->getContentSize();
@@ -382,18 +407,38 @@ namespace MyGame {
                 return false;
                 };
 
-            listener->onTouchEnded = [this, i](Touch* touch, Event* event) {
+            listener->onTouchEnded = [this, card](Touch* touch, Event* event) {
+                // 检查卡牌是否依然有效
+                if (!card || !card->getParent()) {
+                    return;
+                }
+
+                // 获取商品索引
+                int* itemIndexPtr = static_cast<int*>(card->getUserData());
+                if (!itemIndexPtr) {
+                    return;
+                }
+                int itemIndex = *itemIndexPtr;
+
                 // 获取当前金币数量
                 int currentCoins = Hero::getCoins();
-                int itemPrice = shopItems[i].price;
+                int itemPrice = shopItems[itemIndex].price;
 
                 // 检查是否有足够的金币购买
                 if (currentCoins >= itemPrice) {
+                    // 如果当前卡牌是悬停卡牌，先清除引用
+                    if (_hoveredCard == card) {
+                        _hoveredCard = nullptr;
+                    }
+
                     // 扣除金币
                     Hero::setCoins(currentCoins - itemPrice);
 
                     // 应用商品效果
-                    shopItems[i].effect();
+                    shopItems[itemIndex].effect();
+
+                    // 标记商品为已购买
+                    shopItems[itemIndex].purchased = true;
 
                     // 更新金币显示
                     auto coinLabel = this->getChildByName("CoinLabel");
@@ -411,6 +456,36 @@ namespace MyGame {
                     auto fadeOut = FadeOut::create(2.0f);
                     auto remove = RemoveSelf::create();
                     successMsg->runAction(Sequence::create(fadeOut, remove, nullptr));
+
+                    // 释放用户数据内存
+                    delete itemIndexPtr;
+                    card->setUserData(nullptr);
+
+                    // 从卡牌列表中移除
+                    auto it = std::find(_cards.begin(), _cards.end(), card);
+                    if (it != _cards.end()) {
+                        _cards.erase(it);
+                    }
+
+                    // 从界面中移除已购买的商品
+                    card->removeFromParent();
+
+                    // 如果所有商品都已购买，显示消息
+                    bool allPurchased = true;
+                    for (const auto& item : shopItems) {
+                        if (!item.purchased) {
+                            allPurchased = false;
+                            break;
+                        }
+                    }
+
+                    if (allPurchased) {
+                        auto noItemsLabel = Label::createWithTTF("All items sold out!", "fonts/Marker Felt.ttf", 60);
+                        noItemsLabel->setColor(Color3B(255, 0, 0));
+                        noItemsLabel->setPosition(Vec2(Director::getInstance()->getWinSize().width * 0.5f,
+                            Director::getInstance()->getWinSize().height / 2));
+                        this->addChild(noItemsLabel, 1000);
+                    }
                 }
                 else {
                     // 显示金币不足提示
@@ -438,15 +513,21 @@ namespace MyGame {
         _mouseListener = EventListenerMouse::create();
         _mouseListener->onMouseMove = [this, CARD_SCALE, HOVER_SCALE](EventMouse* event) {
             Vec2 mousePos = event->getLocationInView();
+            bool foundHovered = false;
 
             // 遍历所有卡牌检测悬停
             for (auto& card : _cards) {
+                // 确保卡牌仍然有效
+                if (!card || !card->getParent()) {
+                    continue;
+                }
+
                 Rect rect = card->getBoundingBox();
                 if (rect.containsPoint(mousePos)) {
                     // 进入卡牌区域
                     if (_hoveredCard != card) {
                         // 恢复上一个悬停卡牌
-                        if (_hoveredCard) {
+                        if (_hoveredCard && _hoveredCard->getParent()) {
                             _hoveredCard->stopAllActions();
                             _hoveredCard->runAction(ScaleTo::create(0.1f, CARD_SCALE));
                         }
@@ -455,14 +536,18 @@ namespace MyGame {
                         card->runAction(ScaleTo::create(0.1f, HOVER_SCALE));
                         _hoveredCard = card;
                     }
-                    return;
+                    foundHovered = true;
+                    break;
                 }
             }
 
             // 没有悬停卡牌时恢复
-            if (_hoveredCard) {
-                _hoveredCard->stopAllActions();
-                _hoveredCard->runAction(ScaleTo::create(0.1f, CARD_SCALE));
+            if (!foundHovered && _hoveredCard) {
+                // 确保卡牌仍然有效
+                if (_hoveredCard->getParent()) {
+                    _hoveredCard->stopAllActions();
+                    _hoveredCard->runAction(ScaleTo::create(0.1f, CARD_SCALE));
+                }
                 _hoveredCard = nullptr;
             }
             };
@@ -474,15 +559,24 @@ namespace MyGame {
         auto closeLabel = Label::createWithTTF("Close", "fonts/Marker Felt.ttf", 100);
         closeLabel->setColor(Color3B(0, 255, 0));
         closeButton = MenuItemLabel::create(closeLabel, [this](Ref* sender) {
+            // 清除悬停卡牌引用
+            _hoveredCard = nullptr;
+
             this->removeChildByName("GoodsColumn");
             if (_mouseListener) {
                 _eventDispatcher->removeEventListener(_mouseListener);
                 _mouseListener = nullptr;
             }
 
-            // 移除所有商品卡牌
+            // 移除所有商品卡牌并释放用户数据
             for (auto& card : _cards) {
-                card->removeFromParent();
+                if (card && card->getUserData()) {
+                    delete static_cast<int*>(card->getUserData());
+                    card->setUserData(nullptr);
+                }
+                if (card && card->getParent()) {
+                    card->removeFromParent();
+                }
             }
             _cards.clear();
 
@@ -503,5 +597,17 @@ namespace MyGame {
         }
     }
 
+    // 析构函数中清理内存
+    ShopScene::~ShopScene() {
+        // 确保释放所有用户数据内存
+        for (auto& card : _cards) {
+            if (card && card->getUserData()) {
+                delete static_cast<int*>(card->getUserData());
+                card->setUserData(nullptr);
+            }
+        }
+        _cards.clear();
+        _hoveredCard = nullptr;
+    }
 
 } // namespace MyGame

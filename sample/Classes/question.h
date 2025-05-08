@@ -13,9 +13,11 @@ public:
     // 实现返回按钮的回调函数
     void menuReturnCallback(cocos2d::Ref* pSender);
 
+    // 触发随机事件的函数
+    void triggerRandomEvent();
+
     // implement the "static create()" method manually
     CREATE_FUNC(Question);
 };
 
 #endif // __QUESTION_SCENE_H__
-
