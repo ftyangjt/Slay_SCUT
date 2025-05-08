@@ -7,7 +7,6 @@
 #include <random>
 
 USING_NS_CC;
-
 namespace MyGame {
     // 实际定义和初始化静态变量
     RoomType currentRoomType = RoomType::BATTLE;
@@ -744,7 +743,11 @@ namespace MyGame {
 
         // 切换到战斗场景
         auto scene = FightingScene::createScene();
-        Director::getInstance()->replaceScene(scene);
+        // 使用淡入淡出过渡效果，持续1秒
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // 黑色淡入淡出
+
+        // 切换到带过渡效果的地图场景
+        Director::getInstance()->replaceScene(transition);
     }
 
     void Map::menuQuestionCallback(Ref* pSender)
@@ -774,6 +777,7 @@ namespace MyGame {
         // 设置当前选中的层和房间
         currentLayer = layerIndex;
         currentRoom = 0;
+		currentRoomType = RoomType::QUESTION;
 
         // 记录当前房间位置
         currentRoomPosition = item->getPosition();
@@ -786,7 +790,9 @@ namespace MyGame {
 
         // 切换到问号场景
         auto scene = Question::createScene();
-        Director::getInstance()->replaceScene(scene);
+        // 使用淡入淡出过渡效果，持续1秒
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // 黑色淡入淡出
+		Director::getInstance()->replaceScene(transition);
     }
 
     void Map::menuRestCallback(Ref* pSender)
@@ -816,6 +822,7 @@ namespace MyGame {
         // 设置当前选中的层和房间
         currentLayer = layerIndex;
         currentRoom = 0;
+        currentRoomType = RoomType::REST;
 
         // 记录当前房间位置
         currentRoomPosition = item->getPosition();
@@ -828,7 +835,10 @@ namespace MyGame {
 
         // 切换到休息场景
         auto scene = Rest::createScene();
-        Director::getInstance()->replaceScene(scene);
+        // 使用淡入淡出过渡效果，持续1秒
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // 黑色淡入淡出
+        // 切换到带过渡效果的地图场景
+        Director::getInstance()->replaceScene(transition);
     }
 
     void Map::menuBossCallback(Ref* pSender)
@@ -869,7 +879,10 @@ namespace MyGame {
 
         // 切换到 BOSS 战斗场景
         auto scene = FightingScene::createScene();
-        Director::getInstance()->replaceScene(scene);
+        // 使用淡入淡出过渡效果，持续1秒
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // 黑色淡入淡出
+        // 切换到带过渡效果的地图场景
+        Director::getInstance()->replaceScene(transition);
     }
 
     void Map::menuEliteCallback(Ref* pSender)
@@ -910,7 +923,11 @@ namespace MyGame {
 
         // 切换到战斗场景 - 使用与其他回调相同的方式
         auto scene = FightingScene::createScene();
-        Director::getInstance()->replaceScene(scene);
+
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // 黑色淡入淡出
+        // 切换到带过渡效果的地图场景
+        Director::getInstance()->replaceScene(transition);
+
     }
 
     void Map::menuShopCallback(Ref* pSender)
@@ -952,7 +969,10 @@ namespace MyGame {
 
         // 切换到商店场景
         auto scene = ShopScene::createScene();
-        Director::getInstance()->replaceScene(scene);
+
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // 黑色淡入淡出
+        // 切换到带过渡效果的地图场景
+        Director::getInstance()->replaceScene(transition);
     }
 
 

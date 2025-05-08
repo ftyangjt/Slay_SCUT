@@ -32,6 +32,13 @@ bool FightingScene::init()
     _visibleSize = Director::getInstance()->getVisibleSize();
     _origin = Director::getInstance()->getVisibleOrigin();
 
+    // 初始化悬停相关变量
+    _hoveringCardIndex = -1;
+    _cardOriginalPositions.clear();
+    _cardOriginalRotations.clear();
+	_cardOriginalZOrders.clear();
+    _cardIsHovering.clear();
+
     // 创建背景
     createBackground();
 
@@ -229,13 +236,13 @@ void FightingScene::createCharacters()
     if (monster == nullptr)
     {
         CCLOG("Random monster creation failed, falling back to default monster");
-        monster = Monster::create("monster.png");
+        monster = SlimeMonster::create(); // 使用史莱姆作为默认怪物
     }
 
     // 如果仍然失败，报错并返回
     if (monster == nullptr)
     {
-        problemLoading("'monster.png'");
+        problemLoading("Unable to create any monster");
         return;
     }
 
@@ -440,50 +447,39 @@ void FightingScene::startMonsterTurn()
 {
     _isPlayerTurn = false;
 
-    // 创建一个3秒延迟后执行怪物回合的序列
+    // 创建一个延迟后执行怪物回合的序列
     auto delay = DelayTime::create(1.0f);
     auto monsterAction = CallFunc::create([=]() {
+        // 使用怪物的行为模式
+        if (_monster) {
+            // 获取当前行为
+            MonsterActionType action = _monster->getCurrentAction().type;
 
-        // 以下是原来的怪物回合逻辑
-        int damage = 10;
-        int block = 5;
-        playMonsterAttackAnimation();
-        _monster->setBlock(block);
 
-        // 处理格挡
-        int heroBlock = _hero->getBlock();
-        if (heroBlock > 0)
-        {
-            if (heroBlock >= damage)
-            {
-                _hero->setBlock(heroBlock - damage);
-                damage = 0;
-            }
-            else
-            {
-                damage -= heroBlock;
-                _hero->setBlock(0);
-            }
+			if (action == MonsterActionType::ATTACK)
+			{
+				// 播放怪物攻击动画
+				playMonsterAttackAnimation();
+			}
+
+
+            // 执行当前行为
+            _monster->executeCurrentAction(_hero);
+
+            // 更新UI
+            updateHealthAndBlockLabels();
+            updateBuffLabels();
         }
-
-        // 怪物对主角造成伤害
-        if (damage > 0)
-        {
-            playHeroHitAnimation();
-        }
-        int newHealth = _hero->getHealth() - damage;
-
-        _hero->setHealth(newHealth);
-        CCLOG("Hero Health: %d", _hero->getHealth());
-        updateHealthAndBlockLabels();
-        
         });
-	auto endTurnAction = CallFunc::create([this]() {
-		this->endTurn();
-		});
+
+    auto endTurnAction = CallFunc::create([this]() {
+        this->endTurn();
+        });
+
     // 执行延迟和回合逻辑的序列
     this->runAction(Sequence::create(monsterAction, delay, endTurnAction, nullptr));
 }
+
 
 // 结束回合
 void FightingScene::endTurn()
@@ -577,13 +573,30 @@ void FightingScene::checkBattleEnd()
         // 添加金币
         Hero::addCoins(coinReward);
 
-        // 显示卡牌选择界面
-        auto randomCards = generateRandomCards(3);
-        showCardSelectionWithCallback(randomCards, []() {
-            // 在卡牌选择完成后切换到地图场景
-            auto mapScene = MyGame::Map::createScene();
-            Director::getInstance()->replaceScene(TransitionFade::create(0.5f, mapScene));
-            });
+        // 创建获得金币的提示标签
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+        auto coinLabel = Label::createWithTTF("获得 " + std::to_string(coinReward) + " 金币!", "fonts/Marker Felt.ttf", 60);
+        coinLabel->setTextColor(Color4B::YELLOW);
+        coinLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 100));
+        this->addChild(coinLabel, 10);
+
+        // 创建胜利消息标签（现有代码）
+        auto victoryLabel = Label::createWithTTF("YOU WIN！", "fonts/Marker Felt.ttf", 80);
+        victoryLabel->setTextColor(Color4B::YELLOW);
+        victoryLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+        this->addChild(victoryLabel, 10);
+
+        // 延迟动作（现有代码）
+        this->runAction(Sequence::create(
+            DelayTime::create(0.1f),
+            CallFunc::create([]() {
+                auto mapScene = MyGame::Map::createScene();
+                Director::getInstance()->replaceScene(TransitionFade::create(0.5f, mapScene));
+                }),
+            nullptr
+        ));
     }
 }
 
@@ -708,10 +721,9 @@ cocos2d::Label* FightingScene::addCardEffectLabel(cocos2d::Sprite* cardSprite, c
 
     cardSprite->addChild(effectLabel, 1);
 
-    return effectLabel;
-
+    return effectLabel; // 返回效果标签
 }
-// 刷新手牌显示
+
 void FightingScene::updateHandDisplay()
 {
     size_t newCount = _cards.size();
@@ -723,6 +735,13 @@ void FightingScene::updateHandDisplay()
     }
     _cardSprites.clear();
     _lastClickTimes.clear();
+    
+    // 重置悬停相关变量
+    _hoveringCardIndex = -1;
+    _cardOriginalPositions.clear();
+    _cardOriginalRotations.clear();
+    _cardOriginalZOrders.clear();
+    _cardIsHovering.clear();  // 清空悬浮状态标志
 
     if (newCount == 0)
         return;  // 无卡牌则直接返回
@@ -756,10 +775,16 @@ void FightingScene::updateHandDisplay()
         // 设置卡牌位置和固定缩放比例
         sprite->setPosition(Vec2(posX, _origin.y + scaledCardHeight * 0.4f));
         sprite->setScale(cardScale);
+
+        // 根据索引设置递增的Z顺序，确保卡牌从左到右依次叠加（右边的卡牌在上面）
+        sprite->setLocalZOrder(i + 1); // 从1开始，让每张卡有唯一的Z顺序
+
+        // 设置卡牌位置和固定缩放比例
+        sprite->setPosition(Vec2(posX, _origin.y + scaledCardHeight * 0.4f));
+        sprite->setScale(cardScale);
         this->addChild(sprite, 1);
         _cardSprites.push_back(sprite);
         _lastClickTimes.push_back(std::chrono::steady_clock::now());
-
         // 添加卡牌效果标签
         auto effectLabel = addCardEffectLabel(sprite, _cards[i].getEffect());
 
@@ -769,7 +794,35 @@ void FightingScene::updateHandDisplay()
         costLabel->setPosition(Vec2(sprite->getContentSize().width / 2, effectLabel->getPositionY() - 60));
         sprite->addChild(costLabel, 1);
 
-        // 注册触摸事件
+        // 添加鼠标移动监听器（实现悬停效果）
+        auto mouseListener = EventListenerMouse::create();
+        mouseListener->onMouseMove = [this, i, sprite](EventMouse* event) {
+            // 将鼠标坐标转换为节点坐标系
+            Vec2 mousePos = Vec2(event->getCursorX(), event->getCursorY());
+
+            // 检查鼠标是否在卡牌区域内
+            if (sprite->getBoundingBox().containsPoint(mousePos))
+            {
+                // 如果鼠标在卡牌上，且不是当前已悬停的卡牌
+                if (_hoveringCardIndex != i)
+                {
+                    // 如果有其他卡牌正在悬停，先复位它
+                    if (_hoveringCardIndex != -1) {
+                        resetHoverEffect(_hoveringCardIndex);
+                    }
+
+                    // 设置新的悬停卡牌
+                    _hoveringCardIndex = i;
+                    applyHoverEffect(i);
+                }
+            }
+            else if (_hoveringCardIndex == i)
+            {
+                // 如果鼠标离开当前悬停的卡牌
+                resetHoverEffect(i);
+            }
+            };
+		// 添加点击监听器
         auto listener = EventListenerTouchOneByOne::create();
         listener->setSwallowTouches(true);
         listener->onTouchBegan = [this, i](Touch* touch, Event* event) -> bool {
@@ -781,7 +834,9 @@ void FightingScene::updateHandDisplay()
             }
             return false;
             };
+
         _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, sprite);
+        _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, sprite);
     }
 
     // 高亮选中的卡牌（如果有）
@@ -950,7 +1005,7 @@ void FightingScene::applyCardEffects(const Card& card)
         else
         {
             damage -= monsterBlock;
-
+          
             _monster->setBlock(0);
         }
     }
@@ -958,6 +1013,7 @@ void FightingScene::applyCardEffects(const Card& card)
     CCLOG("Damage: %d", damage);
 
     // 处理怪物的生命值
+    
     int newHealth = _monster->getHealth() - damage;
     if (damage > 0) {
         playMonsterHitAnimation(); // 如果造成了伤害，播放怪物受击动画
@@ -977,6 +1033,7 @@ void FightingScene::applyCardEffects(const Card& card)
 }
 
 // 打出卡牌
+// 打出卡牌
 void FightingScene::playCard(int index)
 {
     if (_isCooldown) {
@@ -986,12 +1043,6 @@ void FightingScene::playCard(int index)
     if (index >= 0 && index < _cards.size()) {
         // 原逻辑不变
         Card playedCard = _cards[index];
-
-        // 检查卡牌是否可被打出
-        if (!playedCard.isPlayable()) {
-            CCLOG("This card cannot be played!");
-            return; // 如果卡牌不可被打出，直接返回
-        }
 
         int cost = playedCard.getCost();
         // 检查能量是否足够
@@ -1006,6 +1057,30 @@ void FightingScene::playCard(int index)
 
         // 处理卡牌精灵
         auto cardSprite = _cardSprites[index];
+
+        // 新增：立即将该卡牌标记为不可悬浮状态
+        _cardIsHovering[index] = true; // 设为true表示卡牌正在悬浮中，不能再次触发悬浮效果
+
+        // 如果卡牌当前是悬浮状态，先让它回到原位
+        if (_hoveringCardIndex == index) {
+            // 立即重置卡牌位置但保持不可悬浮状态
+            if (_cardOriginalPositions.find(index) != _cardOriginalPositions.end()) {
+                Vec2 originalPos = _cardOriginalPositions[index];
+                float originalRot = _cardOriginalRotations[index];
+                int originalZOrder = (_cardOriginalZOrders.find(index) != _cardOriginalZOrders.end()) ?
+                    _cardOriginalZOrders[index] : 1;
+
+                // 立即重置位置、旋转和缩放，不使用动画
+                cardSprite->stopAllActions();
+                cardSprite->setPosition(originalPos);
+                cardSprite->setRotation(originalRot);
+                cardSprite->setScale(0.6f);
+                cardSprite->setLocalZOrder(originalZOrder);
+
+                // 重置当前悬停索引
+                _hoveringCardIndex = -1;
+            }
+        }
 
         // 如果是攻击类型的卡牌，播放英雄的挥刀动画
         if (playedCard.getType() == Card::Type::Attack) {
@@ -1443,3 +1518,129 @@ void FightingScene::showCardSelectionWithCallback(const std::vector<Card>& cards
         _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, cardSprite);
     }
 }
+// 更新怪物意图显示
+void FightingScene::createMonsterIntentLabel()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    // 创建怪物意图标签
+    _monsterIntentLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 40);
+    _monsterIntentLabel->setTextColor(Color4B::ORANGE);
+    _monsterIntentLabel->setPosition(Vec2(
+        origin.x + 3 * visibleSize.width / 4,
+        origin.y + visibleSize.height - _monsterHealthLabel->getContentSize().height - 210));
+    this->addChild(_monsterIntentLabel, 1);
+
+    updateMonsterIntentDisplay();
+}
+
+void FightingScene::updateMonsterIntentDisplay()
+{
+    if (!_monster || !_monsterIntentLabel) {
+        return;
+    }
+
+    _monsterIntentLabel->setString("next" + _monster->getNextActionDescription());
+}
+
+// 修改 applyHoverEffect 方法，确保悬浮的卡牌处于最高图层
+void FightingScene::applyHoverEffect(int cardIndex)
+{
+    if (cardIndex < 0 || cardIndex >= _cardSprites.size() || !_cardSprites[cardIndex])
+        return;
+
+    // 检查卡牌是否已经在悬浮中，如果是则不执行任何操作
+    if (_cardIsHovering.find(cardIndex) != _cardIsHovering.end() && _cardIsHovering[cardIndex])
+        return;
+
+    // 如果有其他卡牌正在悬停，先重置它
+    if (_hoveringCardIndex >= 0 && _hoveringCardIndex != cardIndex &&
+        _hoveringCardIndex < _cardSprites.size() && _cardSprites[_hoveringCardIndex])
+    {
+        resetHoverEffect(_hoveringCardIndex);
+    }
+
+    // 获取当前卡牌
+    auto sprite = _cardSprites[cardIndex];
+
+    // 保存原始位置、旋转和Z顺序
+    _cardOriginalPositions[cardIndex] = sprite->getPosition();
+    _cardOriginalRotations[cardIndex] = sprite->getRotation();
+    _cardOriginalZOrders[cardIndex] = sprite->getLocalZOrder(); // 保存原始z顺序
+
+    // 停止所有正在执行的动作
+    sprite->stopAllActions();
+
+    // 使卡牌上浮并放大一点
+    float hoverDistance = 30.0f; // 上浮距离
+    auto moveUp = MoveTo::create(0.1f, Vec2(sprite->getPositionX(),
+        sprite->getPositionY() + hoverDistance));
+    auto scaleUp = ScaleTo::create(0.1f, sprite->getScale() * 1.1f);
+    auto rotate = RotateTo::create(0.1f, 0.0f); // 使卡牌保持正面朝上
+
+    // 设置为最高图层，确保在所有卡牌之上
+    sprite->setLocalZOrder(1000);
+
+    // 标记此卡牌为悬浮状态
+    _cardIsHovering[cardIndex] = true;
+
+    // 同时执行多个动作
+    auto hoverAction = Spawn::create(moveUp, scaleUp, rotate, nullptr);
+    sprite->runAction(hoverAction);
+
+    // 更新当前悬停索引
+    _hoveringCardIndex = cardIndex;
+}
+
+// 重置悬停效果
+void FightingScene::resetHoverEffect(int cardIndex)
+{
+    if (cardIndex < 0 || cardIndex >= _cardSprites.size() || !_cardSprites[cardIndex])
+        return;
+
+    // 获取当前卡牌
+    auto sprite = _cardSprites[cardIndex];
+
+    // 检查是否有保存的原始位置和Z顺序
+    if (_cardOriginalPositions.find(cardIndex) != _cardOriginalPositions.end())
+    {
+        // 记录原始位置和旋转以便恢复
+        Vec2 originalPos = _cardOriginalPositions[cardIndex];
+        float originalRot = _cardOriginalRotations[cardIndex];
+        int originalZOrder = (_cardOriginalZOrders.find(cardIndex) != _cardOriginalZOrders.end()) ?
+            _cardOriginalZOrders[cardIndex] : 1;
+
+        // 确保先停止所有正在执行的动作
+        sprite->stopAllActions();
+
+        // 恢复原始位置、旋转和缩放
+        auto moveBack = MoveTo::create(0.1f, originalPos);
+        auto scaleBack = ScaleTo::create(0.1f, 0.6f); // 恢复原始缩放
+        auto rotateBack = RotateTo::create(0.1f, originalRot); // 恢复原始旋转
+
+        // 创建一个回调，确保重置完成后清理状态和恢复Z顺序
+        auto resetCallback = CallFunc::create([this, sprite, cardIndex, originalZOrder]() {
+            // 恢复Z顺序
+            sprite->setLocalZOrder(originalZOrder);
+
+            // 如果当前悬停索引是这张卡，将其重置
+            if (_hoveringCardIndex == cardIndex) {
+                _hoveringCardIndex = -1;
+            }
+
+            // 重要：标记卡牌不再处于悬浮状态，允许再次悬浮
+            _cardIsHovering[cardIndex] = false;
+            });
+
+        // 使用Sequence确保所有动作按顺序完成
+        auto resetAction = Sequence::create(
+            Spawn::create(moveBack, scaleBack, rotateBack, nullptr),
+            resetCallback,
+            nullptr
+        );
+
+        sprite->runAction(resetAction);
+    }
+}
+
