@@ -32,6 +32,13 @@ bool FightingScene::init()
     _visibleSize = Director::getInstance()->getVisibleSize();
     _origin = Director::getInstance()->getVisibleOrigin();
 
+    // 初始化悬停相关变量
+    _hoveringCardIndex = -1;
+    _cardOriginalPositions.clear();
+    _cardOriginalRotations.clear();
+	_cardOriginalZOrders.clear();
+    _cardIsHovering.clear();
+
     // 创建背景
     createBackground();
 
@@ -725,21 +732,25 @@ cocos2d::Label* FightingScene::addCardEffectLabel(cocos2d::Sprite* cardSprite, c
     return effectLabel; // 返回效果标签
 }
 
-// 刷新手牌显示
 void FightingScene::updateHandDisplay()
 {
     size_t newCount = _cards.size();
 
     // 清除现有卡牌精灵
+        // 清除现有卡牌精灵
     for (auto sprite : _cardSprites)
     {
         sprite->removeFromParent();
     }
     _cardSprites.clear();
     _lastClickTimes.clear();
-
-    if (newCount == 0)
-        return;  // 无卡牌则直接返回
+    
+    // 重置悬停相关变量
+    _hoveringCardIndex = -1;
+    _cardOriginalPositions.clear();
+    _cardOriginalRotations.clear();
+    _cardOriginalZOrders.clear();
+    _cardIsHovering.clear();  // 清空悬浮状态标志
 
     // 创建临时精灵获取卡牌原始尺寸
     auto tempSprite = Sprite::create("cardBackground.jpg");
@@ -770,10 +781,13 @@ void FightingScene::updateHandDisplay()
         // 设置卡牌位置和固定缩放比例
         sprite->setPosition(Vec2(posX, _origin.y + scaledCardHeight * 0.4f));
         sprite->setScale(cardScale);
+
+        // 根据索引设置递增的Z顺序，确保卡牌从左到右依次叠加（右边的卡牌在上面）
+        sprite->setLocalZOrder(i + 1); // 从1开始，让每张卡有唯一的Z顺序
+
         this->addChild(sprite, 1);
         _cardSprites.push_back(sprite);
         _lastClickTimes.push_back(std::chrono::steady_clock::now());
-
         // 添加卡牌效果标签
         auto effectLabel = addCardEffectLabel(sprite, _cards[i].getEffect());
 
@@ -783,7 +797,35 @@ void FightingScene::updateHandDisplay()
         costLabel->setPosition(Vec2(sprite->getContentSize().width / 2, effectLabel->getPositionY() - 60));
         sprite->addChild(costLabel, 1);
 
-        // 注册触摸事件
+        // 添加鼠标移动监听器（实现悬停效果）
+        auto mouseListener = EventListenerMouse::create();
+        mouseListener->onMouseMove = [this, i, sprite](EventMouse* event) {
+            // 将鼠标坐标转换为节点坐标系
+            Vec2 mousePos = Vec2(event->getCursorX(), event->getCursorY());
+
+            // 检查鼠标是否在卡牌区域内
+            if (sprite->getBoundingBox().containsPoint(mousePos))
+            {
+                // 如果鼠标在卡牌上，且不是当前已悬停的卡牌
+                if (_hoveringCardIndex != i)
+                {
+                    // 如果有其他卡牌正在悬停，先复位它
+                    if (_hoveringCardIndex != -1) {
+                        resetHoverEffect(_hoveringCardIndex);
+                    }
+
+                    // 设置新的悬停卡牌
+                    _hoveringCardIndex = i;
+                    applyHoverEffect(i);
+                }
+            }
+            else if (_hoveringCardIndex == i)
+            {
+                // 如果鼠标离开当前悬停的卡牌
+                resetHoverEffect(i);
+            }
+            };
+		// 添加点击监听器
         auto listener = EventListenerTouchOneByOne::create();
         listener->setSwallowTouches(true);
         listener->onTouchBegan = [this, i](Touch* touch, Event* event) -> bool {
@@ -795,7 +837,9 @@ void FightingScene::updateHandDisplay()
             }
             return false;
             };
+
         _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, sprite);
+        _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, sprite);
     }
 
     // 高亮选中的卡牌（如果有）
@@ -929,6 +973,7 @@ void FightingScene::applyCardEffects(const Card& card)
 }
 
 // 打出卡牌
+// 打出卡牌
 void FightingScene::playCard(int index)
 {
     if (_isCooldown) {
@@ -952,6 +997,30 @@ void FightingScene::playCard(int index)
 
         // 处理卡牌精灵
         auto cardSprite = _cardSprites[index];
+
+        // 新增：立即将该卡牌标记为不可悬浮状态
+        _cardIsHovering[index] = true; // 设为true表示卡牌正在悬浮中，不能再次触发悬浮效果
+
+        // 如果卡牌当前是悬浮状态，先让它回到原位
+        if (_hoveringCardIndex == index) {
+            // 立即重置卡牌位置但保持不可悬浮状态
+            if (_cardOriginalPositions.find(index) != _cardOriginalPositions.end()) {
+                Vec2 originalPos = _cardOriginalPositions[index];
+                float originalRot = _cardOriginalRotations[index];
+                int originalZOrder = (_cardOriginalZOrders.find(index) != _cardOriginalZOrders.end()) ?
+                    _cardOriginalZOrders[index] : 1;
+
+                // 立即重置位置、旋转和缩放，不使用动画
+                cardSprite->stopAllActions();
+                cardSprite->setPosition(originalPos);
+                cardSprite->setRotation(originalRot);
+                cardSprite->setScale(0.6f);
+                cardSprite->setLocalZOrder(originalZOrder);
+
+                // 重置当前悬停索引
+                _hoveringCardIndex = -1;
+            }
+        }
 
         // 如果是攻击类型的卡牌，播放英雄的挥刀动画
         if (playedCard.getType() == Card::Type::Attack) {
@@ -1343,3 +1412,104 @@ void FightingScene::updateMonsterIntentDisplay()
 
     _monsterIntentLabel->setString("next" + _monster->getNextActionDescription());
 }
+
+// 修改 applyHoverEffect 方法，确保悬浮的卡牌处于最高图层
+void FightingScene::applyHoverEffect(int cardIndex)
+{
+    if (cardIndex < 0 || cardIndex >= _cardSprites.size() || !_cardSprites[cardIndex])
+        return;
+
+    // 检查卡牌是否已经在悬浮中，如果是则不执行任何操作
+    if (_cardIsHovering.find(cardIndex) != _cardIsHovering.end() && _cardIsHovering[cardIndex])
+        return;
+
+    // 如果有其他卡牌正在悬停，先重置它
+    if (_hoveringCardIndex >= 0 && _hoveringCardIndex != cardIndex &&
+        _hoveringCardIndex < _cardSprites.size() && _cardSprites[_hoveringCardIndex])
+    {
+        resetHoverEffect(_hoveringCardIndex);
+    }
+
+    // 获取当前卡牌
+    auto sprite = _cardSprites[cardIndex];
+
+    // 保存原始位置、旋转和Z顺序
+    _cardOriginalPositions[cardIndex] = sprite->getPosition();
+    _cardOriginalRotations[cardIndex] = sprite->getRotation();
+    _cardOriginalZOrders[cardIndex] = sprite->getLocalZOrder(); // 保存原始z顺序
+
+    // 停止所有正在执行的动作
+    sprite->stopAllActions();
+
+    // 使卡牌上浮并放大一点
+    float hoverDistance = 30.0f; // 上浮距离
+    auto moveUp = MoveTo::create(0.1f, Vec2(sprite->getPositionX(),
+        sprite->getPositionY() + hoverDistance));
+    auto scaleUp = ScaleTo::create(0.1f, sprite->getScale() * 1.1f);
+    auto rotate = RotateTo::create(0.1f, 0.0f); // 使卡牌保持正面朝上
+
+    // 设置为最高图层，确保在所有卡牌之上
+    sprite->setLocalZOrder(1000);
+
+    // 标记此卡牌为悬浮状态
+    _cardIsHovering[cardIndex] = true;
+
+    // 同时执行多个动作
+    auto hoverAction = Spawn::create(moveUp, scaleUp, rotate, nullptr);
+    sprite->runAction(hoverAction);
+
+    // 更新当前悬停索引
+    _hoveringCardIndex = cardIndex;
+}
+
+// 重置悬停效果
+void FightingScene::resetHoverEffect(int cardIndex)
+{
+    if (cardIndex < 0 || cardIndex >= _cardSprites.size() || !_cardSprites[cardIndex])
+        return;
+
+    // 获取当前卡牌
+    auto sprite = _cardSprites[cardIndex];
+
+    // 检查是否有保存的原始位置和Z顺序
+    if (_cardOriginalPositions.find(cardIndex) != _cardOriginalPositions.end())
+    {
+        // 记录原始位置和旋转以便恢复
+        Vec2 originalPos = _cardOriginalPositions[cardIndex];
+        float originalRot = _cardOriginalRotations[cardIndex];
+        int originalZOrder = (_cardOriginalZOrders.find(cardIndex) != _cardOriginalZOrders.end()) ?
+            _cardOriginalZOrders[cardIndex] : 1;
+
+        // 确保先停止所有正在执行的动作
+        sprite->stopAllActions();
+
+        // 恢复原始位置、旋转和缩放
+        auto moveBack = MoveTo::create(0.1f, originalPos);
+        auto scaleBack = ScaleTo::create(0.1f, 0.6f); // 恢复原始缩放
+        auto rotateBack = RotateTo::create(0.1f, originalRot); // 恢复原始旋转
+
+        // 创建一个回调，确保重置完成后清理状态和恢复Z顺序
+        auto resetCallback = CallFunc::create([this, sprite, cardIndex, originalZOrder]() {
+            // 恢复Z顺序
+            sprite->setLocalZOrder(originalZOrder);
+
+            // 如果当前悬停索引是这张卡，将其重置
+            if (_hoveringCardIndex == cardIndex) {
+                _hoveringCardIndex = -1;
+            }
+
+            // 重要：标记卡牌不再处于悬浮状态，允许再次悬浮
+            _cardIsHovering[cardIndex] = false;
+            });
+
+        // 使用Sequence确保所有动作按顺序完成
+        auto resetAction = Sequence::create(
+            Spawn::create(moveBack, scaleBack, rotateBack, nullptr),
+            resetCallback,
+            nullptr
+        );
+
+        sprite->runAction(resetAction);
+    }
+}
+

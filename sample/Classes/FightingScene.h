@@ -63,8 +63,20 @@ private:
     void playMonsterHitAnimation();
     void createMonsterIntentLabel();      // 创建怪物意图标签
     void updateMonsterIntentDisplay();    // 更新怪物意图显示
+    void applyHoverEffect(int cardIndex);
+    void resetHoverEffect(int cardIndex);
+
     cocos2d::Size _visibleSize;
     cocos2d::Vec2 _origin;
+
+private:
+    // 原有变量保持不变
+    int _hoveringCardIndex = -1; // 当前悬停卡牌的索引
+    std::map<int, bool> _cardIsHovering; // 标记卡牌是否正在悬浮中
+    std::map<int, cocos2d::Vec2> _cardOriginalPositions; // 保存卡牌原始位置
+    std::map<int, float> _cardOriginalRotations; // 保存卡牌原始旋转
+    std::map<int, int> _cardOriginalZOrders; // 保存卡牌原始Z顺序
+
     bool _isCooldown = false; // 表示出牌是否处于冷却状态
 	bool _isEndTurnButtonEnabled = true; //表示结束回合按钮是否可用
 	bool _isDrawingCards = false; // 是否正在抽牌
