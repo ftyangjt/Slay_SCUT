@@ -529,12 +529,11 @@ void FightingScene::endTurn()
 
 // 检查战斗是否结束
 void FightingScene::checkBattleEnd()
-{    // 在函数开始时添加这一行
+{
     CCLOG("checkBattleEnd - Current Room Type: %d", static_cast<int>(MyGame::currentRoomType));
 
     if (_hero->getHealth() <= 0)
     {
-        // 现有失败处理代码保持不变...
         CCLOG("Hero is dead. Game Over.");
 
         // 创建失败信息标签
@@ -548,9 +547,8 @@ void FightingScene::checkBattleEnd()
 
         // 添加延迟动作，然后切换到失败场景
         this->runAction(Sequence::create(
-            DelayTime::create(0.1f),  // 延迟0.1秒
+            DelayTime::create(0.1f),
             CallFunc::create([]() {
-                // 切换到失败场景
                 auto failScene = FailScene::createScene();
                 Director::getInstance()->replaceScene(TransitionFade::create(0.5f, failScene));
                 }),
@@ -573,32 +571,17 @@ void FightingScene::checkBattleEnd()
         // 添加金币
         Hero::addCoins(coinReward);
 
-        // 创建获得金币的提示标签
-        auto visibleSize = Director::getInstance()->getVisibleSize();
-        Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-        auto coinLabel = Label::createWithTTF("获得 " + std::to_string(coinReward) + " 金币!", "fonts/Marker Felt.ttf", 60);
-        coinLabel->setTextColor(Color4B::YELLOW);
-        coinLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 100));
-        this->addChild(coinLabel, 10);
-
-        // 创建胜利消息标签（现有代码）
-        auto victoryLabel = Label::createWithTTF("YOU WIN！", "fonts/Marker Felt.ttf", 80);
-        victoryLabel->setTextColor(Color4B::YELLOW);
-        victoryLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
-        this->addChild(victoryLabel, 10);
-
-        // 延迟动作（现有代码）
-        this->runAction(Sequence::create(
-            DelayTime::create(0.1f),
-            CallFunc::create([]() {
-                auto mapScene = MyGame::Map::createScene();
-                Director::getInstance()->replaceScene(TransitionFade::create(0.5f, mapScene));
-                }),
-            nullptr
-        ));
+        // 显示卡牌选择界面
+        auto randomCards = generateRandomCards(3); // 生成3张随机卡牌
+        showCardSelectionWithCallback(randomCards, [this]() {
+            // 在卡牌选择完成后切换到地图场景
+            auto mapScene = MyGame::Map::createScene();
+            Director::getInstance()->replaceScene(TransitionFade::create(0.5f, mapScene));
+            });
     }
 }
+
+
 
 // 以下为卡牌系统的实现
 // 单张抽牌函数 - 修改版
@@ -1044,13 +1027,17 @@ void FightingScene::playCard(int index)
         // 原逻辑不变
         Card playedCard = _cards[index];
 
+        if (!playedCard.isPlayable()) {
+            CCLOG("This card cannot be played!");
+            return;
+        }
+
         int cost = playedCard.getCost();
-        // 检查能量是否足够
-        if (cost > _currentCost)
-        {
+        if (cost > _currentCost) {
             CCLOG("Energy not enough to play this card!");
             return;
         }
+
         // 如果费用足够，扣费并进行原有逻辑
         _currentCost -= cost;
         updateCostLabel();
@@ -1518,6 +1505,7 @@ void FightingScene::showCardSelectionWithCallback(const std::vector<Card>& cards
         _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, cardSprite);
     }
 }
+
 // 更新怪物意图显示
 void FightingScene::createMonsterIntentLabel()
 {
