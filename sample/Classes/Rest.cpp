@@ -96,9 +96,27 @@ namespace MyGame {
 
     void Rest::menuReturnCallback(Ref* pSender)
     {
-        // 返回地图场景
-        auto scene = Map::createScene();
-        Director::getInstance()->replaceScene(scene);
+        // 增加10点最大血量上限
+        Hero::increaseMaxHealth(10);
+
+        // 显示增加的最大血量信息
+        std::string maxHealthText = "+10 Max HP";
+        auto label = Label::createWithTTF(maxHealthText, "fonts/Marker Felt.ttf", 24);
+        label->setPosition(Vec2(Director::getInstance()->getVisibleSize().width / 2,
+            Director::getInstance()->getVisibleSize().height / 2 + 200));
+        label->setScale(3.0);
+        this->addChild(label, 1);
+
+        // 延迟一段时间后返回地图场景
+        this->runAction(Sequence::create(
+            DelayTime::create(2.0f),
+            CallFunc::create([]() {
+                auto scene = Map::createScene();
+                Director::getInstance()->replaceScene(scene);
+                }),
+            nullptr
+        ));
     }
+
 
 } // namespace MyGame

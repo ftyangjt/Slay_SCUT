@@ -4,6 +4,7 @@
 #include "Map.h"
 #include "fail.h"
 #include "Effect.h"
+#include "Victory.h"
 
 USING_NS_CC;
 
@@ -577,29 +578,41 @@ void FightingScene::checkBattleEnd()
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-        auto coinLabel = Label::createWithTTF("获得 " + std::to_string(coinReward) + " 金币!", "fonts/Marker Felt.ttf", 60);
+        auto coinLabel = Label::createWithTTF("Gain " + std::to_string(coinReward) + " Coins", "fonts/Marker Felt.ttf", 60);
         coinLabel->setTextColor(Color4B::YELLOW);
         coinLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 100));
         this->addChild(coinLabel, 10);
 
-        // 创建胜利消息标签（现有代码）
+        // 创建胜利消息标签
         auto victoryLabel = Label::createWithTTF("YOU WIN！", "fonts/Marker Felt.ttf", 80);
         victoryLabel->setTextColor(Color4B::YELLOW);
         victoryLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
         this->addChild(victoryLabel, 10);
 
-        // 延迟动作（现有代码）
-        this->runAction(Sequence::create(
-            DelayTime::create(0.1f),
-            CallFunc::create([]() {
-                auto mapScene = MyGame::Map::createScene();
-                Director::getInstance()->replaceScene(TransitionFade::create(0.5f, mapScene));
-                }),
-            nullptr
-        ));
+        // 如果打败的是 Boss，进入胜利场景
+        if (MyGame::currentRoomType == MyGame::RoomType::BOSS) {
+            this->runAction(Sequence::create(
+                DelayTime::create(0.5f), // 等待2秒观看胜利提示
+                CallFunc::create([]() {
+                    auto victoryScene = MyGame::VictoryScene::createScene();
+                    Director::getInstance()->replaceScene(TransitionFade::create(1.0f, victoryScene));
+                    }),
+                nullptr
+            ));
+        }
+        else {
+            // 非 Boss 战斗，返回地图
+            this->runAction(Sequence::create(
+                DelayTime::create(0.5f),
+                CallFunc::create([]() {
+                    auto mapScene = MyGame::Map::createScene();
+                    Director::getInstance()->replaceScene(TransitionFade::create(0.5f, mapScene));
+                    }),
+                nullptr
+            ));
+        }
     }
 }
-
 // 以下为卡牌系统的实现
 // 单张抽牌函数 - 修改版
 void FightingScene::drawCard()

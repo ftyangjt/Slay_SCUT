@@ -78,6 +78,12 @@ namespace MyGame {
             return false;
         }
 
+        // 重置所有商品的购买状态，使它们在每次重新进入商店时都可以购买
+        for (auto& item : shopItems) {
+            item.purchased = false;
+        }
+
+        // 原有的初始化代码...
         auto director = Director::getInstance();
         auto winSize = director->getWinSize();
 
