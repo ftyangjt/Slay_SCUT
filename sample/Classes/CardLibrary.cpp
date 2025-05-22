@@ -10,62 +10,65 @@ namespace CardLibrary {
     std::vector<Card> getAllCards() {
         std::vector<Card> allCards;
 
-        // ¹¥»÷ÅÆ
+        // æ”»å‡»ç‰Œ
         
-		// Ìí¼ÓStrike¿¨ÅÆ
+		// æ·»åŠ Strikeå¡ç‰Œ
         allCards.push_back(Card("Strike", Card::Type::Attack, 1, "Deal 6 damage", "cardBackground.jpg", 6, 0));
 
-		// Ìí¼ÓBash¿¨ÅÆ
+		// æ·»åŠ Bashå¡ç‰Œ
         Card bashCard("Bash", Card::Type::Attack, 2, "Deal 8 damage and apply 2 Vulnerable", "cardBackground.jpg", 8, 0);
         bashCard.addEffect(Effect::Type::Vulnerable, 2, 2); // 2 stacks of Vulnerable, lasts 2 turns
         allCards.push_back(bashCard);
 
-		// Ìí¼ÓPommel Strike¿¨ÅÆ
+		// æ·»åŠ Pommel Strikeå¡ç‰Œ
         Card pommelStrike("Pommel Strike", Card::Type::Attack, 1, "Deal 5 damage and draw 1 card", "cardBackground.jpg", 5, 0);
         pommelStrike.setSpecialEffect(Card::SpecialEffect::DrawCard, 1); // Draw 1 card
         allCards.push_back(pommelStrike);
 
-		// Ìí¼ÓCounter¿¨ÅÆ
+		// æ·»åŠ Counterå¡ç‰Œ
         Card counterAttack("Counter", Card::Type::Attack, 2, "Gain 5 Block, then deal 5 damage", "cardBackground.jpg", 5, 5);
         allCards.push_back(counterAttack);
 
-        // ¼¼ÄÜÅÆ¡¢ÄÜÁ¦ÅÆ
+		// æ·»åŠ Heavy Blowå¡ç‰Œ
+        allCards.push_back(Card("Heavy Blow", Card::Type::Attack, 2, "Deal 32 damage", "cardBackground.jpg", 32, 0));
 
-		// Ìí¼ÓDefend¿¨ÅÆ
+        // æŠ€èƒ½ç‰Œã€èƒ½åŠ›ç‰Œ
+
+		// æ·»åŠ Defendå¡ç‰Œ
         allCards.push_back(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
 
-        // Ìí¼ÓStrength¿¨ÅÆ
+        // æ·»åŠ Strengthå¡ç‰Œ
         Card strengthPower("Strength", Card::Type::Power, 1, "Gain 2 Strength", "cardBackground.jpg");
-        strengthPower.addEffect(Effect::Type::Strength, 2, -1); // 2¼¶Á¦Á¿£¬³ÖĞøÊ±¼äÎªÓÀ¾Ã
+        strengthPower.addEffect(Effect::Type::Strength, 2, -1); // 2çº§åŠ›é‡ï¼ŒæŒç»­æ—¶é—´ä¸ºæ°¸ä¹…
         allCards.push_back(strengthPower);
 
-        // Ìí¼ÓAdrenaline Rush¿¨ÅÆ
+        // æ·»åŠ Adrenaline Rushå¡ç‰Œ
         Card adrenalineRush("Adrenaline Rush", Card::Type::Skill, 0, "Lose 3 HP, gain 2 Energy", "cardBackground.jpg");
         std::vector<std::pair<Card::SpecialEffect, int>> effects;
         effects.push_back(std::make_pair(Card::SpecialEffect::LoseHealth, 3));
         effects.push_back(std::make_pair(Card::SpecialEffect::GainEnergy, 2));
-        // Ìí¼ÓÃ¿¸öĞ§¹û
+        // æ·»åŠ æ¯ä¸ªæ•ˆæœ
         for (const auto& effect : effects) {
             adrenalineRush.setSpecialEffect(effect.first, effect.second);
         }
         allCards.push_back(adrenalineRush);
 
-        // Ìí¼Ó¼ÀÆ·¿¨ÅÆ
+        // æ·»åŠ ç¥­å“å¡ç‰Œ
         Card sacrifice("Sacrifice", Card::Type::Skill, 0, "Lose 6HP,gain 2 energy,draw 3 cards", "cardBackground.jpg");
         std::vector<std::pair<Card::SpecialEffect, int>> sacrificeEffects;
         sacrificeEffects.push_back(std::make_pair(Card::SpecialEffect::LoseHealth, 6));
         sacrificeEffects.push_back(std::make_pair(Card::SpecialEffect::GainEnergy, 2));
         sacrificeEffects.push_back(std::make_pair(Card::SpecialEffect::DrawCard, 3));
-        // Ìí¼ÓÃ¿¸öĞ§¹û
+        // æ·»åŠ æ¯ä¸ªæ•ˆæœ
         for (const auto& effect : sacrificeEffects) {
             sacrifice.setSpecialEffect(effect.first, effect.second);
         }
         allCards.push_back(sacrifice);
 
-		// ×çÖäÅÆ
-        // Ìí¼ÓÒ»ÕÅÃûÎª"Curse of Weakness"µÄ×çÖäÅÆ
-        Card curseCard("Curse", Card::Type::Curse, 0, "This card cannot be played and reduces your strength by 1", "curseBackground.jpg");
-        curseCard.setPlayable(false); // ×çÖäÅÆ²»ÄÜ±»´ò³ö
+		// è¯…å’’ç‰Œ
+        // æ·»åŠ ä¸€å¼ åä¸º"Curse of Weakness"çš„è¯…å’’ç‰Œ
+        Card curseCard("Curse", Card::Type::Curse, 0, "This card cannot be played", "curseBackground.jpg");
+        curseCard.setPlayable(false); // è¯…å’’ç‰Œä¸èƒ½è¢«æ‰“å‡º
         allCards.push_back(curseCard);
 
         return allCards;
@@ -138,10 +141,10 @@ namespace CardLibrary {
     }
 
     Card getRandomNonInitialNonCurseCard() {
-        // »ñÈ¡ËùÓĞ¿¨ÅÆ
+        // è·å–æ‰€æœ‰å¡ç‰Œ
         std::vector<Card> allCards = getAllCards();
 
-        // ¹ıÂËµô³õÊ¼ÅÆºÍ×çÖäÅÆ
+        // è¿‡æ»¤æ‰åˆå§‹ç‰Œå’Œè¯…å’’ç‰Œ
         std::vector<Card> filteredCards;
         for (const auto& card : allCards) {
             if (card.getName() != "Strike" &&
@@ -152,12 +155,12 @@ namespace CardLibrary {
             }
         }
 
-        // Èç¹ûÃ»ÓĞ·ûºÏÌõ¼şµÄ¿¨ÅÆ£¬·µ»ØÒ»¸öÄ¬ÈÏ¿¨ÅÆ
+        // å¦‚æœæ²¡æœ‰ç¬¦åˆæ¡ä»¶çš„å¡ç‰Œï¼Œè¿”å›ä¸€ä¸ªé»˜è®¤å¡ç‰Œ
         if (filteredCards.empty()) {
             return Card("Unknown", Card::Type::Skill, 0, "No valid cards available", "cardBackground.jpg", 0, 0);
         }
 
-        // Ëæ»úÑ¡ÔñÒ»ÕÅ¿¨ÅÆ
+        // éšæœºé€‰æ‹©ä¸€å¼ å¡ç‰Œ
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis(0, filteredCards.size() - 1);

@@ -71,6 +71,7 @@ private:
 
     cocos2d::Size _visibleSize;
     cocos2d::Vec2 _origin;
+    bool _isSelectingCard = false; // 是否处于选牌界面
 
 private:
     // 原有变量保持不变

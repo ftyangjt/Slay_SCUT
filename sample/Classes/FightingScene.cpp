@@ -81,6 +81,18 @@ bool FightingScene::init()
 	// 创建回合数标签
     createTurnCountLabel();
 
+    // 创建怪物意图标签
+    _monsterIntentLabel = cocos2d::Label::createWithTTF(
+        _monster->getNextActionDescription(),
+        "fonts/Marker Felt.ttf", 40); // 建议字号与BUFF栏一致
+    _monsterIntentLabel->setTextColor(cocos2d::Color4B::ORANGE);
+
+    // 设置标签位置在怪物BUFF栏下方
+    auto buffLabelPos = _monsterBuffLabel->getPosition();
+    float intentOffsetY = _monsterBuffLabel->getContentSize().height / 2 + _monsterIntentLabel->getContentSize().height / 2 + 10; // 10像素间距
+    _monsterIntentLabel->setPosition(buffLabelPos.x, buffLabelPos.y - intentOffsetY);
+
+    this->addChild(_monsterIntentLabel, 10);
     
 
     // 开始玩家回合
@@ -317,6 +329,18 @@ void FightingScene::updateBuffLabels() {
     }
 }
 
+// 更新怪物意图显示标签
+void FightingScene::updateMonsterIntentDisplay()
+{
+    if (!_monster || !_monsterIntentLabel || !_monsterBuffLabel) return;
+    _monsterIntentLabel->setString(_monster->getNextActionDescription());
+
+    // 固定在怪物BUFF栏下方
+    auto buffLabelPos = _monsterBuffLabel->getPosition();
+    float intentOffsetY = _monsterBuffLabel->getContentSize().height / 2 + _monsterIntentLabel->getContentSize().height / 2 + 10;
+    _monsterIntentLabel->setPosition(buffLabelPos.x, buffLabelPos.y - intentOffsetY);
+}
+
 // 开始玩家回合(抽牌、添加回合结束按钮、设置按钮位置)
 void FightingScene::startPlayerTurn()
 {
@@ -520,6 +544,7 @@ void FightingScene::endTurn()
     checkBattleEnd();
     if (!_isPlayerTurn)
     {
+        updateMonsterIntentDisplay();
         startPlayerTurn();
     }
     else
@@ -906,9 +931,18 @@ void FightingScene::applyCardEffects(const Card& card)
     // 例如，如果有力量效果，增加攻击伤害
     applyEffects(damage, block, _hero->getEffects(), card.getType(), false);
 
-    // 应用怪物的效果
-    // 例如，如果有易伤效果，增加对其造成的伤害
-    applyEffects(damage, block, _monster->getEffects(), card.getType(), true);
+    // 只对怪物的debuff（如易伤）生效，不要把怪物的buff（如力量）加到damage上
+    for (const auto& effect : _monster->getEffects()) {
+        if (auto debuff = dynamic_cast<Debuff*>(effect.get())) {
+            switch (debuff->getType()) {
+            case Effect::Type::Vulnerable:
+                damage = static_cast<int>(damage * 1.5);
+                break;
+            default:
+                break;
+            }
+        }
+    }
 
     std::vector<std::shared_ptr<Effect>> effects = card.createEffects();
 
@@ -1049,6 +1083,8 @@ void FightingScene::applyCardEffects(const Card& card)
 // 打出卡牌
 void FightingScene::playCard(int index)
 {
+    if (_isSelectingCard) return; // 选牌时禁止出牌
+
     if (_isCooldown) {
         return; // 如果处于冷却状态，直接返回
     }
@@ -1178,6 +1214,8 @@ void FightingScene::highlightSelectedCard()
 // 处理卡牌点击事件
 void FightingScene::handleCardTap(size_t cardIndex, cocos2d::Touch* touch)
 {
+    if (_isSelectingCard) return; // 选牌时禁止操作
+
     auto now = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lastClickTimes[cardIndex]).count();
 
@@ -1470,6 +1508,8 @@ std::vector<Card> FightingScene::generateRandomCards(int count) {
 
 void FightingScene::showCardSelectionWithCallback(const std::vector<Card>& cards, const std::function<void()>& onSelectionComplete)
 {
+    _isEndTurnButtonEnabled = false;
+    _isSelectingCard = true;
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
@@ -1478,17 +1518,16 @@ void FightingScene::showCardSelectionWithCallback(const std::vector<Card>& cards
     this->addChild(background, 10);
 
     // 动态计算卡牌大小和间距
-    float cardWidth = visibleSize.width * 0.2f;  // 卡牌宽度为屏幕宽度的20%
-    float cardHeight = cardWidth * 1.5f;        // 假设卡牌高度是宽度的1.5倍
-    float spacing = cardWidth * 0.2f;           // 卡牌间距为卡牌宽度的20%
-    float startX = (visibleSize.width - (cardWidth * cards.size() + spacing * (cards.size() - 1))) / 2;
+    float cardWidth = visibleSize.width * 0.2f;
+    float cardHeight = cardWidth * 1.5f;
+    float spacing = cardWidth * 0.2f;
+    float totalWidth = cardWidth * cards.size() + spacing * (cards.size() - 1);
+    float startX = origin.x + (visibleSize.width - totalWidth) / 2 + cardWidth / 2;
 
     for (size_t i = 0; i < cards.size(); ++i) {
-        // 创建卡牌精灵
         auto cardSprite = Sprite::create("cardBackground.jpg");
-
-        // 设置卡牌位置和缩放
-        cardSprite->setPosition(Vec2(startX + i * (cardWidth + spacing), visibleSize.height / 2));
+        float posX = startX + i * (cardWidth + spacing);
+        cardSprite->setPosition(Vec2(posX, origin.y + visibleSize.height / 2));
         float scaleX = cardWidth / cardSprite->getContentSize().width;
         float scaleY = cardHeight / cardSprite->getContentSize().height;
         cardSprite->setScale(scaleX, scaleY);
@@ -1516,6 +1555,9 @@ void FightingScene::showCardSelectionWithCallback(const std::vector<Card>& cards
 
                 // 移除选择界面
                 background->removeFromParent();
+                _isSelectingCard = false; // 选牌完成，恢复状态
+                _isEndTurnButtonEnabled = true;
+
 
                 CCLOG("Card added to deck: %s", card.getEffect().c_str());
 
@@ -1548,18 +1590,11 @@ void FightingScene::createMonsterIntentLabel()
     updateMonsterIntentDisplay();
 }
 
-void FightingScene::updateMonsterIntentDisplay()
-{
-    if (!_monster || !_monsterIntentLabel) {
-        return;
-    }
-
-    _monsterIntentLabel->setString("next" + _monster->getNextActionDescription());
-}
-
 // 修改 applyHoverEffect 方法，确保悬浮的卡牌处于最高图层
 void FightingScene::applyHoverEffect(int cardIndex)
 {
+    if (_isSelectingCard) return; // 选牌时禁止悬浮
+
     if (cardIndex < 0 || cardIndex >= _cardSprites.size() || !_cardSprites[cardIndex])
         return;
 

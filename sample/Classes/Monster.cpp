@@ -3,15 +3,15 @@
 
 USING_NS_CC;
 
-// ³õÊ¼»¯¾²Ì¬³ÉÔ±
+// åˆå§‹åŒ–é™æ€æˆå‘˜
 std::mt19937 Monster::_rng(static_cast<unsigned int>(time(nullptr)));
 
 
-// ¹¤³§·½·¨£¬¸ù¾İÀàÃû´´½¨¾ßÌå¹ÖÎïÊµÀı
+// å·¥å‚æ–¹æ³•ï¼Œæ ¹æ®ç±»ååˆ›å»ºå…·ä½“æ€ªç‰©å®ä¾‹
 Monster* Monster::createFactory(const std::string& monsterClassName) {
     Monster* monster = nullptr;
 
-    // ÆÕÍ¨¹ÖÎï
+    // æ™®é€šæ€ªç‰©
     if (monsterClassName == "SlimeMonster") {
         monster = SlimeMonster::create();
     }
@@ -21,21 +21,21 @@ Monster* Monster::createFactory(const std::string& monsterClassName) {
     else if (monsterClassName == "SnakeMonster") {
         monster = SnakeMonster::create();
     }
-    // ¾«Ó¢¹ÖÎï
+    // ç²¾è‹±æ€ªç‰©
     else if (monsterClassName == "OrcMonster") {
         monster = OrcMonster::create();
     }
     else if (monsterClassName == "GolemMonster") {
         monster = GolemMonster::create();
     }
-    // Boss¹ÖÎï
+    // Bossæ€ªç‰©
     else if (monsterClassName == "KnightBossMonster") {
         monster = KnightBossMonster::create();
     }
     else if (monsterClassName == "DragonBossMonster") {
         monster = DragonBossMonster::create();
     }
-    // Ä¬ÈÏÇé¿öÏÂ´´½¨Ê·À³Ä·
+    // é»˜è®¤æƒ…å†µä¸‹åˆ›å»ºå²è±å§†
     else {
         monster = SlimeMonster::create();
     }
@@ -43,7 +43,7 @@ Monster* Monster::createFactory(const std::string& monsterClassName) {
     return monster;
 }
 
-// Ëæ»ú´´½¨¹ÖÎï
+// éšæœºåˆ›å»ºæ€ªç‰©
 Monster* Monster::createRandom(bool isBoss, bool isElite) {
     std::vector<std::string> candidates;
 
@@ -63,12 +63,12 @@ Monster* Monster::createRandom(bool isBoss, bool isElite) {
     return createFactory(selectedType);
 }
 
-// »ù´¡³õÊ¼»¯
+// åŸºç¡€åˆå§‹åŒ–
 bool Monster::init() {
-    _health = 20;      // Ä¬ÈÏÉúÃüÖµ
-    _block = 0;        // Ä¬ÈÏ¸ñµ²Öµ
-    _attackDamage = 5; // Ä¬ÈÏ¹¥»÷Á¦
-    _currentTurn = 0;  // ³õÊ¼»ØºÏÊı
+    _health = 20;      // é»˜è®¤ç”Ÿå‘½å€¼
+    _block = 0;        // é»˜è®¤æ ¼æŒ¡å€¼
+    _attackDamage = 5; // é»˜è®¤æ”»å‡»åŠ›
+    _currentTurn = 0;  // åˆå§‹å›åˆæ•°
 
     return true;
 }
@@ -79,10 +79,10 @@ bool Monster::initWithSprite(const std::string& spritePath) {
         return false;
     }
 
-    return true; // ²»ÔÙµ÷ÓÃ init()
+    return true; // ä¸å†è°ƒç”¨ init()
 }
 
-// ¸÷ÀàgetterºÍsetter·½·¨
+// å„ç±»getterå’Œsetteræ–¹æ³•
 void Monster::setHealth(int health) {
     _health = health;
 }
@@ -113,7 +113,7 @@ int Monster::getAttackDamage() const {
     return _attackDamage;
 }
 
-// Ìí¼ÓĞ§¹û
+// æ·»åŠ æ•ˆæœ
 void Monster::addEffect(std::shared_ptr<Effect> effect) {
     if (!effect) {
         CCLOG("Error: Attempted to add a null effect.");
@@ -151,7 +151,7 @@ void Monster::updateEffects() {
     }
 }
 
-// »ñÈ¡µ±Ç°ĞĞÎª
+// è·å–å½“å‰è¡Œä¸º
 MonsterAction Monster::getCurrentAction() {
     if (_actionPattern.empty()) {
         return MonsterAction(
@@ -167,7 +167,7 @@ MonsterAction Monster::getCurrentAction() {
     return _actionPattern[actionIndex];
 }
 
-// Ö´ĞĞµ±Ç°ĞĞÎª
+// æ‰§è¡Œå½“å‰è¡Œä¸º
 void Monster::executeCurrentAction(Hero* target) {
     if (!target) {
         CCLOG("Error: Target is nullptr in executeCurrentAction!");
@@ -179,10 +179,10 @@ void Monster::executeCurrentAction(Hero* target) {
     switch (action.type) {
     case MonsterActionType::ATTACK:
     {
-        // ¼ÆËã×îÖÕÉËº¦
+        // è®¡ç®—æœ€ç»ˆä¼¤å®³
         int finalDamage = action.value;
 
-        // Ó¦ÓÃÁ¦Á¿Ğ§¹û
+        // åº”ç”¨åŠ›é‡æ•ˆæœ
         for (const auto& effect : _effects) {
             if (auto buff = dynamic_cast<Buff*>(effect.get())) {
                 if (buff->getType() == Effect::Type::Strength) {
@@ -191,7 +191,7 @@ void Monster::executeCurrentAction(Hero* target) {
             }
         }
 
-        // ´¦ÀíÄ¿±ê¸ñµ²
+        // å¤„ç†ç›®æ ‡æ ¼æŒ¡
         int targetBlock = target->getBlock();
         if (targetBlock > 0) {
             if (targetBlock >= finalDamage) {
@@ -204,7 +204,7 @@ void Monster::executeCurrentAction(Hero* target) {
             }
         }
 
-        // Ôì³ÉÉËº¦
+        // é€ æˆä¼¤å®³
         if (finalDamage > 0) {
             int newHealth = target->getHealth() - finalDamage;
             target->setHealth(newHealth);
@@ -253,28 +253,32 @@ void Monster::executeCurrentAction(Hero* target) {
     prepareNextTurn();
 }
 
-// ×¼±¸ÏÂÒ»»ØºÏ
+// å‡†å¤‡ä¸‹ä¸€å›åˆ
 void Monster::prepareNextTurn() {
     _currentTurn++;
 }
 
-// »ñÈ¡ÏÂÒ»»ØºÏĞĞÎªÃèÊö
+// è·å–ä¸‹ä¸€å›åˆè¡Œä¸ºæè¿°
 std::string Monster::getNextActionDescription() const {
     if (_actionPattern.empty()) {
-        return "¹¥»÷";
+        CCLOG("Monster action pattern is empty!");
+        return "æ”»å‡»";
     }
 
     int nextActionIndex = (_currentTurn + 1) % _actionPattern.size();
-    return _actionPattern[nextActionIndex].description;
+    const std::string& desc = _actionPattern[nextActionIndex].description;
+    CCLOG("Next action description: %s", desc.c_str());
+    return desc;
 }
 
-// ÈıÖÖ»ù±¾¹ÖÎïÀàµÄ³õÊ¼»¯
+
+// ä¸‰ç§åŸºæœ¬æ€ªç‰©ç±»çš„åˆå§‹åŒ–
 bool NormalMonster::init() {
     if (!Monster::init()) {
         return false;
     }
 
-    // ÆÕÍ¨¹ÖÎïÌØÓĞµÄ³õÊ¼»¯Âß¼­
+    // æ™®é€šæ€ªç‰©ç‰¹æœ‰çš„åˆå§‹åŒ–é€»è¾‘
     _health = 25;
     _attackDamage = 7;
     return true;
@@ -285,7 +289,7 @@ bool EliteMonster::init() {
         return false;
     }
 
-    // ¾«Ó¢¹ÖÎïÌØÓĞµÄ³õÊ¼»¯Âß¼­
+    // ç²¾è‹±æ€ªç‰©ç‰¹æœ‰çš„åˆå§‹åŒ–é€»è¾‘
     _health = 70;
     _attackDamage = 12;
     return true;
@@ -296,15 +300,15 @@ bool BossMonster::init() {
         return false;
     }
 
-    // Boss¹ÖÎïÌØÓĞµÄ³õÊ¼»¯Âß¼­
+    // Bossæ€ªç‰©ç‰¹æœ‰çš„åˆå§‹åŒ–é€»è¾‘
     _health = 150;
     _attackDamage = 20;
     return true;
 }
 
-// ¾ßÌå¹ÖÎïÀàµÄÊµÏÖ
+// å…·ä½“æ€ªç‰©ç±»çš„å®ç°
 
-// Ê·À³Ä·
+// å²è±å§†
 bool SlimeMonster::init() {
     if (!NormalMonster::init()) {
         return false;
@@ -325,21 +329,21 @@ bool SlimeMonster::init() {
 void SlimeMonster::initActionPattern() {
     _actionPattern.clear();
 
-    // Ê·À³Ä·µÄÈı»ØºÏÑ­»·Ä£Ê½
+    // å²è±å§†çš„ä¸‰å›åˆå¾ªç¯æ¨¡å¼
     _actionPattern.push_back(MonsterAction(
         MonsterActionType::DEFEND,
         5,
         Effect::Type::Strength,
         0, 0,
-        "·ÀÓù+5"
+        "é˜²å¾¡+5"
     ));
 
     _actionPattern.push_back(MonsterAction(
         MonsterActionType::BUFF,
         0,
         Effect::Type::Strength,
-        1, 3,
-        "Á¦Á¿+1"
+        1, -1,
+        "åŠ›é‡+1"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -347,11 +351,11 @@ void SlimeMonster::initActionPattern() {
         _attackDamage,
         Effect::Type::Strength,
         0, 0,
-        "¹¥»÷" + std::to_string(_attackDamage)
+        "æ”»å‡»" + std::to_string(_attackDamage)
     ));
 }
 
-// ¸ç²¼ÁÖ
+// å“¥å¸ƒæ—
 bool GoblinMonster::init() {
     if (!NormalMonster::init()) {
         return false;
@@ -372,13 +376,13 @@ bool GoblinMonster::init() {
 void GoblinMonster::initActionPattern() {
     _actionPattern.clear();
 
-    // ¸ç²¼ÁÖµÄĞĞÎªÄ£Ê½
+    // å“¥å¸ƒæ—çš„è¡Œä¸ºæ¨¡å¼
     _actionPattern.push_back(MonsterAction(
         MonsterActionType::ATTACK,
         _attackDamage,
         Effect::Type::Strength,
         0, 0,
-        "¹¥»÷" + std::to_string(_attackDamage)
+        "æ”»å‡»" + std::to_string(_attackDamage)
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -386,11 +390,11 @@ void GoblinMonster::initActionPattern() {
         7,
         Effect::Type::Strength,
         0, 0,
-        "·ÀÓù+7"
+        "é˜²å¾¡+7"
     ));
 }
 
-// Éß
+// è›‡
 bool SnakeMonster::init() {
     if (!NormalMonster::init()) {
         return false;
@@ -411,13 +415,13 @@ bool SnakeMonster::init() {
 void SnakeMonster::initActionPattern() {
     _actionPattern.clear();
 
-    // ÉßµÄĞĞÎªÄ£Ê½£ºÁ½»ØºÏ¹¥»÷£¬Ò»»ØºÏ·ÀÓù
+    // è›‡çš„è¡Œä¸ºæ¨¡å¼ï¼šä¸¤å›åˆæ”»å‡»ï¼Œä¸€å›åˆé˜²å¾¡
     _actionPattern.push_back(MonsterAction(
         MonsterActionType::ATTACK,
         _attackDamage,
         Effect::Type::Strength,
         0, 0,
-        "¹¥»÷" + std::to_string(_attackDamage)
+        "æ”»å‡»" + std::to_string(_attackDamage)
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -425,7 +429,7 @@ void SnakeMonster::initActionPattern() {
         _attackDamage,
         Effect::Type::Strength,
         0, 0,
-        "¹¥»÷" + std::to_string(_attackDamage)
+        "æ”»å‡»" + std::to_string(_attackDamage)
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -433,11 +437,11 @@ void SnakeMonster::initActionPattern() {
         0,
         Effect::Type::Vulnerable,
         2, 2,
-        "Ê©¼ÓÒ×ÉË"
+        "æ–½åŠ æ˜“ä¼¤"
     ));
 }
 
-// ÊŞÈË£¨¾«Ó¢£©
+// å…½äººï¼ˆç²¾è‹±ï¼‰
 bool OrcMonster::init() {
     if (!EliteMonster::init()) {
         return false;
@@ -458,21 +462,21 @@ bool OrcMonster::init() {
 void OrcMonster::initActionPattern() {
     _actionPattern.clear();
 
-    // ÊŞÈËµÄĞĞÎªÄ£Ê½
+    // å…½äººçš„è¡Œä¸ºæ¨¡å¼
     _actionPattern.push_back(MonsterAction(
         MonsterActionType::ATTACK,
         _attackDamage,
         Effect::Type::Strength,
         0, 0,
-        "¹¥»÷" + std::to_string(_attackDamage)
+        "æ”»å‡»" + std::to_string(_attackDamage)
     ));
 
     _actionPattern.push_back(MonsterAction(
         MonsterActionType::BUFF,
         0,
         Effect::Type::Strength,
-        2, 3,
-        "Á¦Á¿+2"
+        2, -1,
+        "åŠ›é‡+2"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -480,11 +484,11 @@ void OrcMonster::initActionPattern() {
         _attackDamage * 1.5,
         Effect::Type::Strength,
         0, 0,
-        "ÖØ»÷" + std::to_string(static_cast<int>(_attackDamage * 1.5))
+        "é‡å‡»" + std::to_string(static_cast<int>(_attackDamage * 1.5))
     ));
 }
 
-// Ä§Ïñ£¨¾«Ó¢£©
+// é­”åƒï¼ˆç²¾è‹±ï¼‰
 bool GolemMonster::init() {
     if (!EliteMonster::init()) {
         return false;
@@ -505,13 +509,13 @@ bool GolemMonster::init() {
 void GolemMonster::initActionPattern() {
     _actionPattern.clear();
 
-    // Ä§ÏñµÄĞĞÎªÄ£Ê½
+    // é­”åƒçš„è¡Œä¸ºæ¨¡å¼
     _actionPattern.push_back(MonsterAction(
         MonsterActionType::DEFEND,
         20,
         Effect::Type::Strength,
         0, 0,
-        "·ÀÓù+20"
+        "é˜²å¾¡+20"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -519,7 +523,7 @@ void GolemMonster::initActionPattern() {
         _attackDamage,
         Effect::Type::Strength,
         0, 0,
-        "¹¥»÷" + std::to_string(_attackDamage)
+        "æ”»å‡»" + std::to_string(_attackDamage)
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -527,7 +531,7 @@ void GolemMonster::initActionPattern() {
         10,
         Effect::Type::Strength,
         0, 0,
-        "·ÀÓù+10"
+        "é˜²å¾¡+10"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -535,11 +539,11 @@ void GolemMonster::initActionPattern() {
         _attackDamage * 2,
         Effect::Type::Strength,
         0, 0,
-        "´óÁ¦ÔÒ»÷" + std::to_string(static_cast<int>(_attackDamage * 2))
+        "å¤§åŠ›ç ¸å‡»" + std::to_string(static_cast<int>(_attackDamage * 2))
     ));
 }
 
-// ºÚ°µÆïÊ¿£¨Boss£©
+// é»‘æš—éª‘å£«ï¼ˆBossï¼‰
 bool KnightBossMonster::init() {
     if (!BossMonster::init()) {
         return false;
@@ -560,13 +564,13 @@ bool KnightBossMonster::init() {
 void KnightBossMonster::initActionPattern() {
     _actionPattern.clear();
 
-    // ºÚ°µÆïÊ¿µÄĞĞÎªÄ£Ê½
+    // é»‘æš—éª‘å£«çš„è¡Œä¸ºæ¨¡å¼
     _actionPattern.push_back(MonsterAction(
         MonsterActionType::ATTACK,
         _attackDamage,
         Effect::Type::Strength,
         0, 0,
-        "Õ¶»÷" + std::to_string(_attackDamage)
+        "æ–©å‡»" + std::to_string(_attackDamage)
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -574,15 +578,15 @@ void KnightBossMonster::initActionPattern() {
         25,
         Effect::Type::Strength,
         0, 0,
-        "¶ÜÅÆ¸ñµ²+25"
+        "ç›¾ç‰Œæ ¼æŒ¡+25"
     ));
 
     _actionPattern.push_back(MonsterAction(
         MonsterActionType::BUFF,
         0,
         Effect::Type::Strength,
-        3, 2,
-        "Á¦Á¿»ıĞî+3"
+        3, -1,
+        "åŠ›é‡ç§¯è“„+3"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -590,11 +594,11 @@ void KnightBossMonster::initActionPattern() {
         _attackDamage * 2,
         Effect::Type::Strength,
         0, 0,
-        "ÖÂÃüÖØ»÷" + std::to_string(static_cast<int>(_attackDamage * 2))
+        "è‡´å‘½é‡å‡»" + std::to_string(static_cast<int>(_attackDamage * 2))
     ));
 }
 
-// Ô¶¹Å¾ŞÁú£¨Boss£©
+// è¿œå¤å·¨é¾™ï¼ˆBossï¼‰
 bool DragonBossMonster::init() {
     if (!BossMonster::init()) {
         return false;
@@ -615,13 +619,13 @@ bool DragonBossMonster::init() {
 void DragonBossMonster::initActionPattern() {
     _actionPattern.clear();
 
-    // Ô¶¹Å¾ŞÁúµÄĞĞÎªÄ£Ê½
+    // è¿œå¤å·¨é¾™çš„è¡Œä¸ºæ¨¡å¼
     _actionPattern.push_back(MonsterAction(
         MonsterActionType::DEBUFF,
         0,
         Effect::Type::Vulnerable,
         3, 3,
-        "ÁúÏ¢£¨Ê©¼ÓÒ×ÉË£©"
+        "é¾™æ¯ï¼ˆæ–½åŠ æ˜“ä¼¤ï¼‰"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -629,7 +633,7 @@ void DragonBossMonster::initActionPattern() {
         30,
         Effect::Type::Strength,
         0, 0,
-        "ÁúÁÛ·ÀÓù+30"
+        "é¾™é³é˜²å¾¡+30"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -637,7 +641,7 @@ void DragonBossMonster::initActionPattern() {
         _attackDamage * 1.5,
         Effect::Type::Strength,
         0, 0,
-        "Áú×¦ËºÁÑ" + std::to_string(static_cast<int>(_attackDamage * 1.5))
+        "é¾™çˆªæ’•è£‚" + std::to_string(static_cast<int>(_attackDamage * 1.5))
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -645,6 +649,6 @@ void DragonBossMonster::initActionPattern() {
         _attackDamage * 3,
         Effect::Type::Strength,
         0, 0,
-        "ÃğÊÀÁúÏ¢"
+        "ç­ä¸–é¾™æ¯"
     ));
 }
