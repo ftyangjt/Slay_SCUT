@@ -4,11 +4,11 @@
 #include "cocos2d.h"
 #include "Effect.h"
 
-// ¶¨Òå´æ´¢Ğ§¹ûĞÅÏ¢µÄ½á¹¹Ìå
+// å®šä¹‰å­˜å‚¨æ•ˆæœä¿¡æ¯çš„ç»“æ„ä½“
 struct EffectInfo {
-    Effect::Type type;       // Ğ§¹ûÀàĞÍ
-    int level;               // Ğ§¹ûµÈ¼¶
-    int duration;            // Ğ§¹û³ÖĞøÊ±¼ä
+    Effect::Type type;       // æ•ˆæœç±»å‹
+    int level;               // æ•ˆæœç­‰çº§
+    int duration;            // æ•ˆæœæŒç»­æ—¶é—´
 
     EffectInfo(Effect::Type t, int lvl, int dur) :
         type(t), level(lvl), duration(dur) {
@@ -32,59 +32,62 @@ public:
         GainEnergy,
         DiscardCard,
         LoseHealth,
-        // ¿ÉÒÔÌí¼Ó¸ü¶àÌØÊâĞ§¹û
+        // å¯ä»¥æ·»åŠ æ›´å¤šç‰¹æ®Šæ•ˆæœ
     };
 
-    // Ìí¼Ó»ñÈ¡ÌØÊâĞ§¹ûµÄ·½·¨
+    // æ·»åŠ è·å–ç‰¹æ®Šæ•ˆæœçš„æ–¹æ³•
     SpecialEffect getSpecialEffect() const;
 
-    // Ìí¼ÓÌØÊâĞ§¹ûÊıÖµµÄgetter£¬Èç³é¼¸ÕÅÅÆµÈ
+    // æ·»åŠ ç‰¹æ®Šæ•ˆæœæ•°å€¼çš„getterï¼Œå¦‚æŠ½å‡ å¼ ç‰Œç­‰
     int getSpecialEffectValue() const;
 
-    // ÉèÖÃÌØÊâĞ§¹û
+    // è®¾ç½®ç‰¹æ®Šæ•ˆæœ
     void setSpecialEffect(SpecialEffect effect, int value = 1);
 
     Card(const std::string& name, Type type, int cost, const std::string& effect, const std::string& backgroundFile, int attack = 0, int defense = 0);
     ~Card();
 
-    // »ñÈ¡¿¨ÅÆÃû³Æ
+    // è·å–å¡ç‰Œåç§°
     const std::string& getName() const;
 
-    // »ñÈ¡¿¨ÅÆÀàĞÍ
+    // è·å–å¡ç‰Œç±»å‹
     Type getType() const;
 
-    // »ñÈ¡¿¨ÅÆÄÜÁ¿ÏûºÄ
+    // è·å–å¡ç‰Œèƒ½é‡æ¶ˆè€—
     int getCost() const;
 
-    // »ñÈ¡¿¨ÅÆĞ§¹û
+    // è·å–å¡ç‰Œæ•ˆæœ
     const std::string& getEffect() const;
 
-    // »ñÈ¡¿¨ÅÆ¹¥»÷Á¦
+    // è·å–å¡ç‰Œæ”»å‡»åŠ›
     int getAttack() const;
 
-    // »ñÈ¡¿¨ÅÆ·ÀÓùÁ¦
+    // è·å–å¡ç‰Œé˜²å¾¡åŠ›
     int getBlock() const;
 
-    // Éú³É´øÓĞ¿¨ÅÆĞ§¹ûµÄ±³¾°Í¼Ïñ
+    // ç”Ÿæˆå¸¦æœ‰å¡ç‰Œæ•ˆæœçš„èƒŒæ™¯å›¾åƒ
     cocos2d::Sprite* createCardSprite();
 
-    // »ñÈ¡¿¨ÅÆ¾«Áé
+    // è·å–å¡ç‰Œç²¾çµ
     cocos2d::Sprite* getSprite() const;
 
-    // Ìí¼ÓĞ§¹û - ÏÖÔÚ½ÓÊÜĞ§¹ûÀàĞÍ¡¢µÈ¼¶ºÍÊ±³¤
+    // æ·»åŠ æ•ˆæœ - ç°åœ¨æ¥å—æ•ˆæœç±»å‹ã€ç­‰çº§å’Œæ—¶é•¿
     void addEffect(Effect::Type type, int level, int duration = -1);
 
-    // »ñÈ¡Ğ§¹ûÁĞ±í
+    // è·å–æ•ˆæœåˆ—è¡¨
     const std::vector<EffectInfo>& getEffectInfos() const;
 
-    // ´´½¨²¢»ñÈ¡Ğ§¹û¶ÔÏó
+    // åˆ›å»ºå¹¶è·å–æ•ˆæœå¯¹è±¡
     std::vector<std::shared_ptr<Effect>> createEffects() const;
 
     int getSpecialEffectValue(SpecialEffect effect) const;
     bool hasSpecialEffect(SpecialEffect effect) const;
 
-    bool isPlayable() const; // »ñÈ¡¿¨ÅÆÊÇ·ñ¿É±»´ò³ö
-    void setPlayable(bool playable); // ÉèÖÃ¿¨ÅÆÊÇ·ñ¿É±»´ò³ö
+    bool isPlayable() const; // è·å–å¡ç‰Œæ˜¯å¦å¯è¢«æ‰“å‡º
+    void setPlayable(bool playable); // è®¾ç½®å¡ç‰Œæ˜¯å¦å¯è¢«æ‰“å‡º
+
+    void setExhaust(bool exhaust);
+    bool isExhaust() const;
 
 private:
     std::string _name;
@@ -94,11 +97,11 @@ private:
     std::string _backgroundFile;
     int _attack;
     int _block;
-    cocos2d::Sprite* _sprite; // Ìí¼Ó¿¨ÅÆ¾«Áé³ÉÔ±±äÁ¿
-    std::vector<EffectInfo> _effectInfos; // Ê¹ÓÃĞÂµÄ½á¹¹Ìå´æ´¢Ğ§¹ûĞÅÏ¢
+    cocos2d::Sprite* _sprite; // æ·»åŠ å¡ç‰Œç²¾çµæˆå‘˜å˜é‡
+    std::vector<EffectInfo> _effectInfos; // ä½¿ç”¨æ–°çš„ç»“æ„ä½“å­˜å‚¨æ•ˆæœä¿¡æ¯
     std::vector<std::pair<SpecialEffect, int>> _specialEffects;
     bool _isPlayable = true;
-
+    bool _isExhaust = false; // æ˜¯å¦ä¸ºæ¶ˆè€—ç‰Œ
 };
 
 #endif // __CARD_H__

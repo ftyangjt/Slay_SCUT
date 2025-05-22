@@ -60,6 +60,9 @@
     <ClCompile Include="..\Classes\CardLibrary.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Victory.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -108,6 +111,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\CardLibrary.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Victory.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

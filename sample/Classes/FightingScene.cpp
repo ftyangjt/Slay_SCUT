@@ -614,28 +614,26 @@ void FightingScene::checkBattleEnd()
         victoryLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
         this->addChild(victoryLabel, 10);
 
-        // 如果打败的是 Boss，进入胜利场景
-        if (MyGame::currentRoomType == MyGame::RoomType::BOSS) {
-            this->runAction(Sequence::create(
-                DelayTime::create(0.5f), // 等待2秒观看胜利提示
-                CallFunc::create([]() {
-                    auto victoryScene = MyGame::VictoryScene::createScene();
-                    Director::getInstance()->replaceScene(TransitionFade::create(1.0f, victoryScene));
-                    }),
-                nullptr
-            ));
-        }
-        else {
-            // 非 Boss 战斗，返回地图
-            this->runAction(Sequence::create(
-                DelayTime::create(0.5f),
-                CallFunc::create([]() {
-                    auto mapScene = MyGame::Map::createScene();
-                    Director::getInstance()->replaceScene(TransitionFade::create(0.5f, mapScene));
-                    }),
-                nullptr
-            ));
-        }
+        // 生成3张可选卡牌
+        std::vector<Card> rewardCards = generateRandomCards(3);
+
+        // 延迟1秒后再弹出选牌界面
+        this->runAction(Sequence::create(
+            DelayTime::create(1.0f), // 延迟1秒
+            CallFunc::create([this, rewardCards]() {
+                showCardSelectionWithCallback(rewardCards, [this]() {
+                    if (MyGame::currentRoomType == MyGame::RoomType::BOSS) {
+                        auto victoryScene = MyGame::VictoryScene::createScene();
+                        Director::getInstance()->replaceScene(TransitionFade::create(1.0f, victoryScene));
+                    }
+                    else {
+                        auto mapScene = MyGame::Map::createScene();
+                        Director::getInstance()->replaceScene(TransitionFade::create(0.5f, mapScene));
+                    }
+                    });
+                }),
+            nullptr
+        ));
     }
 }
 // 以下为卡牌系统的实现
@@ -717,6 +715,18 @@ void FightingScene::discardCard(int index)
     {
         // 将卡牌放入弃牌堆
         _discardPile.push_back(_cards[index]);
+        _cards.erase(_cards.begin() + index);
+        updateHandDisplay(); // 更新手牌显示
+    }
+}
+
+// 消耗一张牌
+void FightingScene::exhaustCard(int index)
+{
+    if (index >= 0 && index < _cards.size())
+    {
+        // 将卡牌放入消耗牌堆
+        _exhaustPile.push_back(_cards[index]);
         _cards.erase(_cards.begin() + index);
         updateHandDisplay(); // 更新手牌显示
     }
@@ -1093,6 +1103,11 @@ void FightingScene::playCard(int index)
         // 原逻辑不变
         Card playedCard = _cards[index];
 
+        if (!playedCard.isPlayable()) {
+            CCLOG("This card is not playable!");
+            return;
+        }
+
         int cost = playedCard.getCost();
         // 检查能量是否足够
         if (cost > _currentCost)
@@ -1150,7 +1165,12 @@ void FightingScene::playCard(int index)
         // 动画播放完再移除并丢弃
         auto finish = CallFunc::create([this, index, cardSprite]() {
             cardSprite->removeFromParent();
-            discardCard(index);
+            if (_cards[index].isExhaust()) {
+				exhaustCard(index); // 进消耗牌堆
+            }
+            else {
+                discardCard(index); // 进弃牌堆
+            }
             _selectedCardIndex = -1; // 重置选中的卡牌
             highlightSelectedCard();
 
@@ -1500,8 +1520,15 @@ void FightingScene::playMonsterHitAnimation()
 
 std::vector<Card> FightingScene::generateRandomCards(int count) {
     std::vector<Card> randomCards;
-    for (int i = 0; i < count; ++i) {
-        randomCards.push_back(CardLibrary::getRandomNonInitialNonCurseCard());
+    std::set<std::string> cardNames; // 用于判重，假设卡牌名唯一
+
+    int tryLimit = 100; // 防止死循环
+    while (randomCards.size() < count && tryLimit-- > 0) {
+        Card card = CardLibrary::getRandomNonInitialNonCurseCard();
+        if (cardNames.count(card.getName()) == 0) {
+            randomCards.push_back(card);
+            cardNames.insert(card.getName());
+        }
     }
     return randomCards;
 }

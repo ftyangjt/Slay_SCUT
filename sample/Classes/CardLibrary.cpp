@@ -40,6 +40,7 @@ namespace CardLibrary {
         // 添加Strength卡牌
         Card strengthPower("Strength", Card::Type::Power, 1, "Gain 2 Strength", "cardBackground.jpg");
         strengthPower.addEffect(Effect::Type::Strength, 2, -1); // 2级力量，持续时间为永久
+		strengthPower.setExhaust(true); // 这张牌在使用后会被消耗
         allCards.push_back(strengthPower);
 
         // 添加Adrenaline Rush卡牌
@@ -63,6 +64,7 @@ namespace CardLibrary {
         for (const auto& effect : sacrificeEffects) {
             sacrifice.setSpecialEffect(effect.first, effect.second);
         }
+		sacrifice.setExhaust(true); // 这张牌在使用后会被消耗
         allCards.push_back(sacrifice);
 
 		// 诅咒牌

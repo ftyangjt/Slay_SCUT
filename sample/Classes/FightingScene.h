@@ -38,6 +38,7 @@ private:
     void checkBattleEnd();
     void drawCard(); // 抽一张牌
     void discardCard(int index); // 弃一张牌
+	void exhaustCard(int index); // 消耗一张牌
     void shuffleDrawPile(); // 洗牌
     void initializeDrawPile(); // 初始化牌堆
 	void createCostLabel();
@@ -88,6 +89,7 @@ private:
     int _currentCost;         // 当前可用费用
     std::vector<Card> _drawPile; // 抽牌堆
     std::vector<Card> _discardPile; // 弃牌堆
+    std::vector<Card> _exhaustPile; // 消耗牌堆
     bool _isPlayerTurn; // 是否是玩家回合
     int _turnCount; // 回合数
     std::vector<Card> _cards; // 手牌
