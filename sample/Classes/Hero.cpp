@@ -1,36 +1,36 @@
-// Hero.cpp
+﻿// Hero.cpp
 #include "Hero.h"
 #include "CardLibrary.h"
 
 USING_NS_CC;
 
-// ���Ӿ�̬�������洢Ӣ�۵Ľ���ֵ�ͽ��
-static int heroHealth = 100; // Ĭ������ֵΪ100
-static int heroCoins = 100; // Ĭ�Ͻ��Ϊ100
-// ����һ����̬�������洢Ӣ�۵��������ֵ����
+// 添加静态成员变量存储英雄的生命值和金币
+static int heroHealth = 100; // 默认生命值为100
+static int heroCoins = 100; // 默认金币为100
+// 添加一个静态变量存储英雄的最大生命值上限
 static int heroMaxHealth = Hero::MAX_HEALTH;
-static bool _isDeckInitialized = false; // ������̬����
-std::vector<Card> Hero::_deck; // ���徲̬����
+static bool _isDeckInitialized = false; // 卡组初始化标志
+std::vector<Card> Hero::_deck; // 卡组静态变量
 
-// ��ȡ��ǰ�������ֵ����
+// 获取当前最大生命值上限
 int Hero::getMaxHealth()
 {
     return heroMaxHealth;
 }
 
-// �����������ֵ����
+// 增加最大生命值上限
 void Hero::increaseMaxHealth(int amount)
 {
     heroMaxHealth += amount;
-    // ͬʱ���ӵ�ǰ����ֵ
+    // 同时增加当前生命值
     healHealth(amount);
-    updateStatusDisplayStatic(); // ������ʾ
+    updateStatusDisplayStatic(); // 更新显示
 }
 
-// ��ʼ����̬��ǩ
+// 初始化静态标签
 cocos2d::Label* Hero::s_statusLabel = nullptr;
 
-// ��������ʵ��
+// 创建英雄实例
 Hero* Hero::create(const std::string& filename)
 {
     Hero* hero = new (std::nothrow) Hero();
@@ -43,60 +43,60 @@ Hero* Hero::create(const std::string& filename)
     return nullptr;
 }
 
-// ��ȡ��ǰ����ֵ
+// 获取当前生命值
 int Hero::getCurrentHealth()
 {
     return heroHealth;
 }
 
-// �ָ�ָ������������ֵ������������
+// 恢复指定数量的生命值（不会超过上限）
 void Hero::healHealth(int amount)
 {
-    // �޸����ʹ�ö�̬�� heroMaxHealth �����Ǿ�̬���� MAX_HEALTH
+    // 修改为使用动态的 heroMaxHealth 而不是静态常量 MAX_HEALTH
     heroHealth = std::min(heroHealth + amount, heroMaxHealth);
-    updateStatusDisplayStatic(); // ������ʾ
+    updateStatusDisplayStatic(); // 更新显示
 }
 
-// ��ȡ��ǰ�������
+// 获取当前金币数
 int Hero::getCoins()
 {
     return heroCoins;
 }
 
-// ���ý������
+// 设置金币数量
 void Hero::setCoins(int coins)
 {
     heroCoins = coins;
-    updateStatusDisplayStatic(); // ������ʾ
+    updateStatusDisplayStatic(); // 更新显示
 }
 
-// ���ӽ��
+// 添加金币
 void Hero::addCoins(int amount)
 {
     heroCoins += amount;
-    updateStatusDisplayStatic(); // ������ʾ
+    updateStatusDisplayStatic(); // 更新显示
 }
 
-// ���ý��
+// 重置金币
 void Hero::resetCoins()
 {
     heroCoins = INITIAL_COINS;
-    updateStatusDisplayStatic(); // ������ʾ
+    updateStatusDisplayStatic(); // 更新显示
 }
 
-// ��ʼ��״̬��ʾ
+// 初始化状态显示
 void Hero::initStatusDisplay()
 {
-    // ���ͷſ����Ѿ����ڵı�ǩ
+    // 释放已经存在的标签
     if (s_statusLabel != nullptr) {
         if (s_statusLabel->getParent()) {
             s_statusLabel->removeFromParent();
         }
-        s_statusLabel->release(); // �ͷ�֮ǰ��retain
+        s_statusLabel->release(); // 释放之前的retain
         s_statusLabel = nullptr;
     }
 
-    // ����״̬��ʾ��ǩ���޸���ʾ��ʽΪ��ǰ����ֵ/�������ֵ
+    // 创建状态显示标签，修改显示格式为当前生命值/最大生命值
     s_statusLabel = Label::createWithTTF("Coins: " + std::to_string(heroCoins) +
         " Health: " + std::to_string(heroHealth) + "/" + std::to_string(heroMaxHealth),
         "fonts/Marker Felt.ttf", 24);
@@ -105,60 +105,60 @@ void Hero::initStatusDisplay()
         return;
     }
 
-    s_statusLabel->setAnchorPoint(Vec2(0, 1)); // ���ϽǶ���
+    s_statusLabel->setAnchorPoint(Vec2(0, 1)); // 左上角对齐
 
-    // ��ȡ��ǰ���г����Ϳ��������С
+    // 获取当前运行场景和可见区域大小
     Scene* runningScene = Director::getInstance()->getRunningScene();
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    // ���ñ�ǩλ�������Ͻ�
+    // 设置标签位置在左上角
     s_statusLabel->setPosition(Vec2(origin.x + 10, origin.y + visibleSize.height - 10));
-    s_statusLabel->setTextColor(Color4B::WHITE); // ���ñ�ǩ��ɫΪ��ɫ
+    s_statusLabel->setTextColor(Color4B::WHITE); // 设置标签颜色为白色
 
-    // Ϊ��ǩ���Ӻ�ɫ��ߣ���߿ɶ���
+    // 为标签添加黑色边框，提高可读性
     s_statusLabel->enableOutline(Color4B::BLACK, 1);
 
-    // ����ǩ���ӵ���ǰ���г���
+    // 将标签添加到当前运行场景
     if (runningScene) {
-        runningScene->addChild(s_statusLabel, 100); // ʹ�ü��ߵ�Z˳��ȷ����ʾ����ǰ
+        runningScene->addChild(s_statusLabel, 100); // 使用较高的Z顺序确保显示在最前
     }
 
-    // ���ӳ����л�������
+    // 添加场景切换监听器
     Director::getInstance()->getEventDispatcher()->addCustomEventListener(
         Director::EVENT_AFTER_SET_NEXT_SCENE,
         [](EventCustom* event) {
-            Hero::updateStatusDisplayStatic(); // �����л������״̬��ʾ
+            Hero::updateStatusDisplayStatic(); // 场景切换后更新状态显示
         }
     );
 
-    s_statusLabel->retain(); // ������ǩ�Է������л�ʱ���Զ��ͷ�
+    s_statusLabel->retain(); // 保留标签以防场景切换时被自动释放
 }
 
 
 void Hero::updateStatusDisplayStatic()
 {
-    // �����ǩ�����ڣ��򴴽�
+    // 如果标签不存在，则创建
     if (s_statusLabel == nullptr) {
         initStatusDisplay();
         return;
     }
 
-    // ���±�ǩ�ı����޸���ʾ��ʽΪ��ǰ����ֵ/�������ֵ
+    // 更新标签文本，修改显示格式为当前生命值/最大生命值
     s_statusLabel->setString("Coins: " + std::to_string(heroCoins) +
         " Health: " + std::to_string(heroHealth) + "/" + std::to_string(heroMaxHealth));
 
-    // ����ǩ�Ƿ��ڵ�ǰ������
+    // 检查标签是否在当前场景中
     Scene* currentScene = Director::getInstance()->getRunningScene();
     if (currentScene && !s_statusLabel->getParent()) {
-        s_statusLabel->removeFromParent(); // ȷ����ǩ��֮ǰ�ĸ��ڵ����Ƴ�
-        currentScene->addChild(s_statusLabel, 100); // ���ӵ���ǰ����
+        s_statusLabel->removeFromParent(); // 确保标签从之前的父节点移除
+        currentScene->addChild(s_statusLabel, 100); // 添加到当前场景
     }
 }
 
 
 
-// ��ʼ������
+// 初始化英雄
 bool Hero::init(const std::string& filename)
 {
     if (!Sprite::initWithFile(filename))
@@ -166,187 +166,139 @@ bool Hero::init(const std::string& filename)
         return false;
     }
 
-    // ʹ�ñ��������ֵ��ʼ������
+    // 使用角色生命值初始化成员
     _health = heroHealth;
 
-    // ����Ĭ�ϵĿ���
+    // 创建默认的卡组
     createDefaultDeck();
 
-    // ��ʼ��������ʵ��״̬��ǩ
+    // 初始化英雄实例状态标签
     initStatusDisplay();
     _statusLabel = s_statusLabel;
 
     return true;
 }
 
-// �������ǵ�����ֵ
+// 设置英雄的生命值
 void Hero::setHealth(int health)
 {
     _health = health;
-    // ͬʱ���¾�̬����
+    // 同时更新静态变量
     heroHealth = health;
-    updateStatusDisplayStatic(); // ʹ�þ�̬��������
+    updateStatusDisplayStatic(); // 使用静态方法更新
 }
 
-// ��ȡ���ǵ�����ֵ
+// 获取英雄的生命值
 int Hero::getHealth() const
 {
     return _health;
 }
 
-// ���ý���ֵ����������Ϸ���¿�ʼʱ���ã�
+// 设置生命值（常用于游戏重新开始时调用）
 void Hero::resetHealth()
 {
-    // �޸����ʹ��heroMaxHealth������MAX_HEALTH
-    heroHealth = heroMaxHealth;  // ����Ϊ��ǰ�������ֵ
-    updateStatusDisplayStatic(); // ʹ�þ�̬��������
+    // 修改为使用heroMaxHealth而非MAX_HEALTH
+    heroHealth = heroMaxHealth;  // 重置为当前最大生命值
+    updateStatusDisplayStatic(); // 使用静态方法更新
 }
 
-// �������ǵķ���ֵ
+// 设置英雄的格挡值
 void Hero::setBlock(int block) {
     _block = block;
 }
 
-// ��ȡ���ǵķ���ֵ
+// 获取英雄的格挡值
 int Hero::getBlock() const {
     return _block;
 }
 
-// ���ӿ��Ƶ�����
+// 添加卡牌到卡组
 void Hero::addCardToDeck(const Card& card)
 {
     _deck.push_back(card);
 }
 
-// ��ȡ����
+// 获取卡组
 const std::vector<Card>& Hero::getDeck() const
 {
     return _deck;
 }
 
-// ��տ���
+// 清空卡组
 void Hero::clearDeck()
 {
     _deck.clear();
 }
 
-// ��ʼ��Ĭ�Ͽ���
+// 初始化默认卡组
 void Hero::createDefaultDeck()
 {
     if (_isDeckInitialized) {
         CCLOG("Deck is already initialized. Skipping initialization.");
         return;
     }
-    // ����ʾ������һ����ʼ���飬���忨�����Ը���ʵ���������
+    // 以下示例创建一个初始卡组，具体卡牌可根据实际情况调整
     clearDeck();
-
-    //// ����ʾ�����ƣ����� Card ���캯����Card(name, type, cost, effect, background, attack, defense)��
-    //addCardToDeck(Card("Strike", Card::Type::Attack, 1, "Deal 6 damage", "cardBackground.jpg", 6, 0));
-    //addCardToDeck(Card("Strike", Card::Type::Attack, 1, "Deal 6 damage", "cardBackground.jpg", 6, 0));
-    //addCardToDeck(Card("Strike", Card::Type::Attack, 1, "Deal 6 damage", "cardBackground.jpg", 6, 0));
-    //addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
-    //addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
-    //addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
-
-    //// ���� Bash ���Ʋ���������Ч��
-    //Card bashCard("Bash", Card::Type::Attack, 2, "Deal 8 damage and apply Vulnerable", "cardBackground.jpg", 8, 0);
-    //// ʹ���·�������Ч����ֱ��ָ��Ч�����͡��ȼ��ͳ���ʱ��
-    //bashCard.addEffect(Effect::Type::Vulnerable, 1, 3); // 1�����ˣ�����3�غ�
-    //addCardToDeck(bashCard);
-
-    //Card shrugItOff("Shrug It Off", Card::Type::Skill, 1, "Gain 8 Block, draw 1 card", "cardBackground.jpg", 0, 8);
-    //shrugItOff.setSpecialEffect(Card::SpecialEffect::DrawCard, 1); // ��1����
-    //addCardToDeck(shrugItOff);
-
-    //Card pommelStrike("Pommel Strike", Card::Type::Attack, 1, "Deal 5 damage and draw 1 card", "cardBackground.jpg", 5, 0);
-    //pommelStrike.setSpecialEffect(Card::SpecialEffect::DrawCard, 1); // ��1����
-    //addCardToDeck(pommelStrike);
-
-    //Card strengthCard("Strength", Card::Type::Power, 1, "Gain 2 Strength", "cardBackground.jpg");
-    //strengthCard.addEffect(Effect::Type::Strength, 2, -1); // 2������������ʱ��Ϊ����
-    //addCardToDeck(strengthCard);
-
-    //Card adrenalineRush("Adrenaline Rush", Card::Type::Skill, 0, "Lose 3 HP, gain 2 Energy", "cardBackground.jpg");
-    //adrenalineRush.setSpecialEffect(Card::SpecialEffect::LoseHealth, 3); // ʧȥ3��HP
-    //adrenalineRush.setSpecialEffect(Card::SpecialEffect::GainEnergy, 2); // ���2������
-    //addCardToDeck(adrenalineRush);
-
-    //Card sacrifice("Sacrifice", Card::Type::Skill, 0, "Lose 6HP,gain 2 energy,draw 3 cards", "cardBackground.jpg");
-    //std::vector<std::pair<Card::SpecialEffect, int>> sacrificeEffects;
-    //sacrificeEffects.push_back(std::make_pair(Card::SpecialEffect::LoseHealth, 6));
-    //sacrificeEffects.push_back(std::make_pair(Card::SpecialEffect::GainEnergy, 2));
-    //sacrificeEffects.push_back(std::make_pair(Card::SpecialEffect::DrawCard, 3));
-    //// ����ÿ��Ч��
-    //for (const auto& effect : sacrificeEffects) {
-    //    sacrifice.setSpecialEffect(effect.first, effect.second);
-    //}
-    //addCardToDeck(sacrifice);
-
-    //Card curseCard("Curse", Card::Type::Curse, 0, "This card cannot be played and reduces your strength by 1", "curseBackground.jpg");
-    //curseCard.setPlayable(false); // �����Ʋ��ܱ����
-    //addCardToDeck(curseCard);
-
-    //addCardToDeck(Card("Bludgeon", Card::Type::Attack, 3, "Deal 32 damage", "cardBackground.jpg", 32, 0));
     _isDeckInitialized = true;
     _deck = CardLibrary::getStarterDeck();
 }
 
-//  ����Ч��
+// 添加效果
 void Hero::addEffect(std::shared_ptr<Effect> effect) {
     if (!effect) {
         CCLOG("Error: Attempted to add a null effect.");
-        return; // �������� effect �ǿ�ָ�룬ֱ�ӷ���
+        return; // 如果传入的 effect 是空指针，直接返回
     }
 
     for (auto& existingEffect : _effects) {
-        // ����Ƿ������ͬ���͵�Ч��
+        // 检查是否存在相同类型的效果
         if (existingEffect->getType() == effect->getType()) {
             if (effect->getType() == Effect::Type::Strength) {
-                // ����Ч�������ӵȼ�
+                // 如果效果是力量，加等级
                 existingEffect->setLevel(existingEffect->getLevel() + effect->getLevel());
             }
             else if (effect->getType() == Effect::Type::Vulnerable) {
-                // ����Ч����ʱ������
+                // 如果效果是易伤，加时间
                 existingEffect->addRemainingTurns(effect->getRemainingTurns());
             }
-            return; // ������ɺ�ֱ�ӷ���
+            return; // 处理完成后直接返回
         }
     }
 
-    // ���û���ҵ���ͬ���͵�Ч�����������µ�Ч��
+    // 如果没有找到相同类型的效果，添加新的效果
     _effects.push_back(effect);
 }
 
-// ��ȡӵ�е�Ч��
+// 获取拥有的效果
 const std::vector<std::shared_ptr<Effect>>& Hero::getEffects() const
 {
     return _effects;
 }
 
-// ����Ч�����Ƴ�����ʱ��Ϊ 0 ��Ч��
+// 更新效果并移除持续时间为 0 的效果
 void Hero::updateEffects() {
     for (auto it = _effects.begin(); it != _effects.end(); ) {
         (*it)->reduceTurn();
         if ((*it)->getRemainingTurns() == 0) {
-            it = _effects.erase(it); // �Ƴ�����ʱ��Ϊ 0 ��Ч��
+            it = _effects.erase(it); // 移除持续时间为 0 的效果
         }
         else {
             ++it;
         }
     }
-    updateStatusDisplay(); // ����ʵ�������ĵ��ã������д���
+    updateStatusDisplay(); // 调用实例方法的调用，方便扩展
 }
 
-// ����״̬��ʾ (ʵ������)
+// 更新状态显示 (实例方法)
 void Hero::updateStatusDisplay() {
-    updateStatusDisplayStatic(); // �򵥵ص��þ�̬����
+    updateStatusDisplayStatic(); // 简单地调用静态方法
 }
 
 bool Hero::isDeckInitialized() const {
     return _isDeckInitialized;
 }
 
-// ���ÿ����ʼ��״̬
+// 设置卡组初始化状态
 void Hero::setDeckInitialized(bool initialized) {
     _isDeckInitialized = initialized;
 }
