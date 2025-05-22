@@ -757,7 +757,7 @@ cocos2d::Label* FightingScene::addCardEffectLabel(cocos2d::Sprite* cardSprite, c
     float cardWidth = cardSprite->getContentSize().width;
     float cardHeight = cardSprite->getContentSize().height;
 
-    // 根据文本长度自动调整字体大小 - 更积极的调整
+    // 根据文本长度自动调整字体大小
     int fontSize = 48;
 
     // 创建多行标签，设置最大宽度为卡牌宽度的85%

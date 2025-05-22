@@ -179,10 +179,9 @@ void Monster::executeCurrentAction(Hero* target) {
     switch (action.type) {
     case MonsterActionType::ATTACK:
     {
-        // 计算最终伤害
         int finalDamage = action.value;
 
-        // 应用力量效果
+        // 应用怪物自身的力量
         for (const auto& effect : _effects) {
             if (auto buff = dynamic_cast<Buff*>(effect.get())) {
                 if (buff->getType() == Effect::Type::Strength) {
@@ -191,7 +190,16 @@ void Monster::executeCurrentAction(Hero* target) {
             }
         }
 
-        // 处理目标格挡
+        // 应用玩家的易伤debuff
+        for (const auto& effect : target->getEffects()) {
+            if (auto debuff = dynamic_cast<Debuff*>(effect.get())) {
+                if (debuff->getType() == Effect::Type::Vulnerable) {
+                    finalDamage = static_cast<int>(finalDamage * 1.5);
+                }
+            }
+        }
+
+        // 处理格挡
         int targetBlock = target->getBlock();
         if (targetBlock > 0) {
             if (targetBlock >= finalDamage) {
