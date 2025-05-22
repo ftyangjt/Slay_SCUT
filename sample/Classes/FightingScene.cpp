@@ -587,53 +587,63 @@ void FightingScene::checkBattleEnd()
     {
         CCLOG("Monster is dead. You Win!");
 
-        // 根据当前房间类型设置金币奖励
-        int coinReward = 20;  // 默认普通小怪奖励20金币
-        if (MyGame::currentRoomType == MyGame::RoomType::ELITE) {
-            coinReward = 40;  // 精英怪奖励40金币
-        }
-        else if (MyGame::currentRoomType == MyGame::RoomType::BOSS) {
-            coinReward = 100;  // Boss奖励100金币
-        }
+        // 先禁用怪物的所有动作
+        _monster->stopAllActions();
 
-        // 添加金币
-        Hero::addCoins(coinReward);
+        // 创建淡出动画
+        auto fadeOut = FadeOut::create(0.8f); // 0.8秒淡出
+        auto scaleDown = ScaleTo::create(0.8f, 0.1f); // 同时缩小
+        auto disappear = Spawn::create(fadeOut, scaleDown, nullptr);
 
-        // 创建获得金币的提示标签
-        auto visibleSize = Director::getInstance()->getVisibleSize();
-        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+        // 动画结束后执行胜利奖励逻辑
+        auto afterDisappear = CallFunc::create([this]() {
+            // 根据当前房间类型设置金币奖励
+            int coinReward = 20;
+            if (MyGame::currentRoomType == MyGame::RoomType::ELITE) {
+                coinReward = 40;
+            }
+            else if (MyGame::currentRoomType == MyGame::RoomType::BOSS) {
+                coinReward = 100;
+            }
+            Hero::addCoins(coinReward);
 
-        auto coinLabel = Label::createWithTTF("Gain " + std::to_string(coinReward) + " Coins", "fonts/Marker Felt.ttf", 60);
-        coinLabel->setTextColor(Color4B::YELLOW);
-        coinLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 100));
-        this->addChild(coinLabel, 10);
+            auto visibleSize = Director::getInstance()->getVisibleSize();
+            Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-        // 创建胜利消息标签
-        auto victoryLabel = Label::createWithTTF("YOU WIN！", "fonts/Marker Felt.ttf", 80);
-        victoryLabel->setTextColor(Color4B::YELLOW);
-        victoryLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
-        this->addChild(victoryLabel, 10);
+            auto coinLabel = Label::createWithTTF("Gain " + std::to_string(coinReward) + " Coins", "fonts/Marker Felt.ttf", 60);
+            coinLabel->setTextColor(Color4B::YELLOW);
+            coinLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 100));
+            this->addChild(coinLabel, 10);
 
-        // 生成3张可选卡牌
-        std::vector<Card> rewardCards = generateRandomCards(3);
+            auto victoryLabel = Label::createWithTTF("YOU WIN！", "fonts/Marker Felt.ttf", 80);
+            victoryLabel->setTextColor(Color4B::YELLOW);
+            victoryLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+            this->addChild(victoryLabel, 10);
 
-        // 延迟1秒后再弹出选牌界面
-        this->runAction(Sequence::create(
-            DelayTime::create(1.0f), // 延迟1秒
-            CallFunc::create([this, rewardCards]() {
-                showCardSelectionWithCallback(rewardCards, [this]() {
-                    if (MyGame::currentRoomType == MyGame::RoomType::BOSS) {
-                        auto victoryScene = MyGame::VictoryScene::createScene();
-                        Director::getInstance()->replaceScene(TransitionFade::create(1.0f, victoryScene));
-                    }
-                    else {
-                        auto mapScene = MyGame::Map::createScene();
-                        Director::getInstance()->replaceScene(TransitionFade::create(0.5f, mapScene));
-                    }
-                    });
-                }),
-            nullptr
-        ));
+            // 生成3张可选卡牌
+            std::vector<Card> rewardCards = generateRandomCards(3);
+
+            // 延迟1秒后再弹出选牌界面
+            this->runAction(Sequence::create(
+                DelayTime::create(1.0f),
+                CallFunc::create([this, rewardCards]() {
+                    showCardSelectionWithCallback(rewardCards, [this]() {
+                        if (MyGame::currentRoomType == MyGame::RoomType::BOSS) {
+                            auto victoryScene = MyGame::VictoryScene::createScene();
+                            Director::getInstance()->replaceScene(TransitionFade::create(1.0f, victoryScene));
+                        }
+                        else {
+                            auto mapScene = MyGame::Map::createScene();
+                            Director::getInstance()->replaceScene(TransitionFade::create(0.5f, mapScene));
+                        }
+                        });
+                    }),
+                nullptr
+            ));
+            });
+
+        // 执行动画和后续逻辑
+        _monster->runAction(Sequence::create(disappear, afterDisappear, nullptr));
     }
 }
 // 以下为卡牌系统的实现
