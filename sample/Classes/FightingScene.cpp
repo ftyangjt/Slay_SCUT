@@ -1167,34 +1167,52 @@ void FightingScene::playCard(int index)
         cardSprite->setLocalZOrder(9999);
 
         // 目标位置：弃牌堆按钮
-        Vec2 discardPos = _discardDeckButton->getPosition();
-        auto moveAction = MoveTo::create(0.3f, discardPos);
-        auto scaleAction = ScaleTo::create(0.3f, 0.1f);
-        auto moveAndScale = Spawn::create(moveAction, scaleAction, nullptr);
+        if (_cards[index].isExhaust()) {
+            // 消耗牌动画：渐隐+缩小+旋转
+            auto fadeOut = FadeOut::create(0.4f);
+            auto scaleDown = ScaleTo::create(0.4f, 0.1f);
+            auto rotate = RotateBy::create(0.4f, 180);
+            auto exhaustAnim = Spawn::create(fadeOut, scaleDown, rotate, nullptr);
 
-        // 动画播放完再移除并丢弃
-        auto finish = CallFunc::create([this, index, cardSprite]() {
-            cardSprite->removeFromParent();
-            if (_cards[index].isExhaust()) {
-				exhaustCard(index); // 进消耗牌堆
-            }
-            else {
-                discardCard(index); // 进弃牌堆
-            }
-            _selectedCardIndex = -1; // 重置选中的卡牌
-            highlightSelectedCard();
-
-            // 打出卡牌后，如果没有选中的卡牌，则启用结束回合按钮
-            if (_selectedCardIndex == -1) {
-                _isEndTurnButtonEnabled = true;
-                if (_endTurnButton) {
-                    _endTurnButton->setEnabled(true);
-                    _endTurnButton->setColor(Color3B::WHITE);
+            auto finish = CallFunc::create([this, index, cardSprite]() {
+                cardSprite->removeFromParent();
+                exhaustCard(index); // 进消耗牌堆
+                _selectedCardIndex = -1;
+                highlightSelectedCard();
+                if (_selectedCardIndex == -1) {
+                    _isEndTurnButtonEnabled = true;
+                    if (_endTurnButton) {
+                        _endTurnButton->setEnabled(true);
+                        _endTurnButton->setColor(Color3B::WHITE);
+                    }
                 }
-            }
-            });
+                });
 
-        cardSprite->runAction(Sequence::create(moveAndScale, finish, nullptr));
+            cardSprite->runAction(Sequence::create(exhaustAnim, finish, nullptr));
+        }
+        else {
+            // 原有弃牌动画
+            Vec2 discardPos = _discardDeckButton->getPosition();
+            auto moveAction = MoveTo::create(0.3f, discardPos);
+            auto scaleAction = ScaleTo::create(0.3f, 0.1f);
+            auto moveAndScale = Spawn::create(moveAction, scaleAction, nullptr);
+
+            auto finish = CallFunc::create([this, index, cardSprite]() {
+                cardSprite->removeFromParent();
+                discardCard(index); // 进弃牌堆
+                _selectedCardIndex = -1;
+                highlightSelectedCard();
+                if (_selectedCardIndex == -1) {
+                    _isEndTurnButtonEnabled = true;
+                    if (_endTurnButton) {
+                        _endTurnButton->setEnabled(true);
+                        _endTurnButton->setColor(Color3B::WHITE);
+                    }
+                }
+                });
+
+            cardSprite->runAction(Sequence::create(moveAndScale, finish, nullptr));
+        }
 
         // 设置冷却
         checkBattleEnd();

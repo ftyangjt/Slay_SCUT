@@ -262,7 +262,7 @@ void Monster::prepareNextTurn() {
 std::string Monster::getNextActionDescription() const {
     if (_actionPattern.empty()) {
         CCLOG("Monster action pattern is empty!");
-        return "攻击";
+        return "Attack";
     }
 
     int nextActionIndex = (_currentTurn + 1) % _actionPattern.size();
@@ -335,7 +335,7 @@ void SlimeMonster::initActionPattern() {
         5,
         Effect::Type::Strength,
         0, 0,
-        "防御+5"
+        "Defence+5"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -343,7 +343,7 @@ void SlimeMonster::initActionPattern() {
         0,
         Effect::Type::Strength,
         1, -1,
-        "力量+1"
+        "Strength+1"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -351,7 +351,7 @@ void SlimeMonster::initActionPattern() {
         _attackDamage,
         Effect::Type::Strength,
         0, 0,
-        "攻击" + std::to_string(_attackDamage)
+        "Attack" + std::to_string(_attackDamage)
     ));
 }
 
@@ -382,7 +382,7 @@ void GoblinMonster::initActionPattern() {
         _attackDamage,
         Effect::Type::Strength,
         0, 0,
-        "攻击" + std::to_string(_attackDamage)
+        "Attack" + std::to_string(_attackDamage)
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -390,7 +390,7 @@ void GoblinMonster::initActionPattern() {
         7,
         Effect::Type::Strength,
         0, 0,
-        "防御+7"
+        "Defence+7"
     ));
 }
 
@@ -421,7 +421,7 @@ void SnakeMonster::initActionPattern() {
         _attackDamage,
         Effect::Type::Strength,
         0, 0,
-        "攻击" + std::to_string(_attackDamage)
+        "Attack" + std::to_string(_attackDamage)
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -429,7 +429,7 @@ void SnakeMonster::initActionPattern() {
         _attackDamage,
         Effect::Type::Strength,
         0, 0,
-        "攻击" + std::to_string(_attackDamage)
+        "Attack" + std::to_string(_attackDamage)
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -437,7 +437,7 @@ void SnakeMonster::initActionPattern() {
         0,
         Effect::Type::Vulnerable,
         2, 2,
-        "施加易伤"
+        "Apply Vulnerable"
     ));
 }
 
@@ -468,7 +468,7 @@ void OrcMonster::initActionPattern() {
         _attackDamage,
         Effect::Type::Strength,
         0, 0,
-        "攻击" + std::to_string(_attackDamage)
+        "Attack" + std::to_string(_attackDamage)
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -476,7 +476,7 @@ void OrcMonster::initActionPattern() {
         0,
         Effect::Type::Strength,
         2, -1,
-        "力量+2"
+        "Strength+2"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -484,7 +484,7 @@ void OrcMonster::initActionPattern() {
         _attackDamage * 1.5,
         Effect::Type::Strength,
         0, 0,
-        "重击" + std::to_string(static_cast<int>(_attackDamage * 1.5))
+        "Heavy Blow" + std::to_string(static_cast<int>(_attackDamage * 1.5))
     ));
 }
 
@@ -515,7 +515,7 @@ void GolemMonster::initActionPattern() {
         20,
         Effect::Type::Strength,
         0, 0,
-        "防御+20"
+        "Defence+20"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -523,7 +523,7 @@ void GolemMonster::initActionPattern() {
         _attackDamage,
         Effect::Type::Strength,
         0, 0,
-        "攻击" + std::to_string(_attackDamage)
+        "Attack" + std::to_string(_attackDamage)
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -531,7 +531,7 @@ void GolemMonster::initActionPattern() {
         10,
         Effect::Type::Strength,
         0, 0,
-        "防御+10"
+        "Defence+10"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -539,7 +539,7 @@ void GolemMonster::initActionPattern() {
         _attackDamage * 2,
         Effect::Type::Strength,
         0, 0,
-        "大力砸击" + std::to_string(static_cast<int>(_attackDamage * 2))
+        "Heavy Smash" + std::to_string(static_cast<int>(_attackDamage * 2))
     ));
 }
 
@@ -570,7 +570,7 @@ void KnightBossMonster::initActionPattern() {
         _attackDamage,
         Effect::Type::Strength,
         0, 0,
-        "斩击" + std::to_string(_attackDamage)
+        "Slash" + std::to_string(_attackDamage)
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -578,7 +578,7 @@ void KnightBossMonster::initActionPattern() {
         25,
         Effect::Type::Strength,
         0, 0,
-        "盾牌格挡+25"
+        "Shield Block+25"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -586,7 +586,7 @@ void KnightBossMonster::initActionPattern() {
         0,
         Effect::Type::Strength,
         3, -1,
-        "力量积蓄+3"
+        "Strength Accumulation+3"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -594,7 +594,7 @@ void KnightBossMonster::initActionPattern() {
         _attackDamage * 2,
         Effect::Type::Strength,
         0, 0,
-        "致命重击" + std::to_string(static_cast<int>(_attackDamage * 2))
+        "Fatal Strike" + std::to_string(static_cast<int>(_attackDamage * 2))
     ));
 }
 
@@ -625,7 +625,7 @@ void DragonBossMonster::initActionPattern() {
         0,
         Effect::Type::Vulnerable,
         3, 3,
-        "龙息（施加易伤）"
+        "Dragon's Breath (Inflict Vulnerable)"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -633,7 +633,7 @@ void DragonBossMonster::initActionPattern() {
         30,
         Effect::Type::Strength,
         0, 0,
-        "龙鳞防御+30"
+        "Dragon Scale Defense+30"
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -641,7 +641,7 @@ void DragonBossMonster::initActionPattern() {
         _attackDamage * 1.5,
         Effect::Type::Strength,
         0, 0,
-        "龙爪撕裂" + std::to_string(static_cast<int>(_attackDamage * 1.5))
+        "Dragon Claw Rend" + std::to_string(static_cast<int>(_attackDamage * 1.5))
     ));
 
     _actionPattern.push_back(MonsterAction(
@@ -649,6 +649,6 @@ void DragonBossMonster::initActionPattern() {
         _attackDamage * 3,
         Effect::Type::Strength,
         0, 0,
-        "灭世龙息"
+        "Apocalyptic Dragon Breath"
     ));
 }
