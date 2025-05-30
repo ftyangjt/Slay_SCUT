@@ -1,5 +1,6 @@
 #include "MainMenu.h"
 #include "Hero.h"
+#include "TransitionScene.h"
 #include "Map.h"  // 引入地图场景头文件
 
 USING_NS_CC;
@@ -65,7 +66,6 @@ bool MainMenu::init()
 
     return true;
 }
-
 void MainMenu::menuStartCallback(cocos2d::Ref* pSender)
 {
     // 重置游戏状态
@@ -75,13 +75,13 @@ void MainMenu::menuStartCallback(cocos2d::Ref* pSender)
     Hero::resetHealth();
     Hero::resetCoins();
 
-    // 切换到地图场景
-    auto scene = MyGame::Map::createScene();
+    // 切换到过场动画场景，而不是直接进入地图场景
+    auto scene = MyGame::TransitionScene::createScene();
 
     // 使用淡入淡出过渡效果，持续1秒
     auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // 黑色淡入淡出
 
-    // 切换到带过渡效果的地图场景
+    // 切换到带过渡效果的过场动画场景
     Director::getInstance()->replaceScene(transition);
 }
 

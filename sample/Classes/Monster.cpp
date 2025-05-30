@@ -376,7 +376,7 @@ bool GoblinMonster::init() {
     _health = 30;
     _attackDamage = 8;
     _block = 5;
-
+	this->setScale(0.7f);
     initActionPattern();
     return true;
 }

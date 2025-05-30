@@ -104,7 +104,7 @@ namespace MyGame {
         if (staticMapInfo.empty())
         {
             // 生成多层地图
-            int layers = 1;  // 假设有10层
+            int layers = 18;  // 假设有10层
             int roomsPerLayer = 5;  // 每层有3个房间
             generateRandomMap(layers, roomsPerLayer);
         }
