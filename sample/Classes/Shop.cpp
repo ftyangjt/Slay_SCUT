@@ -201,7 +201,7 @@ namespace MyGame {
 
         // 尝试使用图片按钮
         auto imageButton = MenuItemImage::create(
-            "back.png",
+            "back.jpg",
             "return_selected.png",
             [](Ref* sender) {
                 // 返回地图场景

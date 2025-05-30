@@ -25,22 +25,7 @@ namespace MyGame {
         auto background = Sprite::create("rest_background.png");
         if (background)
         {
-            // 获取背景图像的原始大小
-            Size originalSize = background->getContentSize();
-
-            // 计算缩放比例，使背景图像完全覆盖屏幕
-            float scaleX = visibleSize.width / originalSize.width;
-            float scaleY = visibleSize.height / originalSize.height;
-
-            // 选择较大的缩放比例以确保背景覆盖整个屏幕
-            float scale = (scaleX > scaleY) ? scaleX : scaleY;
-
-            // 应用缩放
-            background->setScale(scale);
-
-            // 设置背景图像位置在屏幕中心
             background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-
             this->addChild(background, 0);  // 将背景图片添加到最底层
         }
 
@@ -53,10 +38,10 @@ namespace MyGame {
         if (restoreItem)
         {
             restoreItem->setPosition(Vec2(
-                origin.x + visibleSize.width / 2-400,
-                origin.y + visibleSize.height / 2
+                origin.x + visibleSize.width / 2,
+                origin.y + visibleSize.height / 2 + 100
             ));
-            restoreItem->setScale(1.0);  // 调整按钮大小
+            restoreItem->setScale(0.5);  // 调整按钮大小
         }
 
         // 创建"返回"按钮
@@ -68,10 +53,10 @@ namespace MyGame {
         if (returnItem)
         {
             returnItem->setPosition(Vec2(
-                origin.x + visibleSize.width / 2+400,
-                origin.y + visibleSize.height / 2
+                origin.x + visibleSize.width / 2,
+                origin.y + visibleSize.height / 2 - 100
             ));
-            returnItem->setScale(1.0);  // 调整按钮大小
+            returnItem->setScale(0.5);  // 调整按钮大小
         }
 
         // 创建菜单
@@ -92,11 +77,9 @@ namespace MyGame {
 
         // 显示恢复信息，显示实际恢复的血量
         std::string healText = "+" + std::to_string(actualHealed);
-        auto label = Label::createWithTTF(healText, "fonts/Marker Felt.ttf", 60);
-        // 设置文本颜色为绿色
-        label->setTextColor(Color4B::GREEN);
+        auto label = Label::createWithTTF(healText, "fonts/Marker Felt.ttf", 24);
         label->setPosition(Vec2(Director::getInstance()->getVisibleSize().width / 2,
-            Director::getInstance()->getVisibleSize().height / 2 + 300));
+            Director::getInstance()->getVisibleSize().height / 2+200));
         label->setScale(3.0);
         this->addChild(label, 1);
 
@@ -118,11 +101,9 @@ namespace MyGame {
 
         // 显示增加的最大血量信息
         std::string maxHealthText = "+10 Max HP";
-        auto label = Label::createWithTTF(maxHealthText, "fonts/Marker Felt.ttf", 60);
-        // 设置文本颜色为金色
-        label->setTextColor(Color4B(255, 215, 0, 255));  // 金色 (255, 215, 0)
+        auto label = Label::createWithTTF(maxHealthText, "fonts/Marker Felt.ttf", 24);
         label->setPosition(Vec2(Director::getInstance()->getVisibleSize().width / 2,
-            Director::getInstance()->getVisibleSize().height / 2 + 300));
+            Director::getInstance()->getVisibleSize().height / 2 + 200));
         label->setScale(3.0);
         this->addChild(label, 1);
 
@@ -136,5 +117,6 @@ namespace MyGame {
             nullptr
         ));
     }
+
 
 } // namespace MyGame

@@ -1,6 +1,6 @@
 #include "MainMenu.h"
 #include "Hero.h"
-#include "TransitionScene.h"
+#include "GameSaveManager.h"
 #include "Map.h"  // 引入地图场景头文件
 
 USING_NS_CC;
@@ -53,19 +53,21 @@ bool MainMenu::init()
     if (exitItem)
     {
         exitItem->setPosition(Vec2(
-            origin.x + visibleSize.width -570,
-            origin.y + visibleSize.height -1100
+            origin.x + visibleSize.width - 50,
+            origin.y + visibleSize.height / 2 - 300
         ));
-        exitItem->setScale(0.2);  // 调整按钮大小
+        exitItem->setScale(3);  // 调整按钮大小
     }
 
     // 将两个菜单项加入菜单
     auto menu = Menu::create(startItem, exitItem, nullptr);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);  // 确保菜单在背景图片之上
+    createContinueButton();
 
     return true;
 }
+
 void MainMenu::menuStartCallback(cocos2d::Ref* pSender)
 {
     // 重置游戏状态
@@ -75,13 +77,13 @@ void MainMenu::menuStartCallback(cocos2d::Ref* pSender)
     Hero::resetHealth();
     Hero::resetCoins();
 
-    // 切换到过场动画场景，而不是直接进入地图场景
-    auto scene = MyGame::TransitionScene::createScene();
+    // 切换到地图场景
+    auto scene = MyGame::Map::createScene();
 
     // 使用淡入淡出过渡效果，持续1秒
     auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // 黑色淡入淡出
 
-    // 切换到带过渡效果的过场动画场景
+    // 切换到带过渡效果的地图场景
     Director::getInstance()->replaceScene(transition);
 }
 
@@ -90,4 +92,70 @@ void MainMenu::menuCloseCallback(Ref* pSender)
 {
     // 退出游戏
     Director::getInstance()->end();
+}
+
+// 在主菜单类中添加
+void MainMenu::createContinueButton()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    // 创建继续游戏按钮
+    auto continueButton = ui::Button::create("button.png", "button_selected.png");
+    continueButton->setPosition(Vec2(origin.x + visibleSize.width / 2+60, origin.y + visibleSize.height / 2 +60));
+	continueButton->setScale(0.5);
+
+    // 根据是否有存档决定按钮状态
+    bool hasSave = GameSaveManager::hasSavedGame();
+    continueButton->setEnabled(hasSave);
+    if (!hasSave)
+    {
+        continueButton->setColor(Color3B(150, 150, 150)); // 灰色表示禁用
+    }
+
+    // 添加点击事件
+    continueButton->addClickEventListener([this](Ref* sender) {
+        loadGame();
+        });
+
+    this->addChild(continueButton, 10);
+}
+
+void MainMenu::loadGame()
+{
+    // 读取存档
+    int health, gold, currentMapId, currentLevel;
+    std::vector<Card> deck;
+
+    if (GameSaveManager::loadGame(health, gold, deck, currentMapId, currentLevel))
+    {
+        // 恢复游戏状态
+        Hero::resetHealth();
+        int maxHealth = Hero::getMaxHealth();
+        Hero::healHealth(health - Hero::getCurrentHealth());
+        Hero::setCoins(gold);
+        Hero::setDeckInitialized(true);
+
+        // 使用新添加的静态方法操作卡组
+        Hero::clearDeckStatic();
+        for (const auto& card : deck) {
+            Hero::addCardToDeckStatic(card);
+        }
+
+    
+
+        // 创建地图场景
+        auto mapScene = MyGame::Map::createScene();
+
+        // 地图场景初始化后，获取Map实例并设置其成员变量
+        auto mapLayer = dynamic_cast<MyGame::Map*>(mapScene->getChildByName("MapLayer"));
+        if (mapLayer) {
+            // 设置地图层级和房间
+            MyGame::Map::currentLayer = currentMapId;
+            MyGame::Map::currentRoom = currentLevel;
+        }
+
+        Director::getInstance()->replaceScene(TransitionFade::create(1.0f, mapScene));
+    }
+
 }
