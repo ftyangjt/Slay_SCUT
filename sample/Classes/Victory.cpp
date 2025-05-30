@@ -40,6 +40,10 @@ namespace MyGame {
 
         // 创建制作人员名单文本
         std::string credits =
+            "Victory!!!\n\n\n\n\n\n\n\n"
+
+            "Relevant Instructions\n\n\n"
+
             "Core Team\n\n"
 
             "Game designers\n"
@@ -100,8 +104,8 @@ namespace MyGame {
 
             "2025 C++ homework";
 
-        // 创建文本标签
-        _creditsLabel = Label::createWithTTF(credits, "fonts/Marker Felt.ttf", 90);
+        // 创建文本标签（字体大小从36增加到60）
+        _creditsLabel = Label::createWithTTF(credits, "fonts/Marker Felt.ttf", 72);
         _creditsLabel->setAlignment(TextHAlignment::CENTER);
         _creditsLabel->setColor(Color3B::WHITE);
 
