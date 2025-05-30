@@ -119,34 +119,49 @@ void FightingScene::createBuffLabels() {
 
     // 创建英雄 BUFF 标签
     _heroBuffLabel = Label::createWithTTF("Hero Buffs: None", "fonts/Marker Felt.ttf", 40);
-    _heroBuffLabel->setTextColor(Color4B::YELLOW); // 设置标签颜色为黄色
+    _heroBuffLabel->setTextColor(Color4B::BLACK); // 设置标签颜色为黄色
     _heroBuffLabel->setPosition(Vec2(origin.x + visibleSize.width / 4, origin.y + visibleSize.height - _heroHealthLabel->getContentSize().height - 140));
     this->addChild(_heroBuffLabel, 1);
 
     // 创建怪物 BUFF 标签
     _monsterBuffLabel = Label::createWithTTF("Monster Buffs: None", "fonts/Marker Felt.ttf", 40);
-    _monsterBuffLabel->setTextColor(Color4B::YELLOW); // 设置标签颜色为黄色
+    _monsterBuffLabel->setTextColor(Color4B::BLACK); // 设置标签颜色为黄色
     _monsterBuffLabel->setPosition(Vec2(origin.x + 3 * visibleSize.width / 4, origin.y + visibleSize.height - _monsterHealthLabel->getContentSize().height - 140));
     this->addChild(_monsterBuffLabel, 1);
 }
 
+// 创建背景
 // 创建背景
 void FightingScene::createBackground()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    auto background = Sprite::create("background.png");
+    auto background = Sprite::create("background-1.png");
     if (background == nullptr)
     {
-        problemLoading("'background.png'");
+        problemLoading("'background-1.png'");
         return;
     }
 
+    // 获取背景图像的原始大小
+    Size originalSize = background->getContentSize();
+
+    // 计算缩放比例，使背景图像完全覆盖屏幕
+    float scaleX = visibleSize.width / originalSize.width;
+    float scaleY = visibleSize.height / originalSize.height;
+
+    // 选择较大的缩放比例以确保背景覆盖整个屏幕
+    float scale = (scaleX > scaleY) ? scaleX : scaleY;
+
+    // 应用缩放
+    background->setScale(scale);
+
+    // 设置背景图像位置在屏幕中心
     background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+
     this->addChild(background, 0);
 }
-
 // 创建回合数标签
 void FightingScene::createTurnCountLabel()
 {
@@ -178,14 +193,61 @@ void FightingScene::createCharacters()
     this->addChild(_hero, 1);
 
     // 创建怪物
+<<<<<<< Updated upstream
     _monster = Monster::create("monster.png");
     if (_monster == nullptr)
+=======
+    // 尝试根据当前房间类型创建相应的怪物
+    Monster* monster = nullptr;
+    bool isEliteMonster = false;
+
+    try {
+        if (MyGame::currentRoomType == MyGame::RoomType::BOSS) {
+            monster = Monster::createRandom(true, false); // 创建Boss怪物
+        }
+        else if (MyGame::currentRoomType == MyGame::RoomType::ELITE) {
+            monster = Monster::createRandom(false, true); // 创建精英怪物
+            isEliteMonster = true;
+        }
+        else {
+            monster = Monster::createRandom(); // 创建普通怪物
+        }
+    }
+    catch (const std::exception& e) {
+        CCLOG("Exception creating monster: %s", e.what());
+    }
+
+    // 如果随机创建失败，使用默认怪物作为后备方案
+    if (monster == nullptr)
+>>>>>>> Stashed changes
     {
         problemLoading("'monster.png'");
         return;
     }
 
+<<<<<<< Updated upstream
     _monster->setPosition(Vec2(origin.x + visibleSize.width - _monster->getContentSize().width / 2, origin.y + visibleSize.height / 2));
+=======
+    _monster = monster;
+
+    // 基本位置计算
+    float baseX = origin.x + visibleSize.width - _monster->getContentSize().width / 2;
+
+    // 根据怪物类型调整位置
+    if (isEliteMonster || _monster->isElite()) {
+        // 精英怪向左移动100像素
+        _monster->setPosition(Vec2(baseX - 300, origin.y + visibleSize.height / 2));
+    }
+    else if (_monster->isBoss()) {
+        // Boss怪物居中
+        _monster->setPosition(Vec2(baseX-100, origin.y + visibleSize.height / 2));
+    }
+    else {
+        // 普通怪物向右移动100像素
+        _monster->setPosition(Vec2(baseX + 200, origin.y + visibleSize.height / 2));
+    }
+
+>>>>>>> Stashed changes
     this->addChild(_monster, 1);
 }
 
@@ -261,8 +323,64 @@ void FightingScene::startPlayerTurn()
 
     if (endTurnButton == nullptr)
     {
+<<<<<<< Updated upstream
         problemLoading("'buttonNormal.png' or 'buttonSelected.png'");
         return;
+=======
+        _endTurnButton = cocos2d::ui::Button::create("button1.jpg", "button.png");
+        if (_endTurnButton == nullptr)
+        {
+            problemLoading("'buttonNormal.png' or 'buttonSelected.png'");
+            return;
+        }
+
+        _endTurnButton->setScale(0.2f);
+        _endTurnButton->setPosition(Vec2(origin.x + visibleSize.width - _endTurnButton->getContentSize().width / 2+400,
+            origin.y + visibleSize.width / 2 - _endTurnButton->getContentSize().height / 2-250));
+
+        // 添加点击事件监听器
+        _endTurnButton->addClickEventListener([this](Ref* sender) {
+            // 严格检查冷却状态
+            if (!_isEndTurnButtonEnabled) {
+                return; // 如果处于冷却状态，直接返回不执行任何操作
+            }
+
+            // 立即设置冷却状态以防止连续点击
+            _isEndTurnButtonEnabled = false;
+
+            // 获取按钮对象并禁用它
+            auto button = static_cast<ui::Button*>(sender);
+            button->setEnabled(false);
+
+            // 视觉反馈 - 可选：改变按钮颜色为灰色
+            button->setColor(Color3B(150, 150, 150));
+
+            // 创建一个动作序列，延迟后重新启用按钮
+            this->runAction(Sequence::create(
+                DelayTime::create(1.0f),
+                CallFunc::create([this, button]() {
+                    // 只有在玩家回合时才重新启用按钮
+                    if (_isPlayerTurn && _selectedCardIndex == -1) {
+                        _isEndTurnButtonEnabled = true;
+                        button->setEnabled(true);
+                        button->setColor(Color3B::WHITE); // 恢复原色
+                    }
+                    }),
+                nullptr
+            ));
+
+            // 最后调用回合结束函数
+            this->endTurn();
+            });
+
+        this->addChild(_endTurnButton, 1);
+    }
+    else
+    {
+        _endTurnButton->setVisible(true);
+        _endTurnButton->setEnabled(false); // 初始禁用
+        _endTurnButton->setColor(Color3B(150, 150, 150)); // 灰色
+>>>>>>> Stashed changes
     }
 
     endTurnButton->setScale(0.25f); // 将按钮缩小到原来的50%
@@ -552,6 +670,16 @@ void FightingScene::updateHandDisplay()
     }
     _cardSprites.clear();
     _lastClickTimes.clear();
+<<<<<<< Updated upstream
+=======
+    
+    // 重置悬停相关变量
+    _hoveringCardIndex = -1;
+    _cardOriginalPositions.clear();
+    _cardOriginalRotations.clear();
+    _cardOriginalZOrders.clear();
+    _cardIsHovering.clear();  // 清空悬浮状态标志
+>>>>>>> Stashed changes
 
     if (newCount == 0)
         return;  // 没有卡牌时直接返回
@@ -608,7 +736,10 @@ void FightingScene::updateHandDisplay()
         this->addChild(sprite, 1);
         _cardSprites.push_back(sprite);
         _lastClickTimes.push_back(std::chrono::steady_clock::now());
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
         // 添加卡牌效果标签
         addCardEffectLabel(sprite, _cards[i].getEffect());
 
@@ -825,6 +956,11 @@ void FightingScene::highlightSelectedCard()
 // 处理卡牌点击事件
 void FightingScene::handleCardTap(size_t cardIndex, cocos2d::Touch* touch)
 {
+<<<<<<< Updated upstream
+=======
+    if (_isSelectingCard) return; // 选牌时禁止操作
+
+>>>>>>> Stashed changes
     auto now = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lastClickTimes[cardIndex]).count();
 

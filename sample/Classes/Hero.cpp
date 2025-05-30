@@ -84,7 +84,11 @@ void Hero::addCardToDeck(const Card& card)
     _deck.push_back(card);
 }
 
+<<<<<<< Updated upstream
 // ��ȡ����
+=======
+// 获取卡组
+>>>>>>> Stashed changes
 const std::vector<Card>& Hero::getDeck() const
 {
     return _deck;
@@ -165,3 +169,20 @@ void Hero::updateEffects() {
         }
     }
 }
+<<<<<<< Updated upstream
+=======
+
+// 更新状态显示 (实例方法)
+void Hero::updateStatusDisplay() {
+    updateStatusDisplayStatic(); // 简单地调用静态方法
+}
+
+bool Hero::isDeckInitialized() const {
+    return _isDeckInitialized;
+}
+
+// 设置卡组初始化状态
+void Hero::setDeckInitialized(bool initialized) {
+    _isDeckInitialized = initialized;
+}
+>>>>>>> Stashed changes

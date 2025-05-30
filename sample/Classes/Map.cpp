@@ -9,6 +9,11 @@
 USING_NS_CC;
 
 namespace MyGame {
+<<<<<<< Updated upstream
+=======
+    // 实际定义和初始化静态变量
+    RoomType currentRoomType = RoomType::BATTLE;
+>>>>>>> Stashed changes
 
     // 存储地图数据（房间类型和位置信息，但不存储指针）
     struct RoomInfo {
@@ -295,11 +300,11 @@ namespace MyGame {
                     break;
                 case RoomType::QUESTION:
                     roomItem = MenuItemImage::create(
-                        "question_normal.jpg",
+                        "question_normal.png",
                         "question_selected.png",
                         CC_CALLBACK_1(Map::menuQuestionCallback, this)
                     );
-                    roomItem->setScale(0.5);
+                    roomItem->setScale(0.15);
                     break;
                 case RoomType::REST:
                     roomItem = MenuItemImage::create(
@@ -935,7 +940,14 @@ namespace MyGame {
 
         // 切换到商店场景
         auto scene = ShopScene::createScene();
+<<<<<<< Updated upstream
         Director::getInstance()->replaceScene(scene);
+=======
+
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // 黑色淡入淡出
+        // 切换到带过渡效果的地图场景
+        Director::getInstance()->replaceScene(transition);
+>>>>>>> Stashed changes
     }
 
 
