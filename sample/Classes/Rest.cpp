@@ -28,6 +28,7 @@ namespace MyGame {
         auto background = Sprite::create("rest_background.png");
         if (background)
         {
+
             // 获取背景图片原始大小
             Size originalSize = background->getContentSize();
 
@@ -45,6 +46,7 @@ namespace MyGame {
             background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 
             this->addChild(background, 0);  // 将背景图片添加到场景底层
+
         }
 
         // 创建"恢复"按钮
@@ -56,10 +58,12 @@ namespace MyGame {
         if (restoreItem)
         {
             restoreItem->setPosition(Vec2(
+
                 origin.x + visibleSize.width / 2 - 400,
                 origin.y + visibleSize.height / 2
             ));
             restoreItem->setScale(1.0);  // 设置按钮大小
+
         }
 
         // 创建"返回"按钮
@@ -71,10 +75,12 @@ namespace MyGame {
         if (returnItem)
         {
             returnItem->setPosition(Vec2(
+
                 origin.x + visibleSize.width / 2 + 400,
                 origin.y + visibleSize.height / 2
             ));
             returnItem->setScale(1.0);  // 设置按钮大小
+
         }
 
         // 创建菜单
@@ -94,6 +100,7 @@ namespace MyGame {
             Hero::healHealth(healAmount);
             int actualHealed = Hero::getCurrentHealth() - oldHealth;
 
+
             // 显示恢复信息，显示实际恢复的血量
             std::string healText = "+" + std::to_string(actualHealed);
             auto label = Label::createWithTTF(healText, "fonts/Marker Felt.ttf", 60);
@@ -103,6 +110,7 @@ namespace MyGame {
                 Director::getInstance()->getVisibleSize().height / 2 + 300));
             label->setScale(3.0);
             this->addChild(label, 1);
+
 
             m_restoreUsed = true; // 标记恢复血量操作已执行
 
@@ -124,6 +132,7 @@ namespace MyGame {
             // 增加10点最大血量上限
             Hero::increaseMaxHealth(10);
 
+
             // 显示增加的最大血量信息
             std::string maxHealthText = "+10 Max HP";
             auto label = Label::createWithTTF(maxHealthText, "fonts/Marker Felt.ttf", 60);
@@ -133,6 +142,7 @@ namespace MyGame {
                 Director::getInstance()->getVisibleSize().height / 2 + 300));
             label->setScale(3.0);
             this->addChild(label, 1);
+
 
             m_increaseMaxHealthUsed = true; // 标记增加最大血量操作已执行
 
@@ -147,5 +157,6 @@ namespace MyGame {
             ));
         }
     }
+
 
 } // namespace MyGame

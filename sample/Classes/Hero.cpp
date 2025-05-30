@@ -219,9 +219,9 @@ void Hero::addCardToDeck(const Card& card)
 }
 
 // 获取卡组
-const std::vector<Card>& Hero::getDeck() const
+const std::vector<Card>& Hero::getDeck()
 {
-    return _deck;
+    return _deck; // _deck 需要是静态成员变量
 }
 
 // 清空卡组
@@ -302,3 +302,4 @@ bool Hero::isDeckInitialized() const {
 void Hero::setDeckInitialized(bool initialized) {
     _isDeckInitialized = initialized;
 }
+
