@@ -61,21 +61,71 @@ namespace MyGame {
         // 创建制作人员名单文本
         std::string credits =
             "Victory!!!\n\n\n\n\n\n\n\n"
+
+            "Relevant Instructions\n\n\n"
+
+            "Core Team\n\n"
+
             "Game designers\n"
             "Jingtian Yang\n\n"
+
             "Program design\n"
             "Tingtian Yang\n"
             "Zhiqirui Ye\n"
             "Baiding Dend\n\n"
+
             "Art Design\n"
             "Xingyi Pan\n\n"
+
+            "Testing Support\n"
+            "Tingtian Yang\n"
+            "Zhiqirui Ye\n"
+            "Baiding Dend\n"
+            "Xingyi Pan\n\n\n"
+
+            "Creative Background\n"
+            "This project originated from the combination of the \n"
+            "interest in C++ programming practice and game development.\n "
+            "It aims to deeply master the application of the C++ language \n"
+            "in practical projects by creating an interesting game, \n"
+            "and at the same time explore the principles of game mechanism \n"
+            "construction and gameplay design.\n "
+            "Therefore, it was selected to develop this game as\n"
+            "the C++ project assignment of South China University of Technology \n"
+            "in 2025.\n\n\n"
+
+            "Copyright Notice\n"
+            "The game mechanics of this game refer to \n"
+            "Slay the Spire. \n"
+            "The story setting of this game is original. \n"
+            "The art resources of this game are basically original, \n"
+            "and some refer to online resources. \n"
+            "This game will not be released externally\n"
+            "and is not used for commercial purposes, \n\n"
+
+            "This game is the C++ project assignment of \n"
+            "South China University of Technology in 2025.\n"
+
+
+            "All rights and interests related to this game \n"
+            "are safeguarded in accordance with \n"
+            "applicable laws and regulations.\n\n\n"
+
             "Special thanks\n"
+            "Technical Support\n"
+            "Cocos2d\n\n"
+
+            "Game Inspiration\n"
+            "Slay the Spire\n\n"
+
             "All the players participating in the test\n\n"
+
             "Thanks for your playing!\n\n"
+
             "2025 C++ homework";
 
         // 创建文本标签（字体大小从36增加到60）
-        _creditsLabel = Label::createWithTTF(credits, "fonts/Marker Felt.ttf", 90);
+        _creditsLabel = Label::createWithTTF(credits, "fonts/Marker Felt.ttf", 72);
         _creditsLabel->setAlignment(TextHAlignment::CENTER);
         _creditsLabel->setColor(Color3B::WHITE);
 
