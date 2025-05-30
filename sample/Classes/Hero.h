@@ -8,6 +8,10 @@
 class Hero : public cocos2d::Sprite
 {
 public:
+    // Hero.h 中添加
+    static void increaseMaxHealth(int amount); // 增加最大生命值上限
+    static int getMaxHealth(); // 获取当前最大生命值上限
+
     // 健康相关
     static int getCurrentHealth(); // 获取当前健康值
     static void healHealth(int amount); // 恢复指定数量的生命值，不超过上限
@@ -41,7 +45,7 @@ public:
 
     // 卡组操作接口
     void addCardToDeck(const Card& card);
-    const std::vector<Card>& getDeck() const;
+    static const std::vector<Card>& getDeck();
     void clearDeck();
     // 初始化默认卡组
     void createDefaultDeck();
@@ -54,10 +58,22 @@ public:
     // 实例方法状态显示
     void updateStatusDisplay();
 
+	// 判断卡组是否已初始化
+    bool isDeckInitialized() const; // 判断卡组是否已初始化
+   static void setDeckInitialized(bool initialized); // 设置卡组初始化状态
+
+    static void clearDeckStatic() {
+        _deck.clear();
+    }
+
+    static void addCardToDeckStatic(const Card& card) {
+        _deck.push_back(card);
+    }
+
 private:
     int _health; // 生命值
     int _block; // 防御值
-    std::vector<Card> _deck; // 卡组
+    static std::vector<Card> _deck; // 卡组
     std::vector<std::shared_ptr<Effect>> _effects; // 效果
     cocos2d::Label* _statusLabel; // 状态显示标签
 

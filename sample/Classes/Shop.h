@@ -9,6 +9,7 @@ namespace MyGame {
         static cocos2d::Scene* createScene();
         virtual bool init() override;
         void showGoodsColumn();
+        virtual ~ShopScene(); // 添加析构函数的声明
 
     private:
         std::vector<cocos2d::Sprite*> _cards; // 存储所有卡牌指针

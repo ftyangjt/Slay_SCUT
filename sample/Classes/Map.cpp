@@ -4,29 +4,23 @@
 #include "question.h"
 #include "Rest.h"
 #include "Shop.h"
+#include "Hero.h"
+#include "GameSaveManager.h"
 #include <random>
 
 USING_NS_CC;
-namespace MyGame {
+    namespace MyGame {
+        // 实际定义和初始化静态变量
+        RoomType currentRoomType = RoomType::BATTLE;
+        int Map::currentLayer = 0;
+        int Map::currentRoom = 0;
 
-    // 存储地图数据（房间类型和位置信息，但不存储指针）
-    struct RoomInfo {
-        RoomType type;
-        cocos2d::Vec2 position;
-    };
-    static std::vector<std::vector<RoomInfo>> staticMapInfo;
-
-    // 存储连线数据
-    static std::vector<ConnectionInfo> staticConnectionInfo;
-
-    // 存储当前可访问的最高层级（静态变量，在场景切换时保持）
-    static int maxAccessibleLayer = 0;
-
-    // 是否刚刚完成了一个房间（用于从房间场景返回地图时判断）
-    static bool roomCompleted = false;
-
-    // 记录当前选择的房间位置（用于判断下一层哪些房间可以访问）
-    static cocos2d::Vec2 currentRoomPosition;
+        // 定义在 Map.h 中声明的静态变量
+        std::vector<std::vector<RoomInfo>> staticMapInfo;
+        std::vector<ConnectionInfo> staticConnectionInfo;
+        int maxAccessibleLayer = 0;
+        bool roomCompleted = false;
+        cocos2d::Vec2 currentRoomPosition;
 
     // 添加重置游戏状态的函数实现
     void resetGameState() {
@@ -124,6 +118,7 @@ namespace MyGame {
 
         // 添加层级提示标签
         createLayerLabels();
+        createSaveButton();
 
         return true;
     }
@@ -402,11 +397,11 @@ namespace MyGame {
                     break;
                 case RoomType::QUESTION:
                     roomItem = MenuItemImage::create(
-                        "question_normal.jpg",
+                        "question_normal.png",
                         "question_selected.png",
                         CC_CALLBACK_1(Map::menuQuestionCallback, this)
                     );
-                    roomItem->setScale(0.5);
+                    roomItem->setScale(0.15);
                     break;
                 case RoomType::REST:
                     roomItem = MenuItemImage::create(
@@ -780,6 +775,9 @@ namespace MyGame {
         // 记录当前房间位置
         currentRoomPosition = item->getPosition();
 
+        // 添加这一行
+        currentRoomType = RoomType::QUESTION;
+
         // 标记为已完成房间
         roomCompleted = true;
 
@@ -821,6 +819,9 @@ namespace MyGame {
 
         // 记录当前房间位置
         currentRoomPosition = item->getPosition();
+
+        // 添加这一行
+        currentRoomType = RoomType::REST;
 
         // 标记为已完成房间
         roomCompleted = true;
@@ -949,10 +950,12 @@ namespace MyGame {
         // 设置当前选中的层和房间
         currentLayer = layerIndex;
         currentRoom = 0;
-		currentRoomType = RoomType::SHOP;
 
         // 记录当前房间位置
         currentRoomPosition = item->getPosition();
+
+        // 添加这一行
+        currentRoomType = RoomType::SHOP;
 
         // 标记为已完成房间
         roomCompleted = true;
@@ -963,6 +966,66 @@ namespace MyGame {
         auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // 黑色淡入淡出
         // 切换到带过渡效果的地图场景
         Director::getInstance()->replaceScene(transition);
+    }
+
+    // 在Map类中添加
+    void Map::createSaveButton()
+    {
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+        // 创建保存按钮
+        auto saveButton = ui::Button::create("button.png", "button_selected.png");
+        saveButton->setPosition(Vec2(origin.x + visibleSize.width - 50, origin.y + 50));
+        saveButton->setScale(0.5f);
+
+        // 添加点击事件
+        saveButton->addClickEventListener([this](Ref* sender) {
+            saveGame();
+            });
+
+        this->addChild(saveButton, 10);
+    }
+
+    void Map::saveGame()
+    {
+        // 获取当前游戏状态
+        int health = Hero::getCurrentHealth();
+        int gold = Hero::getCoins();
+        const std::vector<Card>& deck = Hero::getDeck();
+
+        // 保存游戏，现在传入所有地图相关数据
+        if (GameSaveManager::saveGame(
+            health,
+            gold,
+            deck,
+            currentLayer,
+            currentRoom,
+            staticMapInfo,
+            staticConnectionInfo,
+            maxAccessibleLayer,
+            currentRoomPosition,
+            currentRoomType,
+            roomCompleted
+        ))
+        {
+            // 显示保存成功提示
+            auto visibleSize = Director::getInstance()->getVisibleSize();
+            Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+            auto saveLabel = Label::createWithTTF("游戏已保存", "fonts/Marker Felt.ttf", 40);
+            saveLabel->setColor(Color3B::GREEN);
+            saveLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+            this->addChild(saveLabel, 100);
+
+            // 2秒后移除提示
+            saveLabel->runAction(Sequence::create(
+                DelayTime::create(2.0f),
+                FadeOut::create(0.5f),
+                RemoveSelf::create(),
+                nullptr
+            ));
+        }
     }
 
 

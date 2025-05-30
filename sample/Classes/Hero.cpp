@@ -1,16 +1,36 @@
-// Hero.cpp
+ï»¿// Hero.cpp
 #include "Hero.h"
+#include "CardLibrary.h"
 
 USING_NS_CC;
 
-// Ìí¼Ó¾²Ì¬±äÁ¿À´´æ´¢Ó¢ĞÛµÄ½¡¿µÖµºÍ½ğ±Ò
-static int heroHealth = 100; // Ä¬ÈÏÉúÃüÖµÎª100
-static int heroCoins = 100; // Ä¬ÈÏ½ğ±ÒÎª100
+// æ·»åŠ é™æ€æˆå‘˜å˜é‡å­˜å‚¨è‹±é›„çš„ç”Ÿå‘½å€¼å’Œé‡‘å¸
+static int heroHealth = 100; // é»˜è®¤ç”Ÿå‘½å€¼ä¸º100
+static int heroCoins = 100; // é»˜è®¤é‡‘å¸ä¸º100
+// æ·»åŠ ä¸€ä¸ªé™æ€å˜é‡å­˜å‚¨è‹±é›„çš„æœ€å¤§ç”Ÿå‘½å€¼ä¸Šé™
+static int heroMaxHealth = Hero::MAX_HEALTH;
+static bool _isDeckInitialized = false; // å¡ç»„åˆå§‹åŒ–æ ‡å¿—
+std::vector<Card> Hero::_deck; // å¡ç»„é™æ€å˜é‡
 
-// ³õÊ¼»¯¾²Ì¬±êÇ©
+// è·å–å½“å‰æœ€å¤§ç”Ÿå‘½å€¼ä¸Šé™
+int Hero::getMaxHealth()
+{
+    return heroMaxHealth;
+}
+
+// å¢åŠ æœ€å¤§ç”Ÿå‘½å€¼ä¸Šé™
+void Hero::increaseMaxHealth(int amount)
+{
+    heroMaxHealth += amount;
+    // åŒæ—¶å¢åŠ å½“å‰ç”Ÿå‘½å€¼
+    healHealth(amount);
+    updateStatusDisplayStatic(); // æ›´æ–°æ˜¾ç¤º
+}
+
+// åˆå§‹åŒ–é™æ€æ ‡ç­¾
 cocos2d::Label* Hero::s_statusLabel = nullptr;
 
-// ´´½¨Ö÷½ÇÊµÀı
+// åˆ›å»ºè‹±é›„å®ä¾‹
 Hero* Hero::create(const std::string& filename)
 {
     Hero* hero = new (std::nothrow) Hero();
@@ -23,122 +43,122 @@ Hero* Hero::create(const std::string& filename)
     return nullptr;
 }
 
-// »ñÈ¡µ±Ç°½¡¿µÖµ
+// è·å–å½“å‰ç”Ÿå‘½å€¼
 int Hero::getCurrentHealth()
 {
     return heroHealth;
 }
 
-// »Ö¸´Ö¸¶¨ÊıÁ¿µÄÉúÃüÖµ£¬²»³¬¹ıÉÏÏŞ
+// æ¢å¤æŒ‡å®šæ•°é‡çš„ç”Ÿå‘½å€¼ï¼ˆä¸ä¼šè¶…è¿‡ä¸Šé™ï¼‰
 void Hero::healHealth(int amount)
 {
-    heroHealth = std::min(heroHealth + amount, MAX_HEALTH);
-    updateStatusDisplayStatic(); // ¸üĞÂÏÔÊ¾
+    // ä¿®æ”¹ä¸ºä½¿ç”¨åŠ¨æ€çš„ heroMaxHealth è€Œä¸æ˜¯é™æ€å¸¸é‡ MAX_HEALTH
+    heroHealth = std::min(heroHealth + amount, heroMaxHealth);
+    updateStatusDisplayStatic(); // æ›´æ–°æ˜¾ç¤º
 }
 
-// »ñÈ¡µ±Ç°½ğ±ÒÊıÁ¿
+// è·å–å½“å‰é‡‘å¸æ•°
 int Hero::getCoins()
 {
     return heroCoins;
 }
 
-// ÉèÖÃ½ğ±ÒÊıÁ¿
+// è®¾ç½®é‡‘å¸æ•°é‡
 void Hero::setCoins(int coins)
 {
     heroCoins = coins;
-    updateStatusDisplayStatic(); // ¸üĞÂÏÔÊ¾
+    updateStatusDisplayStatic(); // æ›´æ–°æ˜¾ç¤º
 }
 
-// Ôö¼Ó½ğ±Ò
+// æ·»åŠ é‡‘å¸
 void Hero::addCoins(int amount)
 {
     heroCoins += amount;
-    updateStatusDisplayStatic(); // ¸üĞÂÏÔÊ¾
+    updateStatusDisplayStatic(); // æ›´æ–°æ˜¾ç¤º
 }
 
-// ÖØÖÃ½ğ±Ò
+// é‡ç½®é‡‘å¸
 void Hero::resetCoins()
 {
     heroCoins = INITIAL_COINS;
-    updateStatusDisplayStatic(); // ¸üĞÂÏÔÊ¾
+    updateStatusDisplayStatic(); // æ›´æ–°æ˜¾ç¤º
 }
 
-// ³õÊ¼»¯×´Ì¬ÏÔÊ¾
-
+// åˆå§‹åŒ–çŠ¶æ€æ˜¾ç¤º
 void Hero::initStatusDisplay()
 {
-    // ÏÈÊÍ·Å¿ÉÄÜÒÑ¾­´æÔÚµÄ±êÇ©
+    // é‡Šæ”¾å·²ç»å­˜åœ¨çš„æ ‡ç­¾
     if (s_statusLabel != nullptr) {
         if (s_statusLabel->getParent()) {
             s_statusLabel->removeFromParent();
         }
-        s_statusLabel->release(); // ÊÍ·ÅÖ®Ç°µÄretain
+        s_statusLabel->release(); // é‡Šæ”¾ä¹‹å‰çš„retain
         s_statusLabel = nullptr;
     }
 
-    // ´´½¨×´Ì¬ÏÔÊ¾±êÇ©
+    // åˆ›å»ºçŠ¶æ€æ˜¾ç¤ºæ ‡ç­¾ï¼Œä¿®æ”¹æ˜¾ç¤ºæ ¼å¼ä¸ºå½“å‰ç”Ÿå‘½å€¼/æœ€å¤§ç”Ÿå‘½å€¼
     s_statusLabel = Label::createWithTTF("Coins: " + std::to_string(heroCoins) +
-        " Health: " + std::to_string(heroHealth),
+        " Health: " + std::to_string(heroHealth) + "/" + std::to_string(heroMaxHealth),
         "fonts/Marker Felt.ttf", 24);
     if (s_statusLabel == nullptr) {
         CCLOG("Error: Failed to create status label");
         return;
     }
 
-    s_statusLabel->setAnchorPoint(Vec2(0, 1)); // ×óÉÏ½Ç¶ÔÆë
+    s_statusLabel->setAnchorPoint(Vec2(0, 1)); // å·¦ä¸Šè§’å¯¹é½
 
-    // »ñÈ¡µ±Ç°ÔËĞĞ³¡¾°ºÍ¿ÉÊÓÇøÓò´óĞ¡
+    // è·å–å½“å‰è¿è¡Œåœºæ™¯å’Œå¯è§åŒºåŸŸå¤§å°
     Scene* runningScene = Director::getInstance()->getRunningScene();
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    // ÉèÖÃ±êÇ©Î»ÖÃÔÚ×óÉÏ½Ç
+    // è®¾ç½®æ ‡ç­¾ä½ç½®åœ¨å·¦ä¸Šè§’
     s_statusLabel->setPosition(Vec2(origin.x + 10, origin.y + visibleSize.height - 10));
-    s_statusLabel->setTextColor(Color4B::WHITE); // ÉèÖÃ±êÇ©ÑÕÉ«Îª°×É«
+    s_statusLabel->setTextColor(Color4B::WHITE); // è®¾ç½®æ ‡ç­¾é¢œè‰²ä¸ºç™½è‰²
 
-    // Îª±êÇ©Ìí¼ÓºÚÉ«Ãè±ß£¬Ìá¸ß¿É¶ÁĞÔ
+    // ä¸ºæ ‡ç­¾æ·»åŠ é»‘è‰²è¾¹æ¡†ï¼Œæé«˜å¯è¯»æ€§
     s_statusLabel->enableOutline(Color4B::BLACK, 1);
 
-    // ½«±êÇ©Ìí¼Óµ½µ±Ç°ÔËĞĞ³¡¾°
+    // å°†æ ‡ç­¾æ·»åŠ åˆ°å½“å‰è¿è¡Œåœºæ™¯
     if (runningScene) {
-        runningScene->addChild(s_statusLabel, 100); // Ê¹ÓÃ¼«¸ßµÄZË³ĞòÈ·±£ÏÔÊ¾ÔÚ×îÇ°
+        runningScene->addChild(s_statusLabel, 100); // ä½¿ç”¨è¾ƒé«˜çš„Zé¡ºåºç¡®ä¿æ˜¾ç¤ºåœ¨æœ€å‰
     }
 
-    // Ìí¼Ó³¡¾°ÇĞ»»¼àÌıÆ÷
+    // æ·»åŠ åœºæ™¯åˆ‡æ¢ç›‘å¬å™¨
     Director::getInstance()->getEventDispatcher()->addCustomEventListener(
         Director::EVENT_AFTER_SET_NEXT_SCENE,
         [](EventCustom* event) {
-            Hero::updateStatusDisplayStatic(); // ³¡¾°ÇĞ»»ºó¸üĞÂ×´Ì¬ÏÔÊ¾
+            Hero::updateStatusDisplayStatic(); // åœºæ™¯åˆ‡æ¢åæ›´æ–°çŠ¶æ€æ˜¾ç¤º
         }
     );
 
-    s_statusLabel->retain(); // ±£Áô±êÇ©ÒÔ·À³¡¾°ÇĞ»»Ê±±»×Ô¶¯ÊÍ·Å
+    s_statusLabel->retain(); // ä¿ç•™æ ‡ç­¾ä»¥é˜²åœºæ™¯åˆ‡æ¢æ—¶è¢«è‡ªåŠ¨é‡Šæ”¾
 }
 
 
 void Hero::updateStatusDisplayStatic()
 {
-    // Èç¹û±êÇ©²»´æÔÚ£¬Ôò´´½¨
+    // å¦‚æœæ ‡ç­¾ä¸å­˜åœ¨ï¼Œåˆ™åˆ›å»º
     if (s_statusLabel == nullptr) {
         initStatusDisplay();
         return;
     }
 
-    // ¸üĞÂ±êÇ©ÎÄ±¾
+    // æ›´æ–°æ ‡ç­¾æ–‡æœ¬ï¼Œä¿®æ”¹æ˜¾ç¤ºæ ¼å¼ä¸ºå½“å‰ç”Ÿå‘½å€¼/æœ€å¤§ç”Ÿå‘½å€¼
     s_statusLabel->setString("Coins: " + std::to_string(heroCoins) +
-        " Health: " + std::to_string(heroHealth));
+        " Health: " + std::to_string(heroHealth) + "/" + std::to_string(heroMaxHealth));
 
-    // ¼ì²é±êÇ©ÊÇ·ñÔÚµ±Ç°³¡¾°ÖĞ
+    // æ£€æŸ¥æ ‡ç­¾æ˜¯å¦åœ¨å½“å‰åœºæ™¯ä¸­
     Scene* currentScene = Director::getInstance()->getRunningScene();
     if (currentScene && !s_statusLabel->getParent()) {
-        s_statusLabel->removeFromParent(); // È·±£±êÇ©´ÓÖ®Ç°µÄ¸¸½ÚµãÖĞÒÆ³ı
-        currentScene->addChild(s_statusLabel, 100); // Ìí¼Óµ½µ±Ç°³¡¾°
+        s_statusLabel->removeFromParent(); // ç¡®ä¿æ ‡ç­¾ä»ä¹‹å‰çš„çˆ¶èŠ‚ç‚¹ç§»é™¤
+        currentScene->addChild(s_statusLabel, 100); // æ·»åŠ åˆ°å½“å‰åœºæ™¯
     }
 }
 
 
 
-// ³õÊ¼»¯Ö÷½Ç
+// åˆå§‹åŒ–è‹±é›„
 bool Hero::init(const std::string& filename)
 {
     if (!Sprite::initWithFile(filename))
@@ -146,141 +166,140 @@ bool Hero::init(const std::string& filename)
         return false;
     }
 
-    // Ê¹ÓÃ±£´æµÄÉúÃüÖµ³õÊ¼»¯Ö÷½Ç
+    // ä½¿ç”¨è§’è‰²ç”Ÿå‘½å€¼åˆå§‹åŒ–æˆå‘˜
     _health = heroHealth;
 
-    // ´´½¨Ä¬ÈÏµÄ¿¨×é
+    // åˆ›å»ºé»˜è®¤çš„å¡ç»„
     createDefaultDeck();
 
-    // ³õÊ¼»¯²¢¹ØÁªÊµÀı×´Ì¬±êÇ©
+    // åˆå§‹åŒ–è‹±é›„å®ä¾‹çŠ¶æ€æ ‡ç­¾
     initStatusDisplay();
     _statusLabel = s_statusLabel;
 
     return true;
 }
 
-// ÉèÖÃÖ÷½ÇµÄÉúÃüÖµ
+// è®¾ç½®è‹±é›„çš„ç”Ÿå‘½å€¼
 void Hero::setHealth(int health)
 {
     _health = health;
-    // Í¬Ê±¸üĞÂ¾²Ì¬±äÁ¿
+    // åŒæ—¶æ›´æ–°é™æ€å˜é‡
     heroHealth = health;
-    updateStatusDisplayStatic(); // Ê¹ÓÃ¾²Ì¬·½·¨¸üĞÂ
+    updateStatusDisplayStatic(); // ä½¿ç”¨é™æ€æ–¹æ³•æ›´æ–°
 }
 
-// »ñÈ¡Ö÷½ÇµÄÉúÃüÖµ
+// è·å–è‹±é›„çš„ç”Ÿå‘½å€¼
 int Hero::getHealth() const
 {
     return _health;
 }
 
-// ÖØÖÃ½¡¿µÖµ£¨¿ÉÒÔÔÚÓÎÏ·ÖØĞÂ¿ªÊ¼Ê±µ÷ÓÃ£©
+// è®¾ç½®ç”Ÿå‘½å€¼ï¼ˆå¸¸ç”¨äºæ¸¸æˆé‡æ–°å¼€å§‹æ—¶è°ƒç”¨ï¼‰
 void Hero::resetHealth()
 {
-    heroHealth = MAX_HEALTH;  // ÖØÖÃ¾²Ì¬±äÁ¿
-    updateStatusDisplayStatic(); // Ê¹ÓÃ¾²Ì¬·½·¨¸üĞÂ
+    // ä¿®æ”¹ä¸ºä½¿ç”¨heroMaxHealthè€ŒéMAX_HEALTH
+    heroHealth = heroMaxHealth;  // é‡ç½®ä¸ºå½“å‰æœ€å¤§ç”Ÿå‘½å€¼
+    updateStatusDisplayStatic(); // ä½¿ç”¨é™æ€æ–¹æ³•æ›´æ–°
 }
 
-// ÉèÖÃÖ÷½ÇµÄ·ÀÓùÖµ
+// è®¾ç½®è‹±é›„çš„æ ¼æŒ¡å€¼
 void Hero::setBlock(int block) {
     _block = block;
 }
 
-// »ñÈ¡Ö÷½ÇµÄ·ÀÓùÖµ
+// è·å–è‹±é›„çš„æ ¼æŒ¡å€¼
 int Hero::getBlock() const {
     return _block;
 }
 
-// Ìí¼Ó¿¨ÅÆµ½¿¨×é
+// æ·»åŠ å¡ç‰Œåˆ°å¡ç»„
 void Hero::addCardToDeck(const Card& card)
 {
     _deck.push_back(card);
 }
 
-// »ñÈ¡¿¨×é
-const std::vector<Card>& Hero::getDeck() const
+// è·å–å¡ç»„
+const std::vector<Card>& Hero::getDeck()
 {
-    return _deck;
+    return _deck; // _deck éœ€è¦æ˜¯é™æ€æˆå‘˜å˜é‡
 }
 
-// Çå¿Õ¿¨×é
+// æ¸…ç©ºå¡ç»„
 void Hero::clearDeck()
 {
     _deck.clear();
 }
 
-// ³õÊ¼»¯Ä¬ÈÏ¿¨×é
+// åˆå§‹åŒ–é»˜è®¤å¡ç»„
 void Hero::createDefaultDeck()
 {
-    // ÕâÀïÊ¾Àı´´½¨Ò»¸ö³õÊ¼¿¨×é£¬¾ßÌå¿¨ÅÆÊôĞÔ¸ù¾İÊµ¼ÊĞèÇóµ÷Õû
+    if (_isDeckInitialized) {
+        CCLOG("Deck is already initialized. Skipping initialization.");
+        return;
+    }
+    // ä»¥ä¸‹ç¤ºä¾‹åˆ›å»ºä¸€ä¸ªåˆå§‹å¡ç»„ï¼Œå…·ä½“å¡ç‰Œå¯æ ¹æ®å®é™…æƒ…å†µè°ƒæ•´
     clearDeck();
-
-    // Ìí¼ÓÊ¾Àı¿¨ÅÆ£¨¼ÙÉè Card ¹¹Ôìº¯Êı£ºCard(name, type, cost, effect, background, attack, defense)£©
-    addCardToDeck(Card("Strike", Card::Type::Attack, 1, "Deal 6 damage", "cardBackground.jpg", 6, 0));
-    addCardToDeck(Card("Strike", Card::Type::Attack, 1, "Deal 6 damage", "cardBackground.jpg", 6, 0));
-    addCardToDeck(Card("Strike", Card::Type::Attack, 1, "Deal 6 damage", "cardBackground.jpg", 6, 0));
-    addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
-    addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
-    addCardToDeck(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
-
-    // ´´½¨ Bash ¿¨ÅÆ²¢Ìí¼ÓÒ×ÉËĞ§¹û
-    Card bashCard("Bash", Card::Type::Attack, 2, "Deal 8 damage and apply Vulnerable", "cardBackground.jpg", 8, 0);
-    // Ê¹ÓÃĞÂ·½·¨Ìí¼ÓĞ§¹û£ºÖ±½ÓÖ¸¶¨Ğ§¹ûÀàĞÍ¡¢µÈ¼¶ºÍ³ÖĞøÊ±¼ä
-    bashCard.addEffect(Effect::Type::Vulnerable, 1, 3); // 1¼¶Ò×ÉË£¬³ÖĞø3»ØºÏ
-    addCardToDeck(bashCard);
-
-    Card strengthCard("Strength", Card::Type::Power, 1, "Gain 2 Strength", "cardBackground.jpg");
-    strengthCard.addEffect(Effect::Type::Strength, 2, -1); // 2¼¶Á¦Á¿£¬³ÖĞøÊ±¼äÎªÓÀ¾Ã
-    addCardToDeck(strengthCard);
+    _isDeckInitialized = true;
+    _deck = CardLibrary::getStarterDeck();
 }
 
-//  Ìí¼ÓĞ§¹û
+// æ·»åŠ æ•ˆæœ
 void Hero::addEffect(std::shared_ptr<Effect> effect) {
     if (!effect) {
         CCLOG("Error: Attempted to add a null effect.");
-        return; // Èç¹û´«ÈëµÄ effect ÊÇ¿ÕÖ¸Õë£¬Ö±½Ó·µ»Ø
+        return; // å¦‚æœä¼ å…¥çš„ effect æ˜¯ç©ºæŒ‡é’ˆï¼Œç›´æ¥è¿”å›
     }
 
     for (auto& existingEffect : _effects) {
-        // ¼ì²éÊÇ·ñ´æÔÚÏàÍ¬ÀàĞÍµÄĞ§¹û
+        // æ£€æŸ¥æ˜¯å¦å­˜åœ¨ç›¸åŒç±»å‹çš„æ•ˆæœ
         if (existingEffect->getType() == effect->getType()) {
             if (effect->getType() == Effect::Type::Strength) {
-                // Á¦Á¿Ğ§¹û£ºµş¼ÓµÈ¼¶
+                // å¦‚æœæ•ˆæœæ˜¯åŠ›é‡ï¼ŒåŠ ç­‰çº§
                 existingEffect->setLevel(existingEffect->getLevel() + effect->getLevel());
             }
             else if (effect->getType() == Effect::Type::Vulnerable) {
-                // Ò×ÉËĞ§¹û£ºÊ±³¤µş¼Ó
+                // å¦‚æœæ•ˆæœæ˜¯æ˜“ä¼¤ï¼ŒåŠ æ—¶é—´
                 existingEffect->addRemainingTurns(effect->getRemainingTurns());
             }
-            return; // ´¦ÀíÍê³ÉºóÖ±½Ó·µ»Ø
+            return; // å¤„ç†å®Œæˆåç›´æ¥è¿”å›
         }
     }
 
-    // Èç¹ûÃ»ÓĞÕÒµ½ÏàÍ¬ÀàĞÍµÄĞ§¹û£¬ÔòÌí¼ÓĞÂµÄĞ§¹û
+    // å¦‚æœæ²¡æœ‰æ‰¾åˆ°ç›¸åŒç±»å‹çš„æ•ˆæœï¼Œæ·»åŠ æ–°çš„æ•ˆæœ
     _effects.push_back(effect);
 }
 
-// »ñÈ¡ÓµÓĞµÄĞ§¹û
+// è·å–æ‹¥æœ‰çš„æ•ˆæœ
 const std::vector<std::shared_ptr<Effect>>& Hero::getEffects() const
 {
     return _effects;
 }
 
-// ¸üĞÂĞ§¹û£¬ÒÆ³ı³ÖĞøÊ±¼äÎª 0 µÄĞ§¹û
+// æ›´æ–°æ•ˆæœå¹¶ç§»é™¤æŒç»­æ—¶é—´ä¸º 0 çš„æ•ˆæœ
 void Hero::updateEffects() {
     for (auto it = _effects.begin(); it != _effects.end(); ) {
         (*it)->reduceTurn();
         if ((*it)->getRemainingTurns() == 0) {
-            it = _effects.erase(it); // ÒÆ³ı³ÖĞøÊ±¼äÎª 0 µÄĞ§¹û
+            it = _effects.erase(it); // ç§»é™¤æŒç»­æ—¶é—´ä¸º 0 çš„æ•ˆæœ
         }
         else {
             ++it;
         }
     }
-    updateStatusDisplay(); // ÕâÊÇÊµÀı·½·¨µÄµ÷ÓÃ£¬²»»áÓĞ´íÎó
+    updateStatusDisplay(); // è°ƒç”¨å®ä¾‹æ–¹æ³•çš„è°ƒç”¨ï¼Œæ–¹ä¾¿æ‰©å±•
 }
 
-// ¸üĞÂ×´Ì¬ÏÔÊ¾ (ÊµÀı·½·¨)
+// æ›´æ–°çŠ¶æ€æ˜¾ç¤º (å®ä¾‹æ–¹æ³•)
 void Hero::updateStatusDisplay() {
-    updateStatusDisplayStatic(); // ¼òµ¥µØµ÷ÓÃ¾²Ì¬·½·¨
+    updateStatusDisplayStatic(); // ç®€å•åœ°è°ƒç”¨é™æ€æ–¹æ³•
 }
+
+bool Hero::isDeckInitialized() const {
+    return _isDeckInitialized;
+}
+
+// è®¾ç½®å¡ç»„åˆå§‹åŒ–çŠ¶æ€
+void Hero::setDeckInitialized(bool initialized) {
+    _isDeckInitialized = initialized;
+}
+
