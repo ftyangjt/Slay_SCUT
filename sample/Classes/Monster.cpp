@@ -1,141 +1,77 @@
 #include "Monster.h"
-#include <ctime>
 
 USING_NS_CC;
 
-// åˆå§‹åŒ–é™æ€æˆå‘˜
-std::mt19937 Monster::_rng(static_cast<unsigned int>(time(nullptr)));
-
-
-// å·¥å‚æ–¹æ³•ï¼Œæ ¹æ®ç±»ååˆ›å»ºå…·ä½“æ€ªç‰©å®ä¾‹
-Monster* Monster::createFactory(const std::string& monsterClassName) {
-    Monster* monster = nullptr;
-
-    // æ™®é€šæ€ªç‰©
-    if (monsterClassName == "SlimeMonster") {
-        monster = SlimeMonster::create();
+Monster* Monster::create(const std::string& filename)
+{
+    Monster* monster = new (std::nothrow) Monster();
+    if (monster && monster->init(filename))
+    {
+        monster->autorelease();
+        return monster;
     }
-    else if (monsterClassName == "GoblinMonster") {
-        monster = GoblinMonster::create();
-    }
-    else if (monsterClassName == "SnakeMonster") {
-        monster = SnakeMonster::create();
-    }
-    // ç²¾è‹±æ€ªç‰©
-    else if (monsterClassName == "OrcMonster") {
-        monster = OrcMonster::create();
-    }
-    else if (monsterClassName == "GolemMonster") {
-        monster = GolemMonster::create();
-    }
-    // Bossæ€ªç‰©
-    else if (monsterClassName == "KnightBossMonster") {
-        monster = KnightBossMonster::create();
-    }
-    else if (monsterClassName == "DragonBossMonster") {
-        monster = DragonBossMonster::create();
-    }
-    // é»˜è®¤æƒ…å†µä¸‹åˆ›å»ºå²è±å§†
-    else {
-        monster = SlimeMonster::create();
-    }
-
-    return monster;
+    CC_SAFE_DELETE(monster);
+    return nullptr;
 }
 
-// éšæœºåˆ›å»ºæ€ªç‰©
-Monster* Monster::createRandom(bool isBoss, bool isElite) {
-    std::vector<std::string> candidates;
-
-    if (isBoss) {
-        candidates = { "KnightBossMonster", "DragonBossMonster" };
-    }
-    else if (isElite) {
-        candidates = { "OrcMonster", "GolemMonster" };
-    }
-    else {
-        candidates = { "SlimeMonster", "GoblinMonster", "SnakeMonster" };
+bool Monster::init(const std::string& filename)
+{
+    if (!Sprite::initWithFile(filename))
+    {
+        return false;
     }
 
-    std::uniform_int_distribution<> dist(0, candidates.size() - 1);
-    std::string selectedType = candidates[dist(_rng)];
-
-    return createFactory(selectedType);
-}
-
-// åŸºç¡€åˆå§‹åŒ–
-bool Monster::init() {
-    _health = 20;      // é»˜è®¤ç”Ÿå‘½å€¼
-    _block = 0;        // é»˜è®¤æ ¼æŒ¡å€¼
-    _attackDamage = 5; // é»˜è®¤æ”»å‡»åŠ›
-    _currentTurn = 0;  // åˆå§‹å›åˆæ•°
+    // ³õÊ¼»¯¹ÖÎïµÄÊôĞÔ
+    _health = 100; // Ä¬ÈÏÉúÃüÖµ
 
     return true;
 }
 
-bool Monster::initWithSprite(const std::string& spritePath) {
-    if (!Sprite::initWithFile(spritePath)) {
-        CCLOG("Failed to load sprite: %s", spritePath.c_str());
-        return false;
-    }
-
-    return true; // ä¸å†è°ƒç”¨ init()
-}
-
-// å„ç±»getterå’Œsetteræ–¹æ³•
-void Monster::setHealth(int health) {
+void Monster::setHealth(int health)
+{
     _health = health;
 }
 
-int Monster::getHealth() const {
-    if (this == nullptr) {
-        CCLOG("Error: Called getHealth() on a nullptr Monster object!");
-        return 0;
-    }
+int Monster::getHealth() const
+{
     return _health;
 }
 
-void Monster::setBlock(int block)
-{
+void Monster::setBlock(int block) {
     _block = block;
 }
 
-int Monster::getBlock() const
-{
+int Monster::getBlock() const {
     return _block;
 }
 
-void Monster::setAttackDamage(int damage) {
-    _attackDamage = damage;
-}
-
-int Monster::getAttackDamage() const {
-    return _attackDamage;
-}
-
-// æ·»åŠ æ•ˆæœ
 void Monster::addEffect(std::shared_ptr<Effect> effect) {
     if (!effect) {
         CCLOG("Error: Attempted to add a null effect.");
-        return;
+        return; // Èç¹û´«ÈëµÄ effect ÊÇ¿ÕÖ¸Õë£¬Ö±½Ó·µ»Ø
     }
 
     for (auto& existingEffect : _effects) {
+        // ¼ì²éÊÇ·ñ´æÔÚÏàÍ¬ÀàĞÍµÄĞ§¹û
         if (existingEffect->getType() == effect->getType()) {
             if (effect->getType() == Effect::Type::Strength) {
+                // Á¦Á¿Ğ§¹û£ºµş¼ÓµÈ¼¶
                 existingEffect->setLevel(existingEffect->getLevel() + effect->getLevel());
             }
             else if (effect->getType() == Effect::Type::Vulnerable) {
+                // Ò×ÉËĞ§¹û£ºÊ±³¤µş¼Ó
                 existingEffect->addRemainingTurns(effect->getRemainingTurns());
             }
-            return;
+            return; // ´¦ÀíÍê³ÉºóÖ±½Ó·µ»Ø
         }
     }
 
+    // Èç¹ûÃ»ÓĞÕÒµ½ÏàÍ¬ÀàĞÍµÄĞ§¹û£¬ÔòÌí¼ÓĞÂµÄĞ§¹û
     _effects.push_back(effect);
 }
 
-const std::vector<std::shared_ptr<Effect>>& Monster::getEffects() const {
+const std::vector<std::shared_ptr<Effect>>& Monster::getEffects() const
+{
     return _effects;
 }
 
@@ -143,7 +79,7 @@ void Monster::updateEffects() {
     for (auto it = _effects.begin(); it != _effects.end(); ) {
         (*it)->reduceTurn();
         if ((*it)->getRemainingTurns() == 0) {
-            it = _effects.erase(it);
+            it = _effects.erase(it); // ÒÆ³ı³ÖĞøÊ±¼äÎª 0 µÄĞ§¹û
         }
         else {
             ++it;

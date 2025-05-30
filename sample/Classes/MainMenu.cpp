@@ -1,8 +1,10 @@
 #include "MainMenu.h"
+<<<<<<< Updated upstream
+=======
 #include "Hero.h"
 #include "TransitionScene.h"
-#include "GameSaveManager.h"
-#include "Map.h"  // ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½Í·ï¿½Ä¼ï¿½
+>>>>>>> Stashed changes
+#include "Map.h"  // ÒýÈëµØÍ¼³¡¾°Í·ÎÄ¼þ
 
 USING_NS_CC;
 
@@ -21,19 +23,19 @@ bool MainMenu::init()
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // ï¿½ï¿½ï¿½Ó±ï¿½ï¿½ï¿½Í¼Æ¬
+    // Ìí¼Ó±³¾°Í¼Æ¬
     auto background = Sprite::create("background.webp");
     if (background)
     {
         background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-        this->addChild(background, 0);  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼Æ¬ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½×²ï¿½
-		setScale(1.6);  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼Æ¬ï¿½ï¿½Ð¡
+        this->addChild(background, 0);  // ½«±³¾°Í¼Æ¬Ìí¼Óµ½×îµ×²ã
+		setScale(1.6);  // µ÷Õû±³¾°Í¼Æ¬´óÐ¡
     }
 
-    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Ï·ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½
+    // ´´½¨¡°¿ªÊ¼ÓÎÏ·¡±²Ëµ¥Ïî
     auto startItem = MenuItemImage::create(
-        "start_normal.png",  // ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Í¼Æ¬
-        "start_normal.png",  // Ñ¡ï¿½ï¿½×´Ì¬ï¿½ï¿½Í¼Æ¬
+        "start_normal.png",  // Õý³£×´Ì¬µÄÍ¼Æ¬
+        "start_normal.png",  // Ñ¡ÖÐ×´Ì¬µÄÍ¼Æ¬
         CC_CALLBACK_1(MainMenu::menuStartCallback, this)
     );
     if (startItem)
@@ -42,13 +44,13 @@ bool MainMenu::init()
             origin.x + visibleSize.width / 2,
             origin.y + visibleSize.height / 2 - 145
         ));
-        startItem->setScale(0.75);  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½Ð¡
+        startItem->setScale(0.75);  // µ÷Õû°´Å¥´óÐ¡
     }
 
-    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë³ï¿½ï¿½ï¿½Ï·ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½
+    // ´´½¨¡°ÍË³öÓÎÏ·¡±²Ëµ¥Ïî
     auto exitItem = MenuItemImage::create(
-        "CloseNormal.png",  // ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Í¼Æ¬
-        "CloseSelected.png",  // Ñ¡ï¿½ï¿½×´Ì¬ï¿½ï¿½Í¼Æ¬
+        "CloseNormal.png",  // Õý³£×´Ì¬µÄÍ¼Æ¬
+        "CloseSelected.png",  // Ñ¡ÖÐ×´Ì¬µÄÍ¼Æ¬
         CC_CALLBACK_1(MainMenu::menuCloseCallback, this)
     );
     if (exitItem)
@@ -57,140 +59,46 @@ bool MainMenu::init()
             origin.x + visibleSize.width -570,
             origin.y + visibleSize.height -1100
         ));
-        exitItem->setScale(0.2);  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½Ð¡
+        exitItem->setScale(0.2);  // µ÷Õû°´Å¥´óÐ¡
     }
 
-    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½
+    // ½«Á½¸ö²Ëµ¥Ïî¼ÓÈë²Ëµ¥
     auto menu = Menu::create(startItem, exitItem, nullptr);
     menu->setPosition(Vec2::ZERO);
-    this->addChild(menu, 1);  // È·ï¿½ï¿½ï¿½Ëµï¿½ï¿½Ú±ï¿½ï¿½ï¿½Í¼Æ¬Ö®ï¿½ï¿½
-    createContinueButton();
+    this->addChild(menu, 1);  // È·±£²Ëµ¥ÔÚ±³¾°Í¼Æ¬Ö®ÉÏ
 
     return true;
 }
 <<<<<<< Updated upstream
 
-void MainMenu::menuStartCallback(cocos2d::Ref* pSender)
+void MainMenu::menuStartCallback(Ref* pSender)
 {
-    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï·×´Ì¬
-    MyGame::resetGameState();
-
-    // ï¿½ï¿½ï¿½ï¿½Ó¢ï¿½ï¿½Ñªï¿½ï¿½ï¿½Í½ï¿½ï¿½
-    Hero::resetHealth();
-    Hero::resetCoins();
-
-    // ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½
+    // ÇÐ»»µ½µØÍ¼³¡¾°
     auto scene = MyGame::Map::createScene();
     Director::getInstance()->replaceScene(scene);
 =======
 void MainMenu::menuStartCallback(cocos2d::Ref* pSender)
 {
-    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï·×´Ì¬
+    // ÖØÖÃÓÎÏ·×´Ì¬
     MyGame::resetGameState();
 
-    // ï¿½ï¿½ï¿½ï¿½Ó¢ï¿½ï¿½Ñªï¿½ï¿½ï¿½Í½ï¿½ï¿½
+    // ÖØÖÃÓ¢ÐÛÑªÁ¿ºÍ½ð±Ò
     Hero::resetHealth();
     Hero::resetCoins();
 
-    // ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½Ó½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½
+    // ÇÐ»»µ½¹ý³¡¶¯»­³¡¾°£¬¶ø²»ÊÇÖ±½Ó½øÈëµØÍ¼³¡¾°
     auto scene = MyGame::TransitionScene::createScene();
 
-    // Ê¹ï¿½Ãµï¿½ï¿½ëµ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½
-    auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ï¿½ï¿½É«ï¿½ï¿½ï¿½ëµ­ï¿½ï¿½
+    // Ê¹ÓÃµ­Èëµ­³ö¹ý¶ÉÐ§¹û£¬³ÖÐø1Ãë
+    auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ºÚÉ«µ­Èëµ­³ö
 
-    // ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½Ä¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    // ÇÐ»»µ½´ø¹ý¶ÉÐ§¹ûµÄ¹ý³¡¶¯»­³¡¾°
     Director::getInstance()->replaceScene(transition);
 >>>>>>> Stashed changes
 }
 
-
 void MainMenu::menuCloseCallback(Ref* pSender)
 {
-    // ï¿½Ë³ï¿½ï¿½ï¿½Ï·
+    // ÍË³öÓÎÏ·
     Director::getInstance()->end();
 }
-
-// ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-void MainMenu::createContinueButton()
-{
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½Å¥
-    auto continueButton = ui::Button::create("button.png", "button_selected.png");
-    continueButton->setPosition(Vec2(origin.x + visibleSize.width / 2+60, origin.y + visibleSize.height / 2 +60));
-	continueButton->setScale(0.5);
-
-    // ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ð´æµµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥×´Ì¬
-    bool hasSave = GameSaveManager::hasSavedGame();
-    continueButton->setEnabled(hasSave);
-    if (!hasSave)
-    {
-        continueButton->setColor(Color3B(150, 150, 150)); // ï¿½ï¿½É«ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½
-    }
-
-    // ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½Â¼ï¿½
-    continueButton->addClickEventListener([this](Ref* sender) {
-        loadGame();
-        });
-
-    this->addChild(continueButton, 10);
-}
-
-void MainMenu::loadGame()
-{
-    // ï¿½ï¿½È¡ï¿½æµµ
-    int health, gold, currentMapId, currentLevel;
-    std::vector<Card> deck;
-    std::vector<std::vector<MyGame::RoomInfo>> mapInfo;
-    std::vector<MyGame::ConnectionInfo> connectionInfo;
-    int maxLayer;
-    cocos2d::Vec2 currentRoomPos;
-    MyGame::RoomType roomType;
-    bool completed;
-
-    if (GameSaveManager::loadGame(
-        health,
-        gold,
-        deck,
-        currentMapId,
-        currentLevel,
-        mapInfo,
-        connectionInfo,
-        maxLayer,
-        currentRoomPos,
-        roomType,
-        completed
-    ))
-    {
-        // ï¿½Ö¸ï¿½ï¿½ï¿½Ï·×´Ì¬
-        Hero::resetHealth();
-        int maxHealth = Hero::getMaxHealth();
-        Hero::healHealth(health - Hero::getCurrentHealth());
-        Hero::setCoins(gold);
-
-        // ï¿½ï¿½Õ¿ï¿½ï¿½é²¢ï¿½ï¿½ï¿½Ó¿ï¿½ï¿½ï¿½
-        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Hero ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½Ð¾ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-        Hero::clearDeckStatic();  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¾ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½
-        for (const auto& card : deck) {
-            Hero::addCardToDeckStatic(card);  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¾ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½
-        }
-
-        // ï¿½Ö¸ï¿½ï¿½ï¿½Í¼×´Ì¬
-        MyGame::Map::currentLayer = currentMapId;
-        MyGame::Map::currentRoom = currentLevel;
-
-        // ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Ð¾ï¿½Ì¬ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½
-        MyGame::staticMapInfo = mapInfo;
-        MyGame::staticConnectionInfo = connectionInfo;
-        MyGame::maxAccessibleLayer = maxLayer;
-        MyGame::currentRoomPosition = currentRoomPos;
-        MyGame::currentRoomType = roomType;
-        MyGame::roomCompleted = completed;
-
-        // ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½
-        auto mapScene = MyGame::Map::createScene();
-        Director::getInstance()->replaceScene(TransitionFade::create(1.0f, mapScene));
-    }
-}
-

@@ -1,8 +1,8 @@
 #include "Rest.h"
-#include "Map.h"  // ï¿½ï¿½ï¿½Ó¶ï¿½ Map ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#include "Map.h"  // Ìí¼Ó¶Ô Map ³¡¾°µÄÒýÓÃ
 <<<<<<< Updated upstream
 =======
-#include "Hero.h" // ï¿½ï¿½ï¿½Ó¶ï¿½ Hero ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#include "Hero.h" // Ìí¼Ó¶Ô Hero ÀàµÄÒýÓÃ
 >>>>>>> Stashed changes
 
 USING_NS_CC;
@@ -21,43 +21,40 @@ namespace MyGame {
             return false;
         }
 
-        m_restoreUsed = false; // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Ö¸ï¿½Ñªï¿½ï¿½ï¿½ï¿½Ö¾
-        m_increaseMaxHealthUsed = false; // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñªï¿½ï¿½ï¿½ï¿½Ö¾
-
         auto visibleSize = Director::getInstance()->getVisibleSize();
         auto origin = Director::getInstance()->getVisibleOrigin();
 
-        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼Æ¬
+        // Ìí¼ÓÐÝÏ¢³¡¾°±³¾°Í¼Æ¬
         auto background = Sprite::create("rest_background.png");
         if (background)
         {
 <<<<<<< Updated upstream
             background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 =======
-            // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½Ô­Ê¼ï¿½ï¿½Ð¡
+            // »ñÈ¡±³¾°Í¼ÏñµÄÔ­Ê¼´óÐ¡
             Size originalSize = background->getContentSize();
 
-            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å±ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä»
+            // ¼ÆËãËõ·Å±ÈÀý£¬Ê¹±³¾°Í¼ÏñÍêÈ«¸²¸ÇÆÁÄ»
             float scaleX = visibleSize.width / originalSize.width;
             float scaleY = visibleSize.height / originalSize.height;
 
-            // Ñ¡ï¿½ï¿½Ï´ï¿½ï¿½ï¿½ï¿½ï¿½Å±ï¿½ï¿½ï¿½ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä»
+            // Ñ¡Ôñ½Ï´óµÄËõ·Å±ÈÀýÒÔÈ·±£±³¾°¸²¸ÇÕû¸öÆÁÄ»
             float scale = (scaleX > scaleY) ? scaleX : scaleY;
 
-            // Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            // Ó¦ÓÃËõ·Å
             background->setScale(scale);
 
-            // ï¿½ï¿½ï¿½Ã±ï¿½ï¿½ï¿½Í¼ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä»ï¿½ï¿½ï¿½ï¿½
+            // ÉèÖÃ±³¾°Í¼ÏñÎ»ÖÃÔÚÆÁÄ»ÖÐÐÄ
             background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 
 >>>>>>> Stashed changes
-            this->addChild(background, 0);  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼Æ¬ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½×²ï¿½
+            this->addChild(background, 0);  // ½«±³¾°Í¼Æ¬Ìí¼Óµ½×îµ×²ã
         }
 
-        // ï¿½ï¿½ï¿½ï¿½"ï¿½Ö¸ï¿½"ï¿½ï¿½Å¥
+        // ´´½¨¡°»Ö¸´¡±°´Å¥
         auto restoreItem = MenuItemImage::create(
-            "recover.jpg",  // ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Í¼Æ¬
-            "restore_selected.png",  // Ñ¡ï¿½ï¿½×´Ì¬ï¿½ï¿½Í¼Æ¬
+            "recover.jpg",  // Õý³£×´Ì¬µÄÍ¼Æ¬
+            "restore_selected.png",  // Ñ¡ÖÐ×´Ì¬µÄÍ¼Æ¬
             CC_CALLBACK_1(Rest::menuRestoreCallback, this)
         );
         if (restoreItem)
@@ -67,19 +64,19 @@ namespace MyGame {
                 origin.x + visibleSize.width / 2,
                 origin.y + visibleSize.height / 2 + 100
             ));
-            restoreItem->setScale(0.5);  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½Ð¡
+            restoreItem->setScale(0.5);  // µ÷Õû°´Å¥´óÐ¡
 =======
                 origin.x + visibleSize.width / 2-400,
                 origin.y + visibleSize.height / 2
             ));
-            restoreItem->setScale(1.0);  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½Ð¡
+            restoreItem->setScale(1.0);  // µ÷Õû°´Å¥´óÐ¡
 >>>>>>> Stashed changes
         }
 
-        // ï¿½ï¿½ï¿½ï¿½"ï¿½ï¿½ï¿½ï¿½"ï¿½ï¿½Å¥
+        // ´´½¨¡°·µ»Ø¡±°´Å¥
         auto returnItem = MenuItemImage::create(
-            "up.jpg",  // ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Í¼Æ¬
-            "return_selected.png",  // Ñ¡ï¿½ï¿½×´Ì¬ï¿½ï¿½Í¼Æ¬
+            "up.jpg",  // Õý³£×´Ì¬µÄÍ¼Æ¬
+            "return_selected.png",  // Ñ¡ÖÐ×´Ì¬µÄÍ¼Æ¬
             CC_CALLBACK_1(Rest::menuReturnCallback, this)
         );
         if (returnItem)
@@ -89,16 +86,16 @@ namespace MyGame {
                 origin.x + visibleSize.width / 2,
                 origin.y + visibleSize.height / 2 - 100
             ));
-            returnItem->setScale(0.5);  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½Ð¡
+            returnItem->setScale(0.5);  // µ÷Õû°´Å¥´óÐ¡
 =======
                 origin.x + visibleSize.width / 2+400,
                 origin.y + visibleSize.height / 2
             ));
-            returnItem->setScale(1.0);  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½Ð¡
+            returnItem->setScale(1.0);  // µ÷Õû°´Å¥´óÐ¡
 >>>>>>> Stashed changes
         }
 
-        // ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½
+        // ´´½¨²Ëµ¥
         auto menu = Menu::create(restoreItem, returnItem, nullptr);
         menu->setPosition(Vec2::ZERO);
         this->addChild(menu, 1);
@@ -109,7 +106,7 @@ namespace MyGame {
     void Rest::menuRestoreCallback(Ref* pSender)
     {
 <<<<<<< Updated upstream
-        // ï¿½ï¿½Ê¾ï¿½Ö¸ï¿½ï¿½ï¿½Ï¢
+        // ÏÔÊ¾»Ö¸´ÐÅÏ¢
         auto label = Label::createWithTTF("+30", "fonts/Marker Felt.ttf", 24);
         label->setPosition(Vec2(Director::getInstance()->getVisibleSize().width / 2,
             Director::getInstance()->getVisibleSize().height / 2));
@@ -117,16 +114,16 @@ namespace MyGame {
         this->addChild(label, 1);
 
 =======
-        // ï¿½Ö¸ï¿½Ó¢ï¿½ï¿½30ï¿½ï¿½Ñªï¿½ï¿½
+        // »Ö¸´Ó¢ÐÛ30µãÑªÁ¿
         int healAmount = 30;
         int oldHealth = Hero::getCurrentHealth();
         Hero::healHealth(healAmount);
         int actualHealed = Hero::getCurrentHealth() - oldHealth;
 
-        // ï¿½ï¿½Ê¾ï¿½Ö¸ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½Ê¾Êµï¿½Ê»Ö¸ï¿½ï¿½ï¿½Ñªï¿½ï¿½
+        // ÏÔÊ¾»Ö¸´ÐÅÏ¢£¬ÏÔÊ¾Êµ¼Ê»Ö¸´µÄÑªÁ¿
         std::string healText = "+" + std::to_string(actualHealed);
         auto label = Label::createWithTTF(healText, "fonts/Marker Felt.ttf", 60);
-        // ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ï¿½É«Îªï¿½ï¿½É«
+        // ÉèÖÃÎÄ±¾ÑÕÉ«ÎªÂÌÉ«
         label->setTextColor(Color4B::GREEN);
         label->setPosition(Vec2(Director::getInstance()->getVisibleSize().width / 2,
             Director::getInstance()->getVisibleSize().height / 2 + 300));
@@ -134,7 +131,7 @@ namespace MyGame {
         this->addChild(label, 1);
 
 >>>>>>> Stashed changes
-        // ï¿½Ó³ï¿½Ò»ï¿½ï¿½Ê±ï¿½ï¿½ó·µ»Øµï¿½Í¼ï¿½ï¿½ï¿½ï¿½
+        // ÑÓ³ÙÒ»¶ÎÊ±¼äºó·µ»ØµØÍ¼³¡¾°
         this->runAction(Sequence::create(
             DelayTime::create(2.0f),
             CallFunc::create([]() {
@@ -148,29 +145,28 @@ namespace MyGame {
     void Rest::menuReturnCallback(Ref* pSender)
     {
 <<<<<<< Updated upstream
-        // ï¿½ï¿½ï¿½Øµï¿½Í¼ï¿½ï¿½ï¿½ï¿½
+        // ·µ»ØµØÍ¼³¡¾°
         auto scene = Map::createScene();
         Director::getInstance()->replaceScene(scene);
     }
 
-
 } // namespace MyGame
 
 =======
-        // ï¿½ï¿½ï¿½ï¿½10ï¿½ï¿½ï¿½ï¿½ï¿½Ñªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        // Ôö¼Ó10µã×î´óÑªÁ¿ÉÏÏÞ
         Hero::increaseMaxHealth(10);
 
-        // ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½Ñªï¿½ï¿½ï¿½ï¿½Ï¢
+        // ÏÔÊ¾Ôö¼ÓµÄ×î´óÑªÁ¿ÐÅÏ¢
         std::string maxHealthText = "+10 Max HP";
         auto label = Label::createWithTTF(maxHealthText, "fonts/Marker Felt.ttf", 60);
-        // ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ï¿½É«Îªï¿½ï¿½É«
-        label->setTextColor(Color4B(255, 215, 0, 255));  // ï¿½ï¿½É« (255, 215, 0)
+        // ÉèÖÃÎÄ±¾ÑÕÉ«Îª½ðÉ«
+        label->setTextColor(Color4B(255, 215, 0, 255));  // ½ðÉ« (255, 215, 0)
         label->setPosition(Vec2(Director::getInstance()->getVisibleSize().width / 2,
             Director::getInstance()->getVisibleSize().height / 2 + 300));
         label->setScale(3.0);
         this->addChild(label, 1);
 
-        // ï¿½Ó³ï¿½Ò»ï¿½ï¿½Ê±ï¿½ï¿½ó·µ»Øµï¿½Í¼ï¿½ï¿½ï¿½ï¿½
+        // ÑÓ³ÙÒ»¶ÎÊ±¼äºó·µ»ØµØÍ¼³¡¾°
         this->runAction(Sequence::create(
             DelayTime::create(2.0f),
             CallFunc::create([]() {

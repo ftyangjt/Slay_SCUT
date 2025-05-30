@@ -155,12 +155,10 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
   <ItemGroup>
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\Card.cpp" />
-    <ClCompile Include="..\Classes\CardLibrary.cpp" />
     <ClCompile Include="..\Classes\DiscardDeck.cpp" />
     <ClCompile Include="..\Classes\DrawDeck.cpp" />
     <ClCompile Include="..\Classes\Effect.cpp" />
     <ClCompile Include="..\Classes\fail.cpp" />
-    <ClCompile Include="..\Classes\GameSaveManager.cpp" />
     <ClCompile Include="..\Classes\Hero.cpp" />
     <ClCompile Include="..\Classes\FightingScene.cpp" />
     <ClCompile Include="..\Classes\MainMenu.cpp" />
@@ -168,20 +166,15 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Monster.cpp" />
     <ClCompile Include="..\Classes\question.cpp" />
     <ClCompile Include="..\Classes\Rest.cpp" />
-    <ClCompile Include="..\Classes\Shop.cpp" />
-    <ClCompile Include="..\Classes\TransitionScene.cpp" />
-    <ClCompile Include="..\Classes\Victory.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Classes\AppDelegate.h" />
     <ClInclude Include="..\Classes\Card.h" />
-    <ClInclude Include="..\Classes\CardLibrary.h" />
     <ClInclude Include="..\Classes\DiscardDeck.h" />
     <ClInclude Include="..\Classes\DrawDeck.h" />
     <ClInclude Include="..\Classes\Effect.h" />
     <ClInclude Include="..\Classes\fail.h" />
-    <ClInclude Include="..\Classes\GameSaveManager.h" />
     <ClInclude Include="..\Classes\Hero.h" />
     <ClInclude Include="..\Classes\FightingScene.h" />
     <ClInclude Include="..\Classes\MainMenu.h" />
@@ -189,9 +182,6 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Monster.h" />
     <ClInclude Include="..\Classes\question.h" />
     <ClInclude Include="..\Classes\Rest.h" />
-    <ClInclude Include="..\Classes\Shop.h" />
-    <ClInclude Include="..\Classes\TransitionScene.h" />
-    <ClInclude Include="..\Classes\Victory.h" />
     <ClInclude Include="main.h" />
   </ItemGroup>
   <ItemGroup>

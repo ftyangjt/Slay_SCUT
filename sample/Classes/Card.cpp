@@ -54,75 +54,30 @@ cocos2d::Sprite* Card::getSprite() const
     return _sprite;
 }
 
-// æ·»åŠ æ•ˆæœ - ç°åœ¨æ¥å—æ•ˆæœç±»å‹ã€ç­‰çº§å’Œæ—¶é•¿
+// Ìí¼ÓĞ§¹û - ÏÖÔÚ½ÓÊÜĞ§¹ûÀàĞÍ¡¢µÈ¼¶ºÍÊ±³¤
 void Card::addEffect(Effect::Type type, int level, int duration) {
     _effectInfos.push_back(EffectInfo(type, level, duration));
 }
 
-// è·å–æ•ˆæœä¿¡æ¯åˆ—è¡¨
+// »ñÈ¡Ğ§¹ûĞÅÏ¢ÁĞ±í
 const std::vector<EffectInfo>& Card::getEffectInfos() const {
     return _effectInfos;
 }
 
-// åˆ›å»ºå¹¶è·å–æ•ˆæœå¯¹è±¡ - æ ¹æ®å­˜å‚¨çš„æ•ˆæœä¿¡æ¯åˆ›å»ºå®é™…çš„ Effect å¯¹è±¡
+// ´´½¨²¢»ñÈ¡Ğ§¹û¶ÔÏó - ¸ù¾İ´æ´¢µÄĞ§¹ûĞÅÏ¢´´½¨Êµ¼ÊµÄ Effect ¶ÔÏó
 std::vector<std::shared_ptr<Effect>> Card::createEffects() const {
     std::vector<std::shared_ptr<Effect>> effects;
 
     for (const auto& info : _effectInfos) {
-        // æ ¹æ®æ•ˆæœç±»å‹åˆ›å»ºå¯¹åº”çš„å…·ä½“æ•ˆæœå¯¹è±¡
+        // ¸ù¾İĞ§¹ûÀàĞÍ´´½¨¶ÔÓ¦µÄ¾ßÌåĞ§¹û¶ÔÏó
         if (info.type == Effect::Type::Strength) {
             effects.push_back(std::make_shared<Buff>(info.type, info.level, info.duration));
         }
         else if (info.type == Effect::Type::Vulnerable) {
             effects.push_back(std::make_shared<Debuff>(info.type, info.level, info.duration));
         }
-        // å¦‚æœæœ‰å…¶ä»–ç±»å‹çš„æ•ˆæœï¼Œå¯ä»¥åœ¨è¿™é‡Œæ·»åŠ æ›´å¤šçš„æ¡ä»¶åˆ†æ”¯
+        // Èç¹ûÓĞÆäËûÀàĞÍµÄĞ§¹û£¬¿ÉÒÔÔÚÕâÀïÌí¼Ó¸ü¶àµÄÌõ¼ş·ÖÖ§
     }
 
     return effects;
 }
-
-// è®¾ç½®ç‰¹æ®Šæ•ˆæœ
-void Card::setSpecialEffect(SpecialEffect effect, int value) {
-    // æ£€æŸ¥æ˜¯å¦å·²æœ‰ç›¸åŒç±»å‹çš„æ•ˆæœ
-    for (auto& pair : _specialEffects) {
-        if (pair.first == effect) {
-            // å¦‚æœæœ‰ï¼Œæ›´æ–°å€¼
-            pair.second = value;
-            return;
-        }
-    }
-    // å¦‚æœæ²¡æœ‰ï¼Œæ·»åŠ æ–°æ•ˆæœ
-    _specialEffects.emplace_back(effect, value);
-}
-
-// è·å–ç‰¹æ®Šæ•ˆæœå€¼
-int Card::getSpecialEffectValue(SpecialEffect effect) const {
-    for (const auto& pair : _specialEffects) {
-        if (pair.first == effect) {
-            return pair.second;
-        }
-    }
-    return 0; // å¦‚æœæ²¡æœ‰æ‰¾åˆ°æ•ˆæœï¼Œè¿”å›0
-}
-
-// åˆ¤æ–­æ˜¯å¦æœ‰ç‰¹å®šæ•ˆæœ
-bool Card::hasSpecialEffect(SpecialEffect effect) const {
-    for (const auto& pair : _specialEffects) {
-        if (pair.first == effect) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool Card::isPlayable() const {
-    return _isPlayable;
-}
-
-void Card::setPlayable(bool playable) {
-    _isPlayable = playable;
-}
-
-void Card::setExhaust(bool exhaust) { _isExhaust = exhaust; }
-bool Card::isExhaust() const { return _isExhaust; }

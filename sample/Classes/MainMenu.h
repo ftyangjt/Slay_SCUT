@@ -15,9 +15,6 @@ public:
     // “退出游戏”按钮回调
     void menuCloseCallback(cocos2d::Ref* pSender);
 
-    void createContinueButton();
-    void loadGame();
-
     CREATE_FUNC(MainMenu);
 };
 

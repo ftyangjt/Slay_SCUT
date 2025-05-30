@@ -70,6 +70,7 @@ void DiscardDeck::addCardEffectLabel(cocos2d::Sprite* cardSprite, const std::str
 
 void DiscardDeck::showDeck()
 {
+    // 清空已存在显示的卡牌精灵
     for (auto cardSprite : _cardSprites)
     {
         this->removeChild(cardSprite);
@@ -80,53 +81,27 @@ void DiscardDeck::showDeck()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     auto tempCardSprite = Sprite::create("cardBackground.jpg");
-    float originalCardWidth = tempCardSprite->getContentSize().width;
-    float originalCardHeight = tempCardSprite->getContentSize().height;
-
-    // 设置固定的缩放系数，使卡牌更小
-    float cardScale = 0.4f; // 降低为原来的40%大小
-
-    float scaledCardWidth = originalCardWidth * cardScale;
-    float totalWidth = _discardPile.size() * scaledCardWidth;
-
-    // 计算卡牌之间的重叠量，使卡牌紧贴
-    float cardOverlap = -10.0f; // 负值表示卡牌重叠
-
-    // 如果总宽度超过屏幕宽度，增加重叠量
+    float cardWidth = tempCardSprite->getContentSize().width;
+    float totalWidth = _discardPile.size() * cardWidth;
+    float spacing = 0.0f;
     if (totalWidth > visibleSize.width)
     {
-        // 调整重叠量，使所有卡牌都能显示在屏幕上
-        float availableWidth = visibleSize.width - scaledCardWidth;
-        float neededWidth = (_discardPile.size() - 1) * (scaledCardWidth + cardOverlap);
-
-        if (neededWidth > availableWidth) {
-            cardOverlap = (availableWidth - (_discardPile.size() - 1) * scaledCardWidth) / (_discardPile.size() - 1);
-        }
+        cardWidth = (visibleSize.width - 20.0f) / _discardPile.size();
+        spacing = 0.0f;
     }
-
-    // 计算起始位置，使卡牌居中显示
-    float totalDisplayWidth = scaledCardWidth + (_discardPile.size() - 1) * (scaledCardWidth + cardOverlap);
-    float startX = (visibleSize.width - totalDisplayWidth) / 2 + scaledCardWidth / 2;
-
-    // 创建并放置卡牌
+    else
+    {
+        spacing = (visibleSize.width - totalWidth) / (_discardPile.size() + 1);
+    }
+    float startX = origin.x + spacing + cardWidth / 2;
     for (size_t i = 0; i < _discardPile.size(); ++i)
     {
         auto cardSprite = Sprite::create("cardBackground.jpg");
-        float posX = startX + i * (scaledCardWidth + cardOverlap);
-        cardSprite->setPosition(Vec2(posX, origin.y + visibleSize.height / 2));
-        cardSprite->setScale(cardScale);
+        cardSprite->setPosition(Vec2(startX + i * (cardWidth + spacing), origin.y + cardSprite->getContentSize().height / 3));
+        cardSprite->setScale(cardWidth / cardSprite->getContentSize().width);
         this->addChild(cardSprite, 1);
         _cardSprites.push_back(cardSprite);
-
-        // 添加卡牌效果标签
         addCardEffectLabel(cardSprite, _discardPile[i].getEffect());
-
-        // 添加费用标签
-        auto costLabel = Label::createWithTTF("Cost: " + std::to_string(_discardPile[i].getCost()), "fonts/Marker Felt.ttf", 24);
-        costLabel->setTextColor(Color4B::ORANGE);
-        costLabel->setPosition(Vec2(cardSprite->getContentSize().width / 2,
-            cardSprite->getContentSize().height / 4));
-        cardSprite->addChild(costLabel, 1);
     }
 }
 
