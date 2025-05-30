@@ -1,9 +1,40 @@
-﻿  FightingScene.cpp
+﻿  AppDelegate.cpp
+  DiscardDeck.cpp
+  DrawDeck.cpp
+  FightingScene.cpp
+  Map.cpp
+  question.cpp
 C:\game\Slay_SCUT\sample\Classes\FightingScene.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
   (编译源文件“../Classes/FightingScene.cpp”)
   
+C:\game\Slay_SCUT\sample\Classes\DiscardDeck.cpp(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+C:\game\Slay_SCUT\sample\Classes\DrawDeck.cpp(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+C:\game\Slay_SCUT\sample\Classes\DiscardDeck.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/DiscardDeck.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\DrawDeck.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/DrawDeck.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\FightingScene.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/AppDelegate.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\Card.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/AppDelegate.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\Card.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/DiscardDeck.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\Card.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/DrawDeck.cpp”)
+  
 C:\game\Slay_SCUT\sample\Classes\Card.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
   (编译源文件“../Classes/FightingScene.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\DiscardDeck.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/AppDelegate.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\DrawDeck.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/AppDelegate.cpp”)
   
 C:\game\Slay_SCUT\sample\Classes\DiscardDeck.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
   (编译源文件“../Classes/FightingScene.cpp”)
@@ -11,20 +42,61 @@ C:\game\Slay_SCUT\sample\Classes\DiscardDeck.h(1,1): warning C4819: 该文件包
 C:\game\Slay_SCUT\sample\Classes\DrawDeck.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
   (编译源文件“../Classes/FightingScene.cpp”)
   
+C:\game\Slay_SCUT\sample\Classes\FightingScene.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/DrawDeck.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\FightingScene.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/DiscardDeck.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\FightingScene.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/Map.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\FightingScene.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/question.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\Card.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/Map.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\Card.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/question.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\DrawDeck.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/DiscardDeck.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\DiscardDeck.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/DrawDeck.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\DiscardDeck.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/question.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\DrawDeck.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/question.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\DiscardDeck.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/Map.cpp”)
+  
+C:\game\Slay_SCUT\sample\Classes\DrawDeck.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“../Classes/Map.cpp”)
+  
 C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp(243,34): warning C4101: “e”: 未引用的局部变量
+C:\game\Slay_SCUT\sample\Classes\Map.cpp(156,27): warning C4018: “<”: 有符号/无符号不匹配
 C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp(723,29): warning C4018: “<”: 有符号/无符号不匹配
 C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp(735,29): warning C4018: “<”: 有符号/无符号不匹配
-C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp(907,55): warning C4018: “<”: 有符号/无符号不匹配
-C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp(1118,29): warning C4018: “<”: 有符号/无符号不匹配
-C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp(1560,31): warning C4018: “<”: 有符号/无符号不匹配
-C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp(1659,36): warning C4018: “>=”: 有符号/无符号不匹配
-C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp(1668,28): warning C4018: “<”: 有符号/无符号不匹配
-C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp(1708,36): warning C4018: “>=”: 有符号/无符号不匹配
+C:\game\Slay_SCUT\sample\Classes\question.cpp(340,27): warning C4305: “参数”: 从“double”到“float”截断
+C:\game\Slay_SCUT\sample\Classes\Map.cpp(340,40): warning C4305: “参数”: 从“double”到“float”截断
+C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp(909,55): warning C4018: “<”: 有符号/无符号不匹配
+C:\game\Slay_SCUT\sample\Classes\Map.cpp(390,27): warning C4018: “<”: 有符号/无符号不匹配
+C:\game\Slay_SCUT\sample\Classes\Map.cpp(447,40): warning C4305: “参数”: 从“double”到“float”截断
+C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp(1125,29): warning C4018: “<”: 有符号/无符号不匹配
+C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp(1574,31): warning C4018: “<”: 有符号/无符号不匹配
+C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp(1673,36): warning C4018: “>=”: 有符号/无符号不匹配
+C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp(1682,28): warning C4018: “<”: 有符号/无符号不匹配
+C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp(1722,36): warning C4018: “>=”: 有符号/无符号不匹配
     正在创建库 C:\game\Slay_SCUT\sample\proj.win32\Release.win32\sample.lib 和对象 C:\game\Slay_SCUT\sample\proj.win32\Release.win32\sample.exp
   正在生成代码
-  1 of 3431 functions (<0.1%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    13 functions had inline decision re-evaluated but remain unchanged
+  372 of 3503 functions (10.6%) were compiled, the rest were copied from previous compilation.
+    126 functions were new in current compilation
+    394 functions had inline decision re-evaluated but remain unchanged
   已完成代码的生成
   sample.vcxproj -> C:\game\Slay_SCUT\sample\proj.win32\Release.win32\sample.exe
   正在执行自定义生成步骤

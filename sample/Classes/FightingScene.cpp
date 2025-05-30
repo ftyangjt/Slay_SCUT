@@ -792,6 +792,8 @@ void FightingScene::updateHandDisplay()
     }
     _cardSprites.clear();
     _lastClickTimes.clear();
+
+    _disabledCardIndices.clear();
     
     // 重置悬停相关变量
     _hoveringCardIndex = -1;
@@ -1115,7 +1117,15 @@ void FightingScene::playCard(int index)
         return; // 如果处于冷却状态，直接返回
     }
 
+    // 检查卡牌是否在禁用列表中
+    if (_disabledCardIndices.find(index) != _disabledCardIndices.end()) {
+        return; // 卡牌已在禁用状态
+    }
+
     if (index >= 0 && index < _cards.size()) {
+        // 立即将卡牌添加到禁用列表
+        _disabledCardIndices.insert(index);
+
         // 原逻辑不变
         Card playedCard = _cards[index];
 
@@ -1269,6 +1279,10 @@ void FightingScene::highlightSelectedCard()
 void FightingScene::handleCardTap(size_t cardIndex, cocos2d::Touch* touch)
 {
     if (_isSelectingCard) return; // 选牌时禁止操作
+
+    if (_disabledCardIndices.find(cardIndex) != _disabledCardIndices.end()) {
+        return; // 卡牌处于禁用状态，不响应点击
+    }
 
     auto now = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lastClickTimes[cardIndex]).count();

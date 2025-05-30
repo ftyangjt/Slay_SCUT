@@ -75,13 +75,12 @@ private:
     bool _isSelectingCard = false; // 是否处于选牌界面
 
 private:
-    // 原有变量保持不变
     int _hoveringCardIndex = -1; // 当前悬停卡牌的索引
     std::map<int, bool> _cardIsHovering; // 标记卡牌是否正在悬浮中
+    std::set<int> _disabledCardIndices; // 存储当前不可交互的卡牌索引
     std::map<int, cocos2d::Vec2> _cardOriginalPositions; // 保存卡牌原始位置
     std::map<int, float> _cardOriginalRotations; // 保存卡牌原始旋转
     std::map<int, int> _cardOriginalZOrders; // 保存卡牌原始Z顺序
-
     bool _isCooldown = false; // 表示出牌是否处于冷却状态
 	bool _isEndTurnButtonEnabled = true; //表示结束回合按钮是否可用
 	bool _isDrawingCards = false; // 是否正在抽牌
@@ -94,6 +93,7 @@ private:
     int _turnCount; // 回合数
     std::vector<Card> _cards; // 手牌
     cocos2d::Sprite* _selectedCard; // 选中的卡牌
+
     Hero* _hero; // 英雄对象
     Monster* _monster; // 怪物对象
    
