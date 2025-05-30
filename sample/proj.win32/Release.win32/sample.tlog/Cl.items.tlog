@@ -5,6 +5,7 @@ C:\game\Slay_SCUT\sample\Classes\DiscardDeck.cpp;C:\game\Slay_SCUT\sample\proj.w
 C:\game\Slay_SCUT\sample\Classes\DrawDeck.cpp;C:\game\Slay_SCUT\sample\proj.win32\Release.win32\DrawDeck.obj
 C:\game\Slay_SCUT\sample\Classes\Effect.cpp;C:\game\Slay_SCUT\sample\proj.win32\Release.win32\Effect.obj
 C:\game\Slay_SCUT\sample\Classes\fail.cpp;C:\game\Slay_SCUT\sample\proj.win32\Release.win32\fail.obj
+C:\game\Slay_SCUT\sample\Classes\GameSaveManager.cpp;C:\game\Slay_SCUT\sample\proj.win32\Release.win32\GameSaveManager.obj
 C:\game\Slay_SCUT\sample\Classes\Hero.cpp;C:\game\Slay_SCUT\sample\proj.win32\Release.win32\Hero.obj
 C:\game\Slay_SCUT\sample\Classes\FightingScene.cpp;C:\game\Slay_SCUT\sample\proj.win32\Release.win32\FightingScene.obj
 C:\game\Slay_SCUT\sample\Classes\MainMenu.cpp;C:\game\Slay_SCUT\sample\proj.win32\Release.win32\MainMenu.obj

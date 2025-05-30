@@ -842,6 +842,13 @@ void FightingScene::updateHandDisplay()
         this->addChild(sprite, 1);
         _cardSprites.push_back(sprite);
         _lastClickTimes.push_back(std::chrono::steady_clock::now());
+        // 添加卡牌标题标签（在卡牌顶部居中）
+        auto titleLabel = Label::createWithTTF(_cards[i].getName(), "fonts/Marker Felt.ttf", 60);
+        titleLabel->setTextColor(Color4B::BLACK);
+        // 设置标题在卡牌顶部
+        titleLabel->setPosition(Vec2(sprite->getContentSize().width / 2, sprite->getContentSize().height - 80));
+        sprite->addChild(titleLabel, 2);
+
         // 添加卡牌效果标签
         auto effectLabel = addCardEffectLabel(sprite, _cards[i].getEffect());
 
