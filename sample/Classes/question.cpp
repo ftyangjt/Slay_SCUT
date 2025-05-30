@@ -157,8 +157,8 @@ void Question::createLuckyWheel()
         // 创建一个圆形的DrawNode作为转盘
         auto drawNode = DrawNode::create();
 
-        // 转盘半径
-        float radius = 150.0f;
+        // 转盘半径 - 放大到200
+        float radius = 200.0f; // 原来是150.0f，放大为200.0f
 
         // 画一个填充的圆作为背景
         drawNode->drawSolidCircle(Vec2::ZERO, radius, 0, 60, Color4F(0.8f, 0.8f, 0.8f, 1.0f));
@@ -220,6 +220,11 @@ void Question::createLuckyWheel()
         _wheelSprite->setTexture(rt->getSprite()->getTexture());
         _wheelSprite->setTextureRect(Rect(0, 0, radius * 2, radius * 2));
     }
+    else
+    {
+        // 如果有wheel.png图片，直接放大转盘
+        _wheelSprite->setScale(1.5f); // 将转盘放大1.5倍
+    }
 
     // 设置转盘位置 - 放在右侧
     float wheelX = visibleSize.width / 2 + 150;
@@ -228,36 +233,36 @@ void Question::createLuckyWheel()
 
     // 移除转盘上的文字标签，改为在场景中直接添加静态文字说明
 
-    // 创建左侧的奖励说明文本框
-    auto descriptionBox = LayerColor::create(Color4B(50, 50, 50, 180), 250, 300);
-    descriptionBox->setPosition(Vec2(wheelX - 450, visibleSize.height / 2 - 150));
+    // 创建左侧的奖励说明文本框 - 放大文本框
+    auto descriptionBox = LayerColor::create(Color4B(50, 50, 50, 180), 320, 400); // 原来是250x300，改为320x400
+    descriptionBox->setPosition(Vec2(wheelX - 680, visibleSize.height / 2 - 200));
     this->addChild(descriptionBox, 1);
 
-    // 添加标题
-    auto titleLabel = Label::createWithTTF("Exlaination", "fonts/Marker Felt.ttf", 32);
-    titleLabel->setPosition(Vec2(125, 270));
+    // 添加标题 - 放大字体
+    auto titleLabel = Label::createWithTTF("Exlaination", "fonts/Marker Felt.ttf", 48); // 原来是32，改为48
+    titleLabel->setPosition(Vec2(120, 350)); // 调整位置
     titleLabel->setColor(Color3B::WHITE);
     descriptionBox->addChild(titleLabel);
 
-    // 添加奖励描述
-    auto redDescription = Label::createWithTTF("Red: +20 HP", "fonts/Marker Felt.ttf", 24);
-    redDescription->setPosition(Vec2(125, 200));
+    // 添加奖励描述 - 放大字体
+    auto redDescription = Label::createWithTTF("Red: +20 HP", "fonts/Marker Felt.ttf", 36); // 原来是24，改为36
+    redDescription->setPosition(Vec2(120, 270)); // 调整位置
     redDescription->setColor(Color3B::RED);
     descriptionBox->addChild(redDescription);
 
-    auto greenDescription = Label::createWithTTF("Green: -20 HP", "fonts/Marker Felt.ttf", 24);
-    greenDescription->setPosition(Vec2(125, 150));
+    auto greenDescription = Label::createWithTTF("Green: -20 HP", "fonts/Marker Felt.ttf", 36); // 原来是24，改为36
+    greenDescription->setPosition(Vec2(120, 200)); // 调整位置
     greenDescription->setColor(Color3B::GREEN);
     descriptionBox->addChild(greenDescription);
 
-    auto yellowDescription = Label::createWithTTF("Yellow: +40 coins", "fonts/Marker Felt.ttf", 24);
-    yellowDescription->setPosition(Vec2(125, 100));
+    auto yellowDescription = Label::createWithTTF("Yellow: +40 coins", "fonts/Marker Felt.ttf", 36); // 原来是24，改为36
+    yellowDescription->setPosition(Vec2(120, 130)); // 调整位置
     yellowDescription->setColor(Color3B::YELLOW);
     descriptionBox->addChild(yellowDescription);
 
-    // 添加使用说明
-    auto instructionLabel = Label::createWithTTF("click the button to start", "fonts/Marker Felt.ttf", 22);
-    instructionLabel->setPosition(Vec2(125, 40));
+    // 添加使用说明 - 放大字体
+    auto instructionLabel = Label::createWithTTF("click the button to start", "fonts/Marker Felt.ttf", 32); // 原来是22，改为32
+    instructionLabel->setPosition(Vec2(120, 60)); // 调整位置
     instructionLabel->setColor(Color3B::WHITE);
     descriptionBox->addChild(instructionLabel);
 
@@ -267,35 +272,40 @@ void Question::createLuckyWheel()
     {
         // 如果没有指针图片，创建一个临时的三角形指针
         auto drawNode = DrawNode::create();
-        Vec2 points[3] = { Vec2(0, 30), Vec2(-15, 0), Vec2(15, 0) };
+        Vec2 points[3] = { Vec2(0, 45), Vec2(-20, 0), Vec2(20, 0) }; // 放大指针
         drawNode->drawSolidPoly(points, 3, Color4F(1.0f, 0.5f, 0.0f, 1.0f));
 
         // 创建一个临时精灵包含DrawNode
         _pointerSprite = Sprite::create();
-        auto rt = RenderTexture::create(30, 30);
+        auto rt = RenderTexture::create(40, 45); // 增加渲染纹理尺寸
         rt->beginWithClear(0, 0, 0, 0);
 
         // 获取渲染器和当前的变换矩阵
         auto renderer = Director::getInstance()->getRenderer();
         auto& transform = Director::getInstance()->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
 
-        drawNode->setPosition(Vec2(15, 15));
+        drawNode->setPosition(Vec2(20, 20));
         // 正确调用visit函数，传递渲染器和变换矩阵
         drawNode->visit(renderer, transform, 0);
 
         rt->end();
         _pointerSprite->setTexture(rt->getSprite()->getTexture());
-        _pointerSprite->setTextureRect(Rect(0, 0, 30, 30));
+        _pointerSprite->setTextureRect(Rect(0, 0, 40, 45));
+    }
+    else
+    {
+        // 如果有pointer.png图片，直接放大指针
+        _pointerSprite->setScale(1.5f); // 将指针放大1.5倍
     }
 
-    // 设置指针位置
-    _pointerSprite->setPosition(Vec2(wheelX, visibleSize.height / 2 + 170));
+    // 设置指针位置 - 调整指针位置以适应更大的转盘
+    _pointerSprite->setPosition(Vec2(wheelX, visibleSize.height / 2 + 220));
     this->addChild(_pointerSprite, 2);
 
     // 创建抽奖按钮
     _spinButton = MenuItemImage::create(
         "button.png",   // 正常状态的图片
-        "button_selected.png",  // 选中状态的图片
+        "button.png",  // 选中状态的图片
         CC_CALLBACK_1(Question::onSpinButtonClicked, this)
     );
 
@@ -304,16 +314,16 @@ void Question::createLuckyWheel()
         // 如果没有按钮图片，创建一个临时按钮
         _spinButton = MenuItemImage::create();
         auto drawNode = DrawNode::create();
-        drawNode->drawSolidRect(Vec2(-60, -20), Vec2(60, 20), Color4F(0.0f, 0.5f, 1.0f, 1.0f));
+        drawNode->drawSolidRect(Vec2(-90, -30), Vec2(90, 30), Color4F(0.0f, 0.5f, 1.0f, 1.0f)); // 放大按钮
 
-        auto rt = RenderTexture::create(120, 40);
+        auto rt = RenderTexture::create(180, 60); // 增加渲染纹理尺寸
         rt->beginWithClear(0, 0, 0, 0);
 
         // 获取渲染器和当前的变换矩阵
         auto renderer = Director::getInstance()->getRenderer();
         auto& transform = Director::getInstance()->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
 
-        drawNode->setPosition(Vec2(60, 20));
+        drawNode->setPosition(Vec2(90, 30));
         // 正确调用visit函数，传递渲染器和变换矩阵
         drawNode->visit(renderer, transform, 0);
 
@@ -328,8 +338,8 @@ void Question::createLuckyWheel()
     spinButtonLabel->setPosition(Vec2(_spinButton->getContentSize().width / 2, _spinButton->getContentSize().height / 2));
     _spinButton->addChild(spinButtonLabel);
 
-    // 设置按钮位置 - 放在转盘下方
-    _spinButton->setPosition(Vec2(wheelX, visibleSize.height / 2 - 300));
+    // 设置按钮位置 - 放在转盘下方，调整位置以适应更大的转盘
+    _spinButton->setPosition(Vec2(wheelX, visibleSize.height / 2 - 450));
 
     // 创建菜单并添加按钮
     auto menu = Menu::create(_spinButton, nullptr);
@@ -337,7 +347,7 @@ void Question::createLuckyWheel()
     this->addChild(menu, 2);
 
     // 设置按钮大小
-    _spinButton->setScale(0.3); // 放大按钮
+    _spinButton->setScale(0.5); // 原来是0.3，改为0.5，放大按钮
 }
 
 
