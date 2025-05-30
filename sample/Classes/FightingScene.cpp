@@ -241,7 +241,6 @@ void FightingScene::createCharacters()
     this->addChild(_hero, 1);
 
     // 创建怪物
-    // 尝试根据当前房间类型创建相应的怪物
     Monster* monster = nullptr;
     bool isEliteMonster = false;
 

@@ -121,6 +121,8 @@ namespace CardLibrary {
             starterDeck.push_back(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
         }
 
+        starterDeck.push_back(Card("DEBUG KILL", Card::Type::Attack, 0, "KILL THE ENEMY", "cardBackground.jpg", 9999, 0));
+
         // Add 1 "Bash" card
         Card bashCard("Bash", Card::Type::Attack, 2, "Deal 8 damage and apply 2 Vulnerable", "cardBackground.jpg", 8, 0);
         bashCard.addEffect(Effect::Type::Vulnerable, 2, 2);
