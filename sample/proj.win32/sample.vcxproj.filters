@@ -66,6 +66,9 @@
     <ClCompile Include="..\Classes\TransitionScene.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\GameSaveManager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -120,6 +123,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\TransitionScene.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\GameSaveManager.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

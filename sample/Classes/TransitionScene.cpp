@@ -38,7 +38,7 @@ namespace MyGame {
             this->addChild(_transitionImage);
 
             // 设置缩放动画持续时间
-            _moveDuration = 4.0f; // 8秒的缓慢缩放
+            _moveDuration = 3.0f; // 8秒的缓慢缩放
 
             // 计算目标缩放比例（较大）
             float targetScale = 1.2f;
