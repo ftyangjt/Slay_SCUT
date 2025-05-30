@@ -9,29 +9,18 @@
 #include <random>
 
 USING_NS_CC;
-namespace MyGame {
-    // 实际定义和初始化静态变量
-    RoomType currentRoomType = RoomType::BATTLE;
-    int Map::currentLayer = 0;
-    int Map::currentRoom = 0;
-    // 存储地图数据（房间类型和位置信息，但不存储指针）
-    struct RoomInfo {
-        RoomType type;
-        cocos2d::Vec2 position;
-    };
-    static std::vector<std::vector<RoomInfo>> staticMapInfo;
+    namespace MyGame {
+        // 实际定义和初始化静态变量
+        RoomType currentRoomType = RoomType::BATTLE;
+        int Map::currentLayer = 0;
+        int Map::currentRoom = 0;
 
-    // 存储连线数据
-    static std::vector<ConnectionInfo> staticConnectionInfo;
-
-    // 存储当前可访问的最高层级（静态变量，在场景切换时保持）
-    static int maxAccessibleLayer = 0;
-
-    // 是否刚刚完成了一个房间（用于从房间场景返回地图时判断）
-    static bool roomCompleted = false;
-
-    // 记录当前选择的房间位置（用于判断下一层哪些房间可以访问）
-    static cocos2d::Vec2 currentRoomPosition;
+        // 定义在 Map.h 中声明的静态变量
+        std::vector<std::vector<RoomInfo>> staticMapInfo;
+        std::vector<ConnectionInfo> staticConnectionInfo;
+        int maxAccessibleLayer = 0;
+        bool roomCompleted = false;
+        cocos2d::Vec2 currentRoomPosition;
 
     // 添加重置游戏状态的函数实现
     void resetGameState() {
@@ -1005,12 +994,20 @@ namespace MyGame {
         int gold = Hero::getCoins();
         const std::vector<Card>& deck = Hero::getDeck();
 
-        // 使用当前层和房间信息代替不存在的 currentMapId 和 currentLevel
-        int mapLayer = currentLayer;
-        int roomIndex = currentRoom;
-
-        // 保存游戏
-        if (GameSaveManager::saveGame(health, gold, deck, mapLayer, roomIndex))
+        // 保存游戏，现在传入所有地图相关数据
+        if (GameSaveManager::saveGame(
+            health,
+            gold,
+            deck,
+            currentLayer,
+            currentRoom,
+            staticMapInfo,
+            staticConnectionInfo,
+            maxAccessibleLayer,
+            currentRoomPosition,
+            currentRoomType,
+            roomCompleted
+        ))
         {
             // 显示保存成功提示
             auto visibleSize = Director::getInstance()->getVisibleSize();
