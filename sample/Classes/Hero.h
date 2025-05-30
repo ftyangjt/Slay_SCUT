@@ -8,55 +8,77 @@
 class Hero : public cocos2d::Sprite
 {
 public:
-    // Ìí¼Óµ½ Hero ÀàµÄ¹«¹²²¿·Ö
-    static int getCurrentHealth(); // »ñÈ¡µ±Ç°½¡¿µÖµ
-    static void healHealth(int amount); // »Ö¸´Ö¸¶¨ÊýÁ¿µÄÉúÃüÖµ£¬²»³¬¹ýÉÏÏÞ
-    static const int MAX_HEALTH = 100; // ×î´óÉúÃüÖµ
+    // Hero.h ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    static void increaseMaxHealth(int amount); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½
+    static int getMaxHealth(); // ï¿½ï¿½È¡ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½
 
-    // ÔÚHero.hÖÐÌí¼Ó£º
-    static void resetHealth(); // ÖØÖÃ½¡¿µÖµ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    static int getCurrentHealth(); // ï¿½ï¿½È¡ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Öµ
+    static void healHealth(int amount); // ï¿½Ö¸ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    static const int MAX_HEALTH = 100; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
+    static void resetHealth(); // ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½Öµ
 
-    // ´´½¨Ö÷½ÇÊµÀý
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    static int getCoins(); // ï¿½ï¿½È¡ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    static void setCoins(int coins); // ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    static void addCoins(int amount); // ï¿½ï¿½ï¿½Ó½ï¿½ï¿½
+    static void resetCoins(); // ï¿½ï¿½ï¿½Ã½ï¿½ï¿½
+    static const int INITIAL_COINS = 100; // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+
+    // ×´Ì¬ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½Ó¾ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½
+    static void updateStatusDisplayStatic(); // ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Ê¾
+    static void initStatusDisplay(); // ï¿½ï¿½Ê¼ï¿½ï¿½×´Ì¬ï¿½ï¿½Ê¾
+
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½
     static Hero* create(const std::string& filename);
 
-    // ³õÊ¼»¯Ö÷½Ç
+    // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     bool init(const std::string& filename);
 
-    // ÉèÖÃºÍ»ñÈ¡Ö÷½ÇµÄÉúÃüÖµ
+    // ï¿½ï¿½ï¿½ÃºÍ»ï¿½È¡ï¿½ï¿½ï¿½Çµï¿½ï¿½ï¿½ï¿½ï¿½Öµ
     void setHealth(int health);
     int getHealth() const;
 
-	// ÉèÖÃºÍ»ñÈ¡Ö÷½ÇµÄ·ÀÓùÖµ
+    // ï¿½ï¿½ï¿½ÃºÍ»ï¿½È¡ï¿½ï¿½ï¿½ÇµÄ·ï¿½ï¿½ï¿½Öµ
     void setBlock(int block);
     int getBlock() const;
 
-    // ¿¨×é²Ù×÷½Ó¿Ú
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¿ï¿½
     void addCardToDeck(const Card& card);
-    const std::vector<Card>& getDeck() const;
+    static const std::vector<Card>& getDeck();
     void clearDeck();
-    // ³õÊ¼»¯Ä¬ÈÏ¿¨×é
+    // ï¿½ï¿½Ê¼ï¿½ï¿½Ä¬ï¿½Ï¿ï¿½ï¿½ï¿½
     void createDefaultDeck();
 
-    // Ð§¹û²Ù×÷½Ó¿Ú
+    // Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¿ï¿½
     void addEffect(std::shared_ptr<Effect> effect);
     const std::vector<std::shared_ptr<Effect>>& getEffects() const;
-    void updateEffects(); // ¸üÐÂÐ§¹û£¬ÒÆ³ý³ÖÐøÊ±¼äÎª 0 µÄÐ§¹û
+    void updateEffects(); // ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Îª 0 ï¿½ï¿½Ð§ï¿½ï¿½
 
-<<<<<<< Updated upstream
-=======
-    // ÊµÀý·½·¨×´Ì¬ÏÔÊ¾
+    // Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Ê¾
     void updateStatusDisplay();
 
-	// ÅÐ¶Ï¿¨×éÊÇ·ñÒÑ³õÊ¼»¯
-    bool isDeckInitialized() const; // ÅÐ¶Ï¿¨×éÊÇ·ñÒÑ³õÊ¼»¯
-    void setDeckInitialized(bool initialized); // ÉèÖÃ¿¨×é³õÊ¼»¯×´Ì¬
+	// ï¿½Ð¶Ï¿ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ñ³ï¿½Ê¼ï¿½ï¿½
+    bool isDeckInitialized() const; // ï¿½Ð¶Ï¿ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ñ³ï¿½Ê¼ï¿½ï¿½
+   static void setDeckInitialized(bool initialized); // ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½×´Ì¬
 
->>>>>>> Stashed changes
+    static void clearDeckStatic() {
+        _deck.clear();
+    }
+
+    static void addCardToDeckStatic(const Card& card) {
+        _deck.push_back(card);
+    }
+
 private:
-    int _health; // ÉúÃüÖµ
-	int _block; // ·ÀÓùÖµ
-	std::vector<Card> _deck; // ¿¨×é
-    std::vector<std::shared_ptr<Effect>> _effects;
+    int _health; // ï¿½ï¿½ï¿½ï¿½Öµ
+    int _block; // ï¿½ï¿½ï¿½ï¿½Öµ
+    static std::vector<Card> _deck; // ï¿½ï¿½ï¿½ï¿½
+    std::vector<std::shared_ptr<Effect>> _effects; // Ð§ï¿½ï¿½
+    cocos2d::Label* _statusLabel; // ×´Ì¬ï¿½ï¿½Ê¾ï¿½ï¿½Ç©
+
+    // ï¿½ï¿½ï¿½Ó¾ï¿½Ì¬ï¿½ï¿½Ô±
+    static cocos2d::Label* s_statusLabel; // ï¿½ï¿½Ì¬×´Ì¬ï¿½ï¿½Ê¾ï¿½ï¿½Ç©
 };
 
 #endif // __HERO_H__

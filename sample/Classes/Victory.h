@@ -8,19 +8,19 @@ namespace MyGame {
         static cocos2d::Scene* createScene();
         virtual bool init() override;
 
-        // ¹ö¶¯ÖÆ×÷ÈËÔ±Ãûµ¥
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½
         void scrollCredits();
 
-        // ·µ»Ø²Ëµ¥½çÃæ
+        // ï¿½ï¿½ï¿½Ø²Ëµï¿½ï¿½ï¿½ï¿½ï¿½
         void returnToMenu();
 
         CREATE_FUNC(VictoryScene);
 
     private:
         cocos2d::Label* _creditsLabel;
-        cocos2d::Label* _victoryInfoLabel;
-        cocos2d::Node* _scrollNode;  // ¹ö¶¯½Úµã
-        float _creditsDuration;      // ¹ö¶¯Ê±¼ä
+        cocos2d::Sprite* _victoryLogo;
+        cocos2d::Node* _scrollNode;  // ï¿½ï¿½ï¿½Ó¹ï¿½ï¿½ï¿½ï¿½Úµï¿½
+        float _creditsDuration;      // ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
     };
 
 } // namespace MyGame

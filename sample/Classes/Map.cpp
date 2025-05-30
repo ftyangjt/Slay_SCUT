@@ -4,6 +4,8 @@
 #include "question.h"
 #include "Rest.h"
 #include "Shop.h"
+#include "Hero.h"
+#include "GameSaveManager.h"
 #include <random>
 
 USING_NS_CC;
@@ -11,44 +13,44 @@ USING_NS_CC;
 namespace MyGame {
 <<<<<<< Updated upstream
 =======
-    // Êµ¼Ê¶¨ÒåºÍ³õÊ¼»¯¾²Ì¬±äÁ¿
+    // Êµï¿½Ê¶ï¿½ï¿½ï¿½Í³ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½
     RoomType currentRoomType = RoomType::BATTLE;
 >>>>>>> Stashed changes
 
-    // ´æ´¢µØÍ¼Êý¾Ý£¨·¿¼äÀàÐÍºÍÎ»ÖÃÐÅÏ¢£¬µ«²»´æ´¢Ö¸Õë£©
+    // ï¿½æ´¢ï¿½ï¿½Í¼ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Íºï¿½Î»ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ´¢Ö¸ï¿½ë£©
     struct RoomInfo {
         RoomType type;
         cocos2d::Vec2 position;
     };
     static std::vector<std::vector<RoomInfo>> staticMapInfo;
 
-    // ´æ´¢Á¬ÏßÊý¾Ý
+    // ï¿½æ´¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     static std::vector<ConnectionInfo> staticConnectionInfo;
 
-    // ´æ´¢µ±Ç°¿É·ÃÎÊµÄ×î¸ß²ã¼¶£¨¾²Ì¬±äÁ¿£¬ÔÚ³¡¾°ÇÐ»»Ê±±£³Ö£©
+    // ï¿½æ´¢ï¿½ï¿½Ç°ï¿½É·ï¿½ï¿½Êµï¿½ï¿½ï¿½ß²ã¼¶ï¿½ï¿½ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú³ï¿½ï¿½ï¿½ï¿½Ð»ï¿½Ê±ï¿½ï¿½ï¿½Ö£ï¿½
     static int maxAccessibleLayer = 0;
 
-    // ÊÇ·ñ¸Õ¸ÕÍê³ÉÁËÒ»¸ö·¿¼ä£¨ÓÃÓÚ´Ó·¿¼ä³¡¾°·µ»ØµØÍ¼Ê±ÅÐ¶Ï£©
+    // ï¿½Ç·ï¿½Õ¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ä£¨ï¿½ï¿½ï¿½Ú´Ó·ï¿½ï¿½ä³¡ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½Í¼Ê±ï¿½Ð¶Ï£ï¿½
     static bool roomCompleted = false;
 
-    // ¼ÇÂ¼µ±Ç°Ñ¡ÔñµÄ·¿¼äÎ»ÖÃ£¨ÓÃÓÚÅÐ¶ÏÏÂÒ»²ãÄÄÐ©·¿¼ä¿ÉÒÔ·ÃÎÊ£©
+    // ï¿½ï¿½Â¼ï¿½ï¿½Ç°Ñ¡ï¿½ï¿½Ä·ï¿½ï¿½ï¿½Î»ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½Ð©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô·ï¿½ï¿½Ê£ï¿½
     static cocos2d::Vec2 currentRoomPosition;
 
-    // Ìí¼ÓÖØÖÃÓÎÏ·×´Ì¬µÄº¯ÊýÊµÏÖ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï·×´Ì¬ï¿½Äºï¿½ï¿½ï¿½Êµï¿½ï¿½
     void resetGameState() {
-        // Çå¿ÕµØÍ¼ÐÅÏ¢
+        // ï¿½ï¿½Õµï¿½Í¼ï¿½ï¿½Ï¢
         staticMapInfo.clear();
 
-        // Çå¿ÕÁ¬ÏßÐÅÏ¢
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
         staticConnectionInfo.clear();
 
-        // ÖØÖÃµ±Ç°·¿¼äÎ»ÖÃ
+        // ï¿½ï¿½ï¿½Ãµï¿½Ç°ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
         currentRoomPosition = Vec2::ZERO;
 
-        // ÖØÖÃ¿É·ÃÎÊ²ã¼¶
+        // ï¿½ï¿½ï¿½Ã¿É·ï¿½ï¿½Ê²ã¼¶
         maxAccessibleLayer = 0;
 
-        // ÖØÖÃ·¿¼äÍê³É×´Ì¬
+        // ï¿½ï¿½ï¿½Ã·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
         roomCompleted = false;
     }
 
@@ -67,81 +69,82 @@ namespace MyGame {
         auto visibleSize = Director::getInstance()->getVisibleSize();
         auto origin = Director::getInstance()->getVisibleOrigin();
 
-        // ³õÊ¼»¯µ±Ç°²ãºÍµ±Ç°·¿¼ä
+        // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Íµï¿½Ç°ï¿½ï¿½ï¿½ï¿½
         currentLayer = 0;
         currentRoom = -1;
 
-        // ´´½¨ ScrollView
+        // ï¿½ï¿½ï¿½ï¿½ ScrollView
         scrollView = ui::ScrollView::create();
         scrollView->setDirection(ui::ScrollView::Direction::VERTICAL);
         scrollView->setContentSize(visibleSize);
-        scrollView->setInnerContainerSize(Size(visibleSize.width, visibleSize.height * 3));  // ÉèÖÃ¹ö¶¯·¶Î§
+        scrollView->setInnerContainerSize(Size(visibleSize.width, visibleSize.height * 3));  // ï¿½ï¿½ï¿½Ã¹ï¿½ï¿½ï¿½ï¿½ï¿½Î§
         scrollView->setPosition(origin);
         this->addChild(scrollView);
 
-        // Ìí¼ÓµØÍ¼±³¾°Í¼Æ¬
-        // Ìí¼ÓµØÍ¼±³¾°Í¼Æ¬
+        // ï¿½ï¿½ï¿½Óµï¿½Í¼ï¿½ï¿½ï¿½ï¿½Í¼Æ¬
+        // ï¿½ï¿½ï¿½Óµï¿½Í¼ï¿½ï¿½ï¿½ï¿½Í¼Æ¬
         auto background = Sprite::create("map_background.jpg");
         if (background)
         {
-            // »ñÈ¡±³¾°Í¼Æ¬Ô­Ê¼´óÐ¡ºÍ¹ö¶¯ÈÝÆ÷´óÐ¡
+            // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Í¼Æ¬Ô­Ê¼ï¿½ï¿½Ð¡ï¿½Í¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡
             Size bgSize = background->getContentSize();
             Size containerSize = scrollView->getInnerContainerSize();
 
-            // ¼ÆËãËõ·ÅÒò×ÓÊ¹Í¼Æ¬¿í¶ÈÊÊÓ¦ÆÁÄ»¿í¶È
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹Í¼Æ¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½Ä»ï¿½ï¿½ï¿½ï¿½
             float scaleX = visibleSize.width / bgSize.width;
-            // ¼ÆËãËõ·ÅÒò×ÓÊ¹Í¼Æ¬¸ß¶ÈÊÊÓ¦¹ö¶¯ÇøÓò¸ß¶È
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹Í¼Æ¬ï¿½ß¶ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶ï¿½
             float scaleY = containerSize.height / bgSize.height;
-            // Ê¹ÓÃ½Ï´óµÄËõ·ÅÒò×ÓÒÔÈ·±£Í¼Æ¬¸²¸ÇÕû¸ö¿É¼ûÇøÓò
+            // Ê¹ï¿½Ã½Ï´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È·ï¿½ï¿½Í¼Æ¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¼ï¿½ï¿½ï¿½ï¿½ï¿½
             float scale = std::max(scaleX, scaleY);
 
-            // ÉèÖÃ±³¾°Í¼Æ¬Ëõ·Å
+            // ï¿½ï¿½ï¿½Ã±ï¿½ï¿½ï¿½Í¼Æ¬ï¿½ï¿½ï¿½ï¿½
             background->setScale(scale);
 
-            // ÉèÖÃ±³¾°Í¼Æ¬Î»ÖÃµ½¹ö¶¯ÈÝÆ÷ÖÐÐÄ
+            // ï¿½ï¿½ï¿½Ã±ï¿½ï¿½ï¿½Í¼Æ¬Î»ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             background->setPosition(Vec2(visibleSize.width / 2, containerSize.height / 2));
 
-            scrollView->addChild(background, 0);  // ½«±³¾°Í¼Æ¬Ìí¼Óµ½×îµ×²ã
+            scrollView->addChild(background, 0);  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼Æ¬ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½×²ï¿½
         }
 
-        // ¼ì²éÊÇ·ñÒÑ¾­Éú³ÉÁËµØÍ¼Êý¾Ý
+        // ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½Í¼ï¿½ï¿½ï¿½ï¿½
         if (staticMapInfo.empty())
         {
-            // Éú³É¶à²ãµØÍ¼
-            int layers = 18;  // ¼ÙÉèÓÐ10²ã
-            int roomsPerLayer = 5;  // Ã¿²ãÓÐ3¸ö·¿¼ä
+            // ï¿½ï¿½ï¿½É¶ï¿½ï¿½ï¿½Í¼
+            int layers = 18;  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½10ï¿½ï¿½
+            int roomsPerLayer = 5;  // Ã¿ï¿½ï¿½ï¿½ï¿½3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             generateRandomMap(layers, roomsPerLayer);
         }
         else
         {
-            // Ê¹ÓÃÒÑ´æ´¢µÄµØÍ¼Êý¾ÝÖØÐÂÉú³ÉµØÍ¼
+            // Ê¹ï¿½ï¿½ï¿½Ñ´æ´¢ï¿½Äµï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éµï¿½Í¼
             generateMapFromSavedInfo();
         }
 
-        // Èç¹û¸Õ¸ÕÍê³ÉÁËÒ»¸ö·¿¼ä£¬Ôö¼Ó¿É·ÃÎÊµÄ²ã¼¶
+        // ï¿½ï¿½ï¿½ï¿½Õ¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ä£¬ï¿½ï¿½ï¿½Ó¿É·ï¿½ï¿½ÊµÄ²ã¼¶
         if (roomCompleted)
         {
             maxAccessibleLayer++;
             roomCompleted = false;
         }
 
-        // ¸üÐÂ·¿¼äµÄ¿É·ÃÎÊÐÔ
+        // ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ä¿É·ï¿½ï¿½ï¿½ï¿½ï¿½
         updateRoomAccessibility();
 
-        // Ìí¼Ó²ã¼¶ÌáÊ¾±êÇ©
+        // ï¿½ï¿½ï¿½Ó²ã¼¶ï¿½ï¿½Ê¾ï¿½ï¿½Ç©
         createLayerLabels();
+        createSaveButton();
 
         return true;
     }
 
-    // ´´½¨²ã¼¶±êÇ©
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ã¼¶ï¿½ï¿½Ç©
     void Map::createLayerLabels()
     {
         auto visibleSize = Director::getInstance()->getVisibleSize();
 
-        // Ìí¼Óµ±Ç°¿É·ÃÎÊ²ã¼¶ÌáÊ¾
+        // ï¿½ï¿½ï¿½Óµï¿½Ç°ï¿½É·ï¿½ï¿½Ê²ã¼¶ï¿½ï¿½Ê¾
         auto accessLabel = Label::createWithTTF(
-            "¿É·ÃÎÊ²ã¼¶: " + std::to_string(maxAccessibleLayer + 1),
+            "ï¿½É·ï¿½ï¿½Ê²ã¼¶: " + std::to_string(maxAccessibleLayer + 1),
             "fonts/Marker Felt.ttf",
             32
         );
@@ -149,53 +152,53 @@ namespace MyGame {
         this->addChild(accessLabel, 3);
     }
 
-    // ¸üÐÂ·¿¼äµÄ¿É·ÃÎÊÐÔ
+    // ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ä¿É·ï¿½ï¿½ï¿½ï¿½ï¿½
     void Map::updateRoomAccessibility()
     {
-        // ÏÈ½«ËùÓÐ·¿¼äÉèÎª½ûÓÃ×´Ì¬
+        // ï¿½È½ï¿½ï¿½ï¿½ï¿½Ð·ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½×´Ì¬
         for (int i = 0; i < mapLayers.size(); i++)
         {
             for (auto& room : mapLayers[i])
             {
                 room.item->setEnabled(false);
-                room.item->setColor(Color3B(100, 100, 100)); // »ÒÉ«
+                room.item->setColor(Color3B(100, 100, 100)); // ï¿½ï¿½É«
             }
         }
 
-        // ÌØÊâÇé¿ö£ºÓÎÏ·¿ªÊ¼Ê±£¬µÚÒ»²ãËùÓÐ·¿¼ä¶¼¿É·ÃÎÊ
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½Ê¼Ê±ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Ð·ï¿½ï¿½ä¶¼ï¿½É·ï¿½ï¿½ï¿½
         if (maxAccessibleLayer == 0 && currentRoomPosition == Vec2::ZERO)
         {
             for (auto& room : mapLayers[0])
             {
                 room.item->setEnabled(true);
-                room.item->setColor(Color3B(255, 255, 255)); // Õý³£ÑÕÉ«
+                room.item->setColor(Color3B(255, 255, 255)); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«
             }
             return;
         }
 
-        // ½öÆôÓÃ¿É·ÃÎÊ²ã¼¶ÖÐÍ¨¹ýÂ·¾¶Á¬½ÓµÄ·¿¼ä
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ã¿É·ï¿½ï¿½Ê²ã¼¶ï¿½ï¿½Í¨ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ÓµÄ·ï¿½ï¿½ï¿½
         int accessibleLayer = maxAccessibleLayer;
 
-        // Èç¹ûµ±Ç°Ã»ÓÐÑ¡ÖÐ·¿¼ä£¬µ«ÒÑ¾­Í¨¹ýÁËÒ»Ð©²ã¼¶
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ç°Ã»ï¿½ï¿½Ñ¡ï¿½Ð·ï¿½ï¿½ä£¬ï¿½ï¿½ï¿½Ñ¾ï¿½Í¨ï¿½ï¿½ï¿½ï¿½Ò»Ð©ï¿½ã¼¶
         if (currentRoomPosition == Vec2::ZERO && maxAccessibleLayer > 0) {
-            // ÆôÓÃÐÂ½âËø²ãµÄËùÓÐ·¿¼ä
+            // ï¿½ï¿½ï¿½ï¿½ï¿½Â½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð·ï¿½ï¿½ï¿½
             for (auto& room : mapLayers[maxAccessibleLayer]) {
                 room.item->setEnabled(true);
-                room.item->setColor(Color3B(255, 255, 255)); // Õý³£ÑÕÉ«
+                room.item->setColor(Color3B(255, 255, 255)); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«
             }
             return;
         }
 
-        // ±éÀúÁ¬ÏßÐÅÏ¢£¬ÕÒ³ö´Óµ±Ç°·¿¼äÎ»ÖÃ¿ÉÒÔµ½´ïµÄÏÂÒ»²ã·¿¼ä
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½Ò³ï¿½ï¿½Óµï¿½Ç°ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã¿ï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ã·¿ï¿½ï¿½
         for (auto& connection : staticConnectionInfo) {
-            // ¼ì²éÁ¬ÏßµÄÆðµãÊÇ·ñÓëµ±Ç°·¿¼äÎ»ÖÃÆ¥Åä
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ßµï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ëµ±Ç°ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½Æ¥ï¿½ï¿½
             if (connection.start.equals(currentRoomPosition)) {
-                // ÕÒµ½¸ÃÁ¬ÏßÖÕµãËù¶ÔÓ¦µÄ·¿¼ä
+                // ï¿½Òµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½Ä·ï¿½ï¿½ï¿½
                 for (auto& room : mapLayers[maxAccessibleLayer]) {
-                    // Èç¹û·¿¼äÎ»ÖÃÓëÁ¬ÏßÖÕµãÆ¥Åä£¬ÔòÆôÓÃ¸Ã·¿¼ä
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õµï¿½Æ¥ï¿½ä£¬ï¿½ï¿½ï¿½ï¿½ï¿½Ã¸Ã·ï¿½ï¿½ï¿½
                     if (room.item->getPosition().equals(connection.end)) {
                         room.item->setEnabled(true);
-                        room.item->setColor(Color3B(255, 255, 255)); // Õý³£ÑÕÉ«
+                        room.item->setColor(Color3B(255, 255, 255)); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«
                     }
                 }
             }
@@ -207,11 +210,11 @@ namespace MyGame {
         static std::random_device rd;
         static std::mt19937 gen(rd());
 
-        // ¸üÐÂ¸ÅÂÊ·Ö²¼£¬Ìí¼ÓELITEÀàÐÍ
+        // ï¿½ï¿½ï¿½Â¸ï¿½ï¿½Ê·Ö²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ELITEï¿½ï¿½ï¿½ï¿½
         // START(0), BATTLE(1), QUESTION(2), REST(3), BOSS(4), ELITE(5)
-        static std::discrete_distribution<> dis({ 0, 45, 20, 10, 0, 15,10 });  // ¸øELITE 15%µÄ¸ÅÂÊ
+        static std::discrete_distribution<> dis({ 0, 45, 20, 10, 0, 15,10 });  // ï¿½ï¿½ELITE 15%ï¿½Ä¸ï¿½ï¿½ï¿½
 
-        // »ñÈ¡Ëæ»úÖµ²¢×ª»»ÎªRoomType
+        // ï¿½ï¿½È¡ï¿½ï¿½ï¿½Öµï¿½ï¿½×ªï¿½ï¿½ÎªRoomType
         int randomType = dis(gen);
         return static_cast<RoomType>(randomType);
     }
@@ -221,52 +224,52 @@ namespace MyGame {
         auto visibleSize = Director::getInstance()->getVisibleSize();
         auto origin = Director::getInstance()->getVisibleOrigin();
 
-        // Ëæ»úÊýÉú³ÉÆ÷
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         static std::random_device rd;
         static std::mt19937 gen(rd());
 
-        // Ìí¼Ó¿ªÊ¼µãÍ¼±ê
+        // ï¿½ï¿½ï¿½Ó¿ï¿½Ê¼ï¿½ï¿½Í¼ï¿½ï¿½
         auto startItem = MenuItemImage::create(
-            "start.png",  // Ê¹ÓÃÌØÊâÍ¼°¸
+            "start.png",  // Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½
             "start_selected.png",
-            [](Ref*) {}  // ¿ªÊ¼µã²»ÐèÒª»Øµ÷º¯Êý
+            [](Ref*) {}  // ï¿½ï¿½Ê¼ï¿½ã²»ï¿½ï¿½Òªï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½
         );
         if (startItem)
         {
             startItem->setPosition(Vec2(
                 visibleSize.width / 2,
-                scrollView->getInnerContainerSize().height - 100  // ÉèÖÃ¿ªÊ¼µãÎ»ÖÃ
+                scrollView->getInnerContainerSize().height - 100  // ï¿½ï¿½ï¿½Ã¿ï¿½Ê¼ï¿½ï¿½Î»ï¿½ï¿½
             ));
-            startItem->setScale(0.5);  // µ÷ÕûÍ¼±ê´óÐ¡
+            startItem->setScale(0.5);  // ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½Ð¡
             auto menu = Menu::create(startItem, nullptr);
             menu->setPosition(Vec2::ZERO);
-            scrollView->addChild(menu, 1);  // È·±£Í¼±êÔÚ±³¾°Í¼Æ¬Ö®ÉÏ
+            scrollView->addChild(menu, 1);  // È·ï¿½ï¿½Í¼ï¿½ï¿½ï¿½Ú±ï¿½ï¿½ï¿½Í¼Æ¬Ö®ï¿½ï¿½
         }
 
-        // Çå¿ÕÊý¾Ý
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         mapLayers.clear();
         staticMapInfo.clear();
 
-        // ¼ÆËã×îÐ¡·¿¼äÊý
-        int minRooms = std::max(3, roomsPerLayer - 2); // ×îµÍÊýÁ¿Îª3»òÉè¶¨Öµ-2
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        int minRooms = std::max(3, roomsPerLayer - 2); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª3ï¿½ï¿½ï¿½è¶¨Öµ-2
 
         for (int i = 0; i < layers; ++i)
         {
             std::vector<Room> layer;
-            std::vector<RoomInfo> layerInfo;  // ´æ´¢µ±Ç°²ãµÄ·¿¼äÐÅÏ¢
-            int roomCount;  // Ã¿²ãµÄ·¿¼äÊýÁ¿
+            std::vector<RoomInfo> layerInfo;  // ï¿½æ´¢ï¿½ï¿½Ç°ï¿½ï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+            int roomCount;  // Ã¿ï¿½ï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-            // ¸ù¾Ý²»Í¬²ã¼¶ÉèÖÃ²»Í¬µÄ·¿¼äÊýÁ¿ºÍÀàÐÍ
+            // ï¿½ï¿½ï¿½Ý²ï¿½Í¬ï¿½ã¼¶ï¿½ï¿½ï¿½Ã²ï¿½Í¬ï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             if (i == layers - 1) {
-                // ×îºóÒ»²ã£¨Boss²ã£©Ö»ÓÐ1¸ö·¿¼ä
+                // ï¿½ï¿½ï¿½Ò»ï¿½ã£¨Bossï¿½ã£©Ö»ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 roomCount = 1;
             }
             else if (i == layers - 2) {
-                // Boss²ãÇ°Ò»²ãÖÁÉÙÓÐ3¸ö·¿¼ä£¨¶¼ÊÇÐÝÏ¢·¿¼ä£©
+                // Bossï¿½ï¿½Ç°Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½3ï¿½ï¿½ï¿½ï¿½ï¿½ä£¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ä£©
                 roomCount = roomsPerLayer;
             }
             else {
-                // ÆäËû²ãËæ»úÉú³É·¿¼äÊýÁ¿£º×îÐ¡Öµµ½roomsPerLayerÖ®¼ä
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡Öµï¿½ï¿½roomsPerLayerÖ®ï¿½ï¿½
                 std::uniform_int_distribution<> roomDist(minRooms, roomsPerLayer);
                 roomCount = roomDist(gen);
             }
@@ -275,15 +278,15 @@ namespace MyGame {
             {
                 RoomType roomType;
 
-                // ¸ù¾Ý²»Í¬²ã¼¶ÉèÖÃ²»Í¬µÄ·¿¼äÀàÐÍ
+                // ï¿½ï¿½ï¿½Ý²ï¿½Í¬ï¿½ã¼¶ï¿½ï¿½ï¿½Ã²ï¿½Í¬ï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 if (i == layers - 1) {
-                    roomType = RoomType::BOSS;  // ×îºóÒ»²ãÊÇ BOSS ·¿¼ä
+                    roomType = RoomType::BOSS;  // ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ BOSS ï¿½ï¿½ï¿½ï¿½
                 }
                 else if (i == layers - 2) {
-                    roomType = RoomType::REST;  // Boss²ãÇ°Ò»²ãÈ«²¿ÊÇÐÝÏ¢·¿¼ä
+                    roomType = RoomType::REST;  // Bossï¿½ï¿½Ç°Ò»ï¿½ï¿½È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½
                 }
                 else {
-                    roomType = getRandomRoomType();  // ÆäËû²ãËæ»úÉú³É·¿¼äÀàÐÍ
+                    roomType = getRandomRoomType();  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 }
 
                 MenuItemImage* roomItem = nullptr;
@@ -316,7 +319,7 @@ namespace MyGame {
                     break;
                 case RoomType::BOSS:
                     roomItem = MenuItemImage::create(
-                        "boss.png",  // Ê¹ÓÃÌØÊâÍ¼°¸
+                        "boss.png",  // Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½
                         "boss_selected.png",
                         CC_CALLBACK_1(Map::menuBossCallback, this)
                     );
@@ -325,7 +328,7 @@ namespace MyGame {
 
                 case RoomType::ELITE:
                     roomItem = MenuItemImage::create(
-                        "elite_normal.png",  // ÐèÒª×¼±¸ÕâÐ©×ÊÔ´Í¼Æ¬
+                        "elite_normal.png",  // ï¿½ï¿½Òª×¼ï¿½ï¿½ï¿½ï¿½Ð©ï¿½ï¿½Ô´Í¼Æ¬
                         "elite_selected.png",
                         CC_CALLBACK_1(Map::menuEliteCallback, this)
                     );
@@ -342,40 +345,40 @@ namespace MyGame {
                 }
                 if (roomItem)
                 {
-                    // ¸ù¾Ý·¿¼äÊýÁ¿µ÷ÕûÎ»ÖÃ
+                    // ï¿½ï¿½ï¿½Ý·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
                     Vec2 position;
                     if (roomCount == 1) {
-                        // Èç¹ûÖ»ÓÐÒ»¸ö·¿¼ä£¬·ÅÔÚÖÐ¼ä
+                        // ï¿½ï¿½ï¿½Ö»ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ä£¬ï¿½ï¿½ï¿½ï¿½ï¿½Ð¼ï¿½
                         position = Vec2(
                             visibleSize.width / 2,
-                            scrollView->getInnerContainerSize().height - (i + 1) * 200  // ¸ù¾Ý²ãÊýµ÷ÕûÎ»ÖÃ
+                            scrollView->getInnerContainerSize().height - (i + 1) * 200  // ï¿½ï¿½ï¿½Ý²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
                         );
                     }
                     else {
-                        // ¸ù¾Ý·¿¼äÊýÁ¿¾ùÔÈ·Ö²¼
+                        // ï¿½ï¿½ï¿½Ý·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È·Ö²ï¿½
                         float spacing = visibleSize.width / (roomCount + 1);
                         position = Vec2(
                             origin.x + spacing * (j + 1),
-                            scrollView->getInnerContainerSize().height - (i + 1) * 200  // ¸ù¾Ý²ãÊýµ÷ÕûÎ»ÖÃ
+                            scrollView->getInnerContainerSize().height - (i + 1) * 200  // ï¿½ï¿½ï¿½Ý²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
                         );
                     }
 
                     roomItem->setPosition(position);
-                    // ´æ´¢²ã¼¶ÐÅÏ¢
+                    // ï¿½æ´¢ï¿½ã¼¶ï¿½ï¿½Ï¢
                     roomItem->setTag(i);
 
                     auto menu = Menu::create(roomItem, nullptr);
                     menu->setPosition(Vec2::ZERO);
-                    scrollView->addChild(menu, 1);  // È·±£²Ëµ¥ÔÚ±³¾°Í¼Æ¬Ö®ÉÏ
+                    scrollView->addChild(menu, 1);  // È·ï¿½ï¿½ï¿½Ëµï¿½ï¿½Ú±ï¿½ï¿½ï¿½Í¼Æ¬Ö®ï¿½ï¿½
 
                     layer.push_back({ roomType, roomItem });
 
-                    // ±£´æÎ»ÖÃÐÅÏ¢ÒÔ±ãºóÐøÖØ½¨
+                    // ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½Ô±ï¿½ï¿½ï¿½ï¿½ï¿½Ø½ï¿½
                     layerInfo.push_back({ roomType, position });
                 }
             }
             mapLayers.push_back(layer);
-            staticMapInfo.push_back(layerInfo);  // ´æ´¢¸Ã²ãÐÅÏ¢
+            staticMapInfo.push_back(layerInfo);  // ï¿½æ´¢ï¿½Ã²ï¿½ï¿½ï¿½Ï¢
         }
 
         connectRooms(mapLayers);
@@ -383,10 +386,10 @@ namespace MyGame {
 
     void Map::generateMapFromSavedInfo()
     {
-        // Çå¿ÕÏÖÓÐµØÍ¼Êý¾Ý
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½Í¼ï¿½ï¿½ï¿½ï¿½
         mapLayers.clear();
 
-        // ¸ù¾Ý±£´æµÄµØÍ¼ÐÅÏ¢ÖØÐÂ´´½¨·¿¼ä
+        // ï¿½ï¿½ï¿½Ý±ï¿½ï¿½ï¿½Äµï¿½Í¼ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½Â´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         for (int i = 0; i < staticMapInfo.size(); i++)
         {
             const auto& layerInfo = staticMapInfo[i];
@@ -408,11 +411,11 @@ namespace MyGame {
                     break;
                 case RoomType::QUESTION:
                     roomItem = MenuItemImage::create(
-                        "question_normal.jpg",
+                        "question_normal.png",
                         "question_selected.png",
                         CC_CALLBACK_1(Map::menuQuestionCallback, this)
                     );
-                    roomItem->setScale(0.5);
+                    roomItem->setScale(0.15);
                     break;
                 case RoomType::REST:
                     roomItem = MenuItemImage::create(
@@ -424,7 +427,7 @@ namespace MyGame {
                     break;
                 case RoomType::BOSS:
                     roomItem = MenuItemImage::create(
-                        "boss.png",  // Ê¹ÓÃÌØÊâÍ¼°¸
+                        "boss.png",  // Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½
                         "boss_selected.png",
                         CC_CALLBACK_1(Map::menuBossCallback, this)
                     );
@@ -432,7 +435,7 @@ namespace MyGame {
                     break;
                 case RoomType::ELITE:
                     roomItem = MenuItemImage::create(
-                        "elite_normal.png",  // ÐèÒª×¼±¸ÕâÐ©×ÊÔ´Í¼Æ¬
+                        "elite_normal.png",  // ï¿½ï¿½Òª×¼ï¿½ï¿½ï¿½ï¿½Ð©ï¿½ï¿½Ô´Í¼Æ¬
                         "elite_selected.png",
                         CC_CALLBACK_1(Map::menuEliteCallback, this)
                     );
@@ -440,7 +443,7 @@ namespace MyGame {
                     break;
                 case RoomType::SHOP:
                     roomItem = MenuItemImage::create(
-                        "shop_normal.png",  // Ê¹ÓÃÉÌµêÍ¼±ê
+                        "shop_normal.png",  // Ê¹ï¿½ï¿½ï¿½Ìµï¿½Í¼ï¿½ï¿½
                         "shop_selected.png",
                         CC_CALLBACK_1(Map::menuShopCallback, this)
                     );
@@ -452,12 +455,12 @@ namespace MyGame {
                 if (roomItem)
                 {
                     roomItem->setPosition(roomInfo.position);
-                    // ´æ´¢²ã¼¶ÐÅÏ¢
+                    // ï¿½æ´¢ï¿½ã¼¶ï¿½ï¿½Ï¢
                     roomItem->setTag(i);
 
                     auto menu = Menu::create(roomItem, nullptr);
                     menu->setPosition(Vec2::ZERO);
-                    scrollView->addChild(menu, 1);  // È·±£²Ëµ¥ÔÚ±³¾°Í¼Æ¬Ö®ÉÏ
+                    scrollView->addChild(menu, 1);  // È·ï¿½ï¿½ï¿½Ëµï¿½ï¿½Ú±ï¿½ï¿½ï¿½Í¼Æ¬Ö®ï¿½ï¿½
 
                     layer.push_back({ roomInfo.type, roomItem });
                 }
@@ -470,21 +473,21 @@ namespace MyGame {
 
     void Map::connectRooms(const std::vector<std::vector<Room>>& map)
     {
-        // ´´½¨Ò»¸öDrawNodeÓÃÓÚ»æÖÆÁ¬½ÓÏß£¬½µµÍzOrderÊ¹ÆäÎ»ÓÚÍ¼±êÏÂ·½
+        // ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½DrawNodeï¿½ï¿½ï¿½Ú»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß£ï¿½ï¿½ï¿½ï¿½ï¿½zOrderÊ¹ï¿½ï¿½Î»ï¿½ï¿½Í¼ï¿½ï¿½ï¿½Â·ï¿½
         auto drawNode = DrawNode::create();
-        scrollView->addChild(drawNode, 0);  // zOrderÎª0£¬»á±»zOrderÎª1µÄ·¿¼äÍ¼±ê¸²¸Ç
+        scrollView->addChild(drawNode, 0);  // zOrderÎª0ï¿½ï¿½ï¿½á±»zOrderÎª1ï¿½Ä·ï¿½ï¿½ï¿½Í¼ï¿½ê¸²ï¿½ï¿½
 
-        // Èç¹ûÒÑ¾­ÓÐ±£´æµÄÁ¬ÏßÐÅÏ¢£¬Ö±½ÓÊ¹ÓÃ
+        // ï¿½ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½Ð±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Ö±ï¿½ï¿½Ê¹ï¿½ï¿½
         if (!staticConnectionInfo.empty()) {
             for (const auto& connection : staticConnectionInfo) {
-                // Ê¹ÓÃ½¥±äÉ«µÄÏßÌõ£¬´ÓÆðµãµ½ÖÕµãÓÉÇ³À¶É«¹ý¶Éµ½ÉîÀ¶É«
-                Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);  // Ç³À¶É«£¬°ëÍ¸Ã÷
-                Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);    // ÉîÀ¶É«£¬°ëÍ¸Ã÷
+                // Ê¹ï¿½Ã½ï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ãµ½ï¿½Õµï¿½ï¿½ï¿½Ç³ï¿½ï¿½É«ï¿½ï¿½ï¿½Éµï¿½ï¿½ï¿½ï¿½ï¿½É«
+                Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);  // Ç³ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ï¿½
+                Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);    // ï¿½ï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ï¿½
 
-                // »æÖÆ´ÖÏß¶Î£¬Ê¹ÓÃ½¥±äÐ§¹û
-                float lineWidth = 3.0f;  // Ôö¼ÓÏßÌõ¿í¶È
+                // ï¿½ï¿½ï¿½Æ´ï¿½ï¿½ß¶Î£ï¿½Ê¹ï¿½Ã½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
+                float lineWidth = 3.0f;  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-                // ÏÈ»æÖÆÒõÓ°Ð§¹û
+                // ï¿½È»ï¿½ï¿½ï¿½ï¿½ï¿½Ó°Ð§ï¿½ï¿½
                 drawNode->drawSegment(
                     connection.start,
                     connection.end,
@@ -492,7 +495,7 @@ namespace MyGame {
                     Color4F(0.0f, 0.0f, 0.0f, 0.3f)
                 );
 
-                // ÔÙ»æÖÆÖ÷Ïß
+                // ï¿½Ù»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 drawNode->drawSegment(
                     connection.start,
                     connection.end,
@@ -500,14 +503,14 @@ namespace MyGame {
                     startColor
                 );
 
-                // ÔÚ¹Ø¼üµã»æÖÆÐ¡Ô²µã£¬Ôö¼ÓÊÓ¾õÐ§¹û
+                // ï¿½Ú¹Ø¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡Ô²ï¿½ã£¬ï¿½ï¿½ï¿½ï¿½ï¿½Ó¾ï¿½Ð§ï¿½ï¿½
                 drawNode->drawDot(connection.start, lineWidth * 1.2f, startColor);
                 drawNode->drawDot(connection.end, lineWidth * 1.2f, endColor);
             }
             return;
         }
 
-        // Çå¿ÕÁ¬ÏßÐÅÏ¢ÒÔ±ãÖØÐÂÉú³É
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½Ô±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         staticConnectionInfo.clear();
 
         for (size_t i = 0; i < map.size() - 1; ++i)
@@ -516,65 +519,65 @@ namespace MyGame {
             const auto& nextLayer = map[i + 1];
 
             if (nextLayer.empty() || currentLayer.empty()) {
-                continue;  // È·±£²ã²»Îª¿Õ
+                continue;  // È·ï¿½ï¿½ï¿½ã²»Îªï¿½ï¿½
             }
 
-            // ´¦ÀíBOSS²ãµÄÌØÊâÇé¿ö£¨Ö»ÓÐÒ»¸ö·¿¼ä£©
+            // ï¿½ï¿½ï¿½ï¿½BOSSï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ä£©
             if (nextLayer.size() == 1) {
-                // ËùÓÐµ±Ç°²ã·¿¼ä¶¼Á¬½Óµ½ÏÂÒ»²ãµÄBOSS·¿¼ä
+                // ï¿½ï¿½ï¿½Ðµï¿½Ç°ï¿½ã·¿ï¿½ä¶¼ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½BOSSï¿½ï¿½ï¿½ï¿½
                 auto bossPos = nextLayer[0].item->getPosition();
                 for (const auto& currentRoom : currentLayer) {
                     auto startPos = currentRoom.item->getPosition();
 
-                    // Ê¹ÓÃ½¥±äÉ«µÄÏßÌõ
+                    // Ê¹ï¿½Ã½ï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                     Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);
                     Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);
 
-                    // ÏÈ»æÖÆÒõÓ°
+                    // ï¿½È»ï¿½ï¿½ï¿½ï¿½ï¿½Ó°
                     drawNode->drawSegment(
                         startPos,
                         bossPos,
-                        3.0f + 1.0f,  // Ö÷Ïß¿í¶È+ÒõÓ°¿í¶È
+                        3.0f + 1.0f,  // ï¿½ï¿½ï¿½ß¿ï¿½ï¿½ï¿½+ï¿½ï¿½Ó°ï¿½ï¿½ï¿½ï¿½
                         Color4F(0.0f, 0.0f, 0.0f, 0.3f)
                     );
 
-                    // ÔÙ»æÖÆÖ÷Ïß
+                    // ï¿½Ù»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                     drawNode->drawSegment(startPos, bossPos, 3.0f, startColor);
 
-                    // Ìí¼Óµã×ºÐ§¹û
+                    // ï¿½ï¿½ï¿½Óµï¿½×ºÐ§ï¿½ï¿½
                     drawNode->drawDot(startPos, 4.0f, startColor);
                     drawNode->drawDot(bossPos, 4.0f, endColor);
 
-                    // ±£´æÁ¬ÏßÐÅÏ¢
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
                     staticConnectionInfo.push_back({ startPos, bossPos });
                 }
                 continue;
             }
 
-            // ¼ÇÂ¼ÏÂÒ»²ã·¿¼äÒÑÁ¬½Ó×´Ì¬
+            // ï¿½ï¿½Â¼ï¿½ï¿½Ò»ï¿½ã·¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
             std::vector<bool> nextRoomConnected(nextLayer.size(), false);
 
-            // ÎªÃ¿¸öµ±Ç°²ãµÄ·¿¼ä´´½¨Á¬½Ó£¬ÔÊÐí¿çÔ½Ò»¸ö·¿¼ä
+            // ÎªÃ¿ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Ä·ï¿½ï¿½ä´´ï¿½ï¿½ï¿½ï¿½ï¿½Ó£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             for (size_t j = 0; j < currentLayer.size(); j++)
             {
                 auto startPos = currentLayer[j].item->getPosition();
 
-                // È·¶¨µ±Ç°·¿¼äÔÚÏÂÒ»²ã¿ÉÄÜÁ¬½ÓµÄ·¿¼äË÷Òý·¶Î§
-                // ÔÊÐíºáÏò¿çÔ½Ò»¸ö·¿¼ä£¬µ«²»ÄÜ¿çÔ½Á½¸ö
-                int maxConnections = 2; // ÏÞÖÆÃ¿¸ö·¿¼ä×î¶àÁ¬½ÓÏÂÒ»²ãµÄ·¿¼äÊý
+                // È·ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÓµÄ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î§
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ä£¬ï¿½ï¿½ï¿½ï¿½ï¿½Ü¿ï¿½Ô½ï¿½ï¿½ï¿½ï¿½
+                int maxConnections = 2; // ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½
                 int connectionsCount = 0;
 
-                // ¸ù¾Ýµ±Ç°²ãºÍÏÂÒ»²ãµÄ·¿¼äÊýÁ¿¹ØÏµÈ·¶¨Á¬½Ó²ßÂÔ
+                // ï¿½ï¿½ï¿½Ýµï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÏµÈ·ï¿½ï¿½ï¿½ï¿½ï¿½Ó²ï¿½ï¿½ï¿½
                 if (nextLayer.size() <= 2) {
-                    // Èç¹ûÏÂÒ»²ã·¿¼äÉÙÓÚ3¸ö£¬ËùÓÐ·¿¼ä¶¼¿ÉÒÔ»¥ÏàÁ¬½Ó
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ã·¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð·ï¿½ï¿½ä¶¼ï¿½ï¿½ï¿½Ô»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                     for (size_t k = 0; k < nextLayer.size() && connectionsCount < maxConnections; k++) {
                         auto endPos = nextLayer[k].item->getPosition();
 
-                        // Ê¹ÓÃ½¥±äÉ«µÄÏßÌõ
-                        Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);  // Ç³À¶É«
-                        Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);    // ÉîÀ¶É«
+                        // Ê¹ï¿½Ã½ï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                        Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);  // Ç³ï¿½ï¿½É«
+                        Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);    // ï¿½ï¿½ï¿½ï¿½É«
 
-                        // ÏÈ»æÖÆÒõÓ°
+                        // ï¿½È»ï¿½ï¿½ï¿½ï¿½ï¿½Ó°
                         drawNode->drawSegment(
                             startPos,
                             endPos,
@@ -582,22 +585,22 @@ namespace MyGame {
                             Color4F(0.0f, 0.0f, 0.0f, 0.3f)
                         );
 
-                        // ÔÙ»æÖÆÖ÷Ïß
+                        // ï¿½Ù»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                         drawNode->drawSegment(startPos, endPos, 3.0f, startColor);
 
-                        // Ìí¼Óµã×ºÐ§¹û
+                        // ï¿½ï¿½ï¿½Óµï¿½×ºÐ§ï¿½ï¿½
                         drawNode->drawDot(startPos, 4.0f, startColor);
                         drawNode->drawDot(endPos, 4.0f, endColor);
 
-                        // ±£´æÁ¬ÏßÐÅÏ¢
+                        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
                         staticConnectionInfo.push_back({ startPos, endPos });
                         nextRoomConnected[k] = true;
                         connectionsCount++;
                     }
                 }
                 else {
-                    // ÎªÃ¿¸ö·¿¼äÕÒµ½"ºÏÀí"µÄÁ¬½ÓÎ»ÖÃ
-                    // ÓëÔ­´úÂëÏàÍ¬µÄÂß¼­
+                    // ÎªÃ¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òµï¿½"ï¿½ï¿½ï¿½ï¿½"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+                    // ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ß¼ï¿½
                     int baseIndex;
 
                     if (currentLayer.size() <= nextLayer.size()) {
@@ -632,15 +635,15 @@ namespace MyGame {
                         }
                     }
 
-                    // »æÖÆËùÓÐÁ¬½Ó£¬Ê¹ÓÃÃÀ»¯Ð§¹û
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó£ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
                     for (int idx : connectIndexes) {
                         auto endPos = nextLayer[idx].item->getPosition();
 
-                        // Ê¹ÓÃ½¥±äÉ«µÄÏßÌõ
+                        // Ê¹ï¿½Ã½ï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                         Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);
                         Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);
 
-                        // ÏÈ»æÖÆÒõÓ°
+                        // ï¿½È»ï¿½ï¿½ï¿½ï¿½ï¿½Ó°
                         drawNode->drawSegment(
                             startPos,
                             endPos,
@@ -648,29 +651,29 @@ namespace MyGame {
                             Color4F(0.0f, 0.0f, 0.0f, 0.3f)
                         );
 
-                        // ÔÙ»æÖÆÖ÷Ïß
+                        // ï¿½Ù»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                         drawNode->drawSegment(startPos, endPos, 3.0f, startColor);
 
-                        // Ìí¼Óµã×ºÐ§¹û
+                        // ï¿½ï¿½ï¿½Óµï¿½×ºÐ§ï¿½ï¿½
                         drawNode->drawDot(startPos, 4.0f, startColor);
                         drawNode->drawDot(endPos, 4.0f, endColor);
 
-                        // ±£´æÁ¬ÏßÐÅÏ¢
+                        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
                         staticConnectionInfo.push_back({ startPos, endPos });
                     }
                 }
             }
 
-            // È·±£ËùÓÐÏÂ²ã·¿¼ä¶¼ÓÐÁ¬½Ó
+            // È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â²ã·¿ï¿½ä¶¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             for (size_t j = 0; j < nextLayer.size(); j++) {
                 if (!nextRoomConnected[j]) {
-                    // ÕÒµ½Ïà¶ÔÎ»ÖÃ×î½üµÄÉÏ²ã·¿¼ä
+                    // ï¿½Òµï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï²ã·¿ï¿½ï¿½
                     int closestRoomIndex = 0;
                     float minDistance = FLT_MAX;
 
                     for (size_t k = 0; k < currentLayer.size(); k++) {
                         float xDist = currentLayer[k].item->getPosition().x - nextLayer[j].item->getPosition().x;
-                        float dist = fabs(xDist);  // Ö»¿¼ÂÇË®Æ½¾àÀë
+                        float dist = fabs(xDist);  // Ö»ï¿½ï¿½ï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ï¿½
 
                         if (dist < minDistance) {
                             minDistance = dist;
@@ -681,11 +684,11 @@ namespace MyGame {
                     auto startPos = currentLayer[closestRoomIndex].item->getPosition();
                     auto endPos = nextLayer[j].item->getPosition();
 
-                    // Ê¹ÓÃ½¥±äÉ«µÄÏßÌõ
+                    // Ê¹ï¿½Ã½ï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                     Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);
                     Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);
 
-                    // ÏÈ»æÖÆÒõÓ°
+                    // ï¿½È»ï¿½ï¿½ï¿½ï¿½ï¿½Ó°
                     drawNode->drawSegment(
                         startPos,
                         endPos,
@@ -693,14 +696,14 @@ namespace MyGame {
                         Color4F(0.0f, 0.0f, 0.0f, 0.3f)
                     );
 
-                    // ÔÙ»æÖÆÖ÷Ïß
+                    // ï¿½Ù»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                     drawNode->drawSegment(startPos, endPos, 3.0f, startColor);
 
-                    // Ìí¼Óµã×ºÐ§¹û
+                    // ï¿½ï¿½ï¿½Óµï¿½×ºÐ§ï¿½ï¿½
                     drawNode->drawDot(startPos, 4.0f, startColor);
                     drawNode->drawDot(endPos, 4.0f, endColor);
 
-                    // ±£´æÁ¬ÏßÐÅÏ¢
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
                     staticConnectionInfo.push_back({ startPos, endPos });
                     nextRoomConnected[j] = true;
                 }
@@ -714,16 +717,16 @@ namespace MyGame {
         auto item = static_cast<MenuItemImage*>(pSender);
         int layerIndex = item->getTag();
 
-        // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÃÎÊÕâ¸ö²ã¼¶
+        // ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã¼¶
         if (layerIndex > maxAccessibleLayer)
         {
-            // ´´½¨ÌáÊ¾±êÇ©
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Ç©
             auto visibleSize = Director::getInstance()->getVisibleSize();
             auto label = Label::createWithTTF("unable to enter now", "fonts/Marker Felt.ttf", 32);
             label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
             this->addChild(label, 5);
 
-            // 2ÃëºóÒÆ³ýÌáÊ¾
+            // 2ï¿½ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ï¿½Ê¾
             label->runAction(Sequence::create(
                 DelayTime::create(2.0f),
                 RemoveSelf::create(),
@@ -733,19 +736,25 @@ namespace MyGame {
             return;
         }
 
-        // ÉèÖÃµ±Ç°Ñ¡ÖÐµÄ²ãºÍ·¿¼ä
+        // ï¿½ï¿½ï¿½Ãµï¿½Ç°Ñ¡ï¿½ÐµÄ²ï¿½Í·ï¿½ï¿½ï¿½
         currentLayer = layerIndex;
         currentRoom = 0;
 
-        // ¼ÇÂ¼µ±Ç°·¿¼äÎ»ÖÃ
+        // ï¿½ï¿½Â¼ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
         currentRoomPosition = item->getPosition();
 
-        // ±ê¼ÇÎªÒÑÍê³É·¿¼ä
+        currentRoomType = RoomType::BATTLE;
+
+        // ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½É·ï¿½ï¿½ï¿½
         roomCompleted = true;
 
-        // ÇÐ»»µ½Õ½¶·³¡¾°
+        // ï¿½Ð»ï¿½ï¿½ï¿½Õ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         auto scene = FightingScene::createScene();
-        Director::getInstance()->replaceScene(scene);
+        // Ê¹ï¿½Ãµï¿½ï¿½ëµ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ï¿½ï¿½É«ï¿½ï¿½ï¿½ëµ­ï¿½ï¿½
+
+        // ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½Äµï¿½Í¼ï¿½ï¿½ï¿½ï¿½
+        Director::getInstance()->replaceScene(transition);
     }
 
     void Map::menuQuestionCallback(Ref* pSender)
@@ -753,16 +762,16 @@ namespace MyGame {
         auto item = static_cast<MenuItemImage*>(pSender);
         int layerIndex = item->getTag();
 
-        // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÃÎÊÕâ¸ö²ã¼¶
+        // ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã¼¶
         if (layerIndex > maxAccessibleLayer)
         {
-            // ´´½¨ÌáÊ¾±êÇ©
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Ç©
             auto visibleSize = Director::getInstance()->getVisibleSize();
             auto label = Label::createWithTTF("unable to enter now", "fonts/Marker Felt.ttf", 32);
             label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
             this->addChild(label, 5);
 
-            // 2ÃëºóÒÆ³ýÌáÊ¾
+            // 2ï¿½ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ï¿½Ê¾
             label->runAction(Sequence::create(
                 DelayTime::create(2.0f),
                 RemoveSelf::create(),
@@ -772,19 +781,25 @@ namespace MyGame {
             return;
         }
 
-        // ÉèÖÃµ±Ç°Ñ¡ÖÐµÄ²ãºÍ·¿¼ä
+        // ï¿½ï¿½ï¿½Ãµï¿½Ç°Ñ¡ï¿½ÐµÄ²ï¿½Í·ï¿½ï¿½ï¿½
         currentLayer = layerIndex;
         currentRoom = 0;
+		currentRoomType = RoomType::QUESTION;
 
-        // ¼ÇÂ¼µ±Ç°·¿¼äÎ»ÖÃ
+        // ï¿½ï¿½Â¼ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
         currentRoomPosition = item->getPosition();
 
-        // ±ê¼ÇÎªÒÑÍê³É·¿¼ä
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
+        currentRoomType = RoomType::QUESTION;
+
+        // ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½É·ï¿½ï¿½ï¿½
         roomCompleted = true;
 
-        // ÇÐ»»µ½ÎÊºÅ³¡¾°
+        // ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ÊºÅ³ï¿½ï¿½ï¿½
         auto scene = Question::createScene();
-        Director::getInstance()->replaceScene(scene);
+        // Ê¹ï¿½Ãµï¿½ï¿½ëµ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ï¿½ï¿½É«ï¿½ï¿½ï¿½ëµ­ï¿½ï¿½
+		Director::getInstance()->replaceScene(transition);
     }
 
     void Map::menuRestCallback(Ref* pSender)
@@ -792,16 +807,16 @@ namespace MyGame {
         auto item = static_cast<MenuItemImage*>(pSender);
         int layerIndex = item->getTag();
 
-        // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÃÎÊÕâ¸ö²ã¼¶
+        // ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã¼¶
         if (layerIndex > maxAccessibleLayer)
         {
-            // ´´½¨ÌáÊ¾±êÇ©
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Ç©
             auto visibleSize = Director::getInstance()->getVisibleSize();
             auto label = Label::createWithTTF("unable to enter now", "fonts/Marker Felt.ttf", 32);
             label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
             this->addChild(label, 5);
 
-            // 2ÃëºóÒÆ³ýÌáÊ¾
+            // 2ï¿½ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ï¿½Ê¾
             label->runAction(Sequence::create(
                 DelayTime::create(2.0f),
                 RemoveSelf::create(),
@@ -811,19 +826,26 @@ namespace MyGame {
             return;
         }
 
-        // ÉèÖÃµ±Ç°Ñ¡ÖÐµÄ²ãºÍ·¿¼ä
+        // ï¿½ï¿½ï¿½Ãµï¿½Ç°Ñ¡ï¿½ÐµÄ²ï¿½Í·ï¿½ï¿½ï¿½
         currentLayer = layerIndex;
         currentRoom = 0;
+        currentRoomType = RoomType::REST;
 
-        // ¼ÇÂ¼µ±Ç°·¿¼äÎ»ÖÃ
+        // ï¿½ï¿½Â¼ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
         currentRoomPosition = item->getPosition();
 
-        // ±ê¼ÇÎªÒÑÍê³É·¿¼ä
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
+        currentRoomType = RoomType::REST;
+
+        // ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½É·ï¿½ï¿½ï¿½
         roomCompleted = true;
 
-        // ÇÐ»»µ½ÐÝÏ¢³¡¾°
+        // ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½
         auto scene = Rest::createScene();
-        Director::getInstance()->replaceScene(scene);
+        // Ê¹ï¿½Ãµï¿½ï¿½ëµ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ï¿½ï¿½É«ï¿½ï¿½ï¿½ëµ­ï¿½ï¿½
+        // ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½Äµï¿½Í¼ï¿½ï¿½ï¿½ï¿½
+        Director::getInstance()->replaceScene(transition);
     }
 
     void Map::menuBossCallback(Ref* pSender)
@@ -831,16 +853,16 @@ namespace MyGame {
         auto item = static_cast<MenuItemImage*>(pSender);
         int layerIndex = item->getTag();
 
-        // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÃÎÊÕâ¸ö²ã¼¶
+        // ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã¼¶
         if (layerIndex > maxAccessibleLayer)
         {
-            // ´´½¨ÌáÊ¾±êÇ©
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Ç©
             auto visibleSize = Director::getInstance()->getVisibleSize();
             auto label = Label::createWithTTF("Unable to enter now", "fonts/Marker Felt.ttf", 32);
             label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
             this->addChild(label, 5);
 
-            // 2ÃëºóÒÆ³ýÌáÊ¾
+            // 2ï¿½ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ï¿½Ê¾
             label->runAction(Sequence::create(
                 DelayTime::create(2.0f),
                 RemoveSelf::create(),
@@ -850,19 +872,24 @@ namespace MyGame {
             return;
         }
 
-        // ÉèÖÃµ±Ç°Ñ¡ÖÐµÄ²ãºÍ·¿¼ä
+        // ï¿½ï¿½ï¿½Ãµï¿½Ç°Ñ¡ï¿½ÐµÄ²ï¿½Í·ï¿½ï¿½ï¿½
         currentLayer = layerIndex;
         currentRoom = 0;
 
-        // ¼ÇÂ¼µ±Ç°·¿¼äÎ»ÖÃ
+        // ï¿½ï¿½Â¼ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
         currentRoomPosition = item->getPosition();
 
-        // ±ê¼ÇÎªÒÑÍê³É·¿¼ä
+		currentRoomType = RoomType::BOSS;
+
+        // ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½É·ï¿½ï¿½ï¿½
         roomCompleted = true;
 
-        // ÇÐ»»µ½ BOSS Õ½¶·³¡¾°
+        // ï¿½Ð»ï¿½ï¿½ï¿½ BOSS Õ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         auto scene = FightingScene::createScene();
-        Director::getInstance()->replaceScene(scene);
+        // Ê¹ï¿½Ãµï¿½ï¿½ëµ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ï¿½ï¿½É«ï¿½ï¿½ï¿½ëµ­ï¿½ï¿½
+        // ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½Äµï¿½Í¼ï¿½ï¿½ï¿½ï¿½
+        Director::getInstance()->replaceScene(transition);
     }
 
     void Map::menuEliteCallback(Ref* pSender)
@@ -870,16 +897,16 @@ namespace MyGame {
         auto item = static_cast<MenuItemImage*>(pSender);
         int layerIndex = item->getTag();
 
-        // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÃÎÊÕâ¸ö²ã¼¶
+        // ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã¼¶
         if (layerIndex > maxAccessibleLayer)
         {
-            // ´´½¨ÌáÊ¾±êÇ©
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Ç©
             auto visibleSize = Director::getInstance()->getVisibleSize();
-            auto label = Label::createWithTTF("ÎÞ·¨½øÈë´Ë·¿¼ä", "fonts/Marker Felt.ttf", 32);
+            auto label = Label::createWithTTF("ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½Ë·ï¿½ï¿½ï¿½", "fonts/Marker Felt.ttf", 32);
             label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
             this->addChild(label, 5);
 
-            // 2ÃëºóÒÆ³ýÌáÊ¾
+            // 2ï¿½ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ï¿½Ê¾
             label->runAction(Sequence::create(
                 DelayTime::create(2.0f),
                 RemoveSelf::create(),
@@ -889,19 +916,25 @@ namespace MyGame {
             return;
         }
 
-        // ÉèÖÃµ±Ç°Ñ¡ÖÐµÄ²ãºÍ·¿¼ä
+        // ï¿½ï¿½ï¿½Ãµï¿½Ç°Ñ¡ï¿½ÐµÄ²ï¿½Í·ï¿½ï¿½ï¿½
         currentLayer = layerIndex;
         currentRoom = 0;
 
-        // ¼ÇÂ¼µ±Ç°·¿¼äÎ»ÖÃ
+        // ï¿½ï¿½Â¼ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
         currentRoomPosition = item->getPosition();
 
-        // ±ê¼ÇÎªÒÑÍê³É·¿¼ä
+        currentRoomType = RoomType::ELITE;
+
+        // ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½É·ï¿½ï¿½ï¿½
         roomCompleted = true;
 
-        // ÇÐ»»µ½Õ½¶·³¡¾° - Ê¹ÓÃÓëÆäËû»Øµ÷ÏàÍ¬µÄ·½Ê½
+        // ï¿½Ð»ï¿½ï¿½ï¿½Õ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ - Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½ï¿½ï¿½Í¬ï¿½Ä·ï¿½Ê½
         auto scene = FightingScene::createScene();
-        Director::getInstance()->replaceScene(scene);
+
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ï¿½ï¿½É«ï¿½ï¿½ï¿½ëµ­ï¿½ï¿½
+        // ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½Äµï¿½Í¼ï¿½ï¿½ï¿½ï¿½
+        Director::getInstance()->replaceScene(transition);
+
     }
 
     void Map::menuShopCallback(Ref* pSender)
@@ -909,16 +942,16 @@ namespace MyGame {
         auto item = static_cast<MenuItemImage*>(pSender);
         int layerIndex = item->getTag();
 
-        // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÃÎÊÕâ¸ö²ã¼¶
+        // ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã¼¶
         if (layerIndex > maxAccessibleLayer)
         {
-            // ´´½¨ÌáÊ¾±êÇ©
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Ç©
             auto visibleSize = Director::getInstance()->getVisibleSize();
-            auto label = Label::createWithTTF("ÎÞ·¨½øÈëÉÌµê", "fonts/Marker Felt.ttf", 32);
+            auto label = Label::createWithTTF("ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½", "fonts/Marker Felt.ttf", 32);
             label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
             this->addChild(label, 5);
 
-            // 2ÃëºóÒÆ³ýÌáÊ¾
+            // 2ï¿½ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ï¿½Ê¾
             label->runAction(Sequence::create(
                 DelayTime::create(2.0f),
                 RemoveSelf::create(),
@@ -928,26 +961,85 @@ namespace MyGame {
             return;
         }
 
-        // ÉèÖÃµ±Ç°Ñ¡ÖÐµÄ²ãºÍ·¿¼ä
+        // ï¿½ï¿½ï¿½Ãµï¿½Ç°Ñ¡ï¿½ÐµÄ²ï¿½Í·ï¿½ï¿½ï¿½
         currentLayer = layerIndex;
         currentRoom = 0;
 
-        // ¼ÇÂ¼µ±Ç°·¿¼äÎ»ÖÃ
+        // ï¿½ï¿½Â¼ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
         currentRoomPosition = item->getPosition();
 
-        // ±ê¼ÇÎªÒÑÍê³É·¿¼ä
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
+        currentRoomType = RoomType::SHOP;
+
+        // ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½É·ï¿½ï¿½ï¿½
         roomCompleted = true;
 
-        // ÇÐ»»µ½ÉÌµê³¡¾°
+        // ï¿½Ð»ï¿½ï¿½ï¿½ï¿½Ìµê³¡ï¿½ï¿½
         auto scene = ShopScene::createScene();
-<<<<<<< Updated upstream
-        Director::getInstance()->replaceScene(scene);
-=======
 
-        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ºÚÉ«µ­Èëµ­³ö
-        // ÇÐ»»µ½´ø¹ý¶ÉÐ§¹ûµÄµØÍ¼³¡¾°
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ï¿½ï¿½É«ï¿½ï¿½ï¿½ëµ­ï¿½ï¿½
+        // ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½Äµï¿½Í¼ï¿½ï¿½ï¿½ï¿½
         Director::getInstance()->replaceScene(transition);
->>>>>>> Stashed changes
+    }
+
+    // ï¿½ï¿½Mapï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    void Map::createSaveButton()
+    {
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ°´Å¥
+        auto saveButton = ui::Button::create("button.png", "button_selected.png");
+        saveButton->setPosition(Vec2(origin.x + visibleSize.width - 50, origin.y + 50));
+        saveButton->setScale(0.5f);
+
+        // ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½Â¼ï¿½
+        saveButton->addClickEventListener([this](Ref* sender) {
+            saveGame();
+            });
+
+        this->addChild(saveButton, 10);
+    }
+
+    void Map::saveGame()
+    {
+        // ï¿½ï¿½È¡ï¿½ï¿½Ç°ï¿½ï¿½Ï·×´Ì¬
+        int health = Hero::getCurrentHealth();
+        int gold = Hero::getCoins();
+        const std::vector<Card>& deck = Hero::getDeck();
+
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if (GameSaveManager::saveGame(
+            health,
+            gold,
+            deck,
+            currentLayer,
+            currentRoom,
+            staticMapInfo,
+            staticConnectionInfo,
+            maxAccessibleLayer,
+            currentRoomPosition,
+            currentRoomType,
+            roomCompleted
+        ))
+        {
+            // ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½Ê¾
+            auto visibleSize = Director::getInstance()->getVisibleSize();
+            Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+            auto saveLabel = Label::createWithTTF("ï¿½ï¿½Ï·ï¿½Ñ±ï¿½ï¿½ï¿½", "fonts/Marker Felt.ttf", 40);
+            saveLabel->setColor(Color3B::GREEN);
+            saveLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+            this->addChild(saveLabel, 100);
+
+            // 2ï¿½ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ï¿½Ê¾
+            saveLabel->runAction(Sequence::create(
+                DelayTime::create(2.0f),
+                FadeOut::create(0.5f),
+                RemoveSelf::create(),
+                nullptr
+            ));
+        }
     }
 
 
