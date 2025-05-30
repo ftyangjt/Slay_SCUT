@@ -167,34 +167,49 @@ void FightingScene::createBuffLabels() {
 
     // 创建英雄 BUFF 标签
     _heroBuffLabel = Label::createWithTTF("Hero Buffs: None", "fonts/Marker Felt.ttf", 40);
-    _heroBuffLabel->setTextColor(Color4B::YELLOW); // 设置标签颜色为黄色
+    _heroBuffLabel->setTextColor(Color4B::BLACK); // 设置标签颜色为黄色
     _heroBuffLabel->setPosition(Vec2(origin.x + visibleSize.width / 4, origin.y + visibleSize.height - _heroHealthLabel->getContentSize().height - 140));
     this->addChild(_heroBuffLabel, 1);
 
     // 创建怪物 BUFF 标签
     _monsterBuffLabel = Label::createWithTTF("Monster Buffs: None", "fonts/Marker Felt.ttf", 40);
-    _monsterBuffLabel->setTextColor(Color4B::YELLOW); // 设置标签颜色为黄色
+    _monsterBuffLabel->setTextColor(Color4B::BLACK); // 设置标签颜色为黄色
     _monsterBuffLabel->setPosition(Vec2(origin.x + 3 * visibleSize.width / 4, origin.y + visibleSize.height - _monsterHealthLabel->getContentSize().height - 140));
     this->addChild(_monsterBuffLabel, 1);
 }
 
+// 创建背景
 // 创建背景
 void FightingScene::createBackground()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    auto background = Sprite::create("background.png");
+    auto background = Sprite::create("background-1.png");
     if (background == nullptr)
     {
-        problemLoading("'background.png'");
+        problemLoading("'background-1.png'");
         return;
     }
 
+    // 获取背景图像的原始大小
+    Size originalSize = background->getContentSize();
+
+    // 计算缩放比例，使背景图像完全覆盖屏幕
+    float scaleX = visibleSize.width / originalSize.width;
+    float scaleY = visibleSize.height / originalSize.height;
+
+    // 选择较大的缩放比例以确保背景覆盖整个屏幕
+    float scale = (scaleX > scaleY) ? scaleX : scaleY;
+
+    // 应用缩放
+    background->setScale(scale);
+
+    // 设置背景图像位置在屏幕中心
     background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+
     this->addChild(background, 0);
 }
-
 // 创建回合数标签
 void FightingScene::createTurnCountLabel()
 {
@@ -207,7 +222,6 @@ void FightingScene::createTurnCountLabel()
     _turnCountLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - _turnCountLabel->getContentSize().height));
     this->addChild(_turnCountLabel, 1);
 }
-
 
 // 创建角色和怪物
 void FightingScene::createCharacters()
@@ -229,6 +243,7 @@ void FightingScene::createCharacters()
     // 创建怪物
     // 尝试根据当前房间类型创建相应的怪物
     Monster* monster = nullptr;
+    bool isEliteMonster = false;
 
     try {
         if (MyGame::currentRoomType == MyGame::RoomType::BOSS) {
@@ -236,6 +251,7 @@ void FightingScene::createCharacters()
         }
         else if (MyGame::currentRoomType == MyGame::RoomType::ELITE) {
             monster = Monster::createRandom(false, true); // 创建精英怪物
+            isEliteMonster = true;
         }
         else {
             monster = Monster::createRandom(); // 创建普通怪物
@@ -260,10 +276,26 @@ void FightingScene::createCharacters()
     }
 
     _monster = monster;
-    _monster->setPosition(Vec2(origin.x + visibleSize.width - _monster->getContentSize().width / 2, origin.y + visibleSize.height / 2));
+
+    // 基本位置计算
+    float baseX = origin.x + visibleSize.width - _monster->getContentSize().width / 2;
+
+    // 根据怪物类型调整位置
+    if (isEliteMonster || _monster->isElite()) {
+        // 精英怪向左移动100像素
+        _monster->setPosition(Vec2(baseX - 300, origin.y + visibleSize.height / 2));
+    }
+    else if (_monster->isBoss()) {
+        // Boss怪物居中
+        _monster->setPosition(Vec2(baseX-100, origin.y + visibleSize.height / 2));
+    }
+    else {
+        // 普通怪物向右移动100像素
+        _monster->setPosition(Vec2(baseX + 200, origin.y + visibleSize.height / 2));
+    }
+
     this->addChild(_monster, 1);
 }
-
 
 // 初始化牌堆
 void FightingScene::initializeDrawPile()
@@ -360,16 +392,16 @@ void FightingScene::startPlayerTurn()
     // 如果按钮不存在，创建它
     if (_endTurnButton == nullptr)
     {
-        _endTurnButton = cocos2d::ui::Button::create("button.png", "button_selected.png");
+        _endTurnButton = cocos2d::ui::Button::create("button1.jpg", "button.png");
         if (_endTurnButton == nullptr)
         {
             problemLoading("'buttonNormal.png' or 'buttonSelected.png'");
             return;
         }
 
-        _endTurnButton->setScale(0.25f);
-        _endTurnButton->setPosition(Vec2(origin.x + visibleSize.width - _endTurnButton->getContentSize().width / 2,
-            origin.y + visibleSize.width / 2 - _endTurnButton->getContentSize().height / 2));
+        _endTurnButton->setScale(0.2f);
+        _endTurnButton->setPosition(Vec2(origin.x + visibleSize.width - _endTurnButton->getContentSize().width / 2+400,
+            origin.y + visibleSize.width / 2 - _endTurnButton->getContentSize().height / 2-250));
 
         // 添加点击事件监听器
         _endTurnButton->addClickEventListener([this](Ref* sender) {

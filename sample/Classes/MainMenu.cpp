@@ -52,10 +52,10 @@ bool MainMenu::init()
     if (exitItem)
     {
         exitItem->setPosition(Vec2(
-            origin.x + visibleSize.width - 50,
-            origin.y + visibleSize.height / 2 - 300
+            origin.x + visibleSize.width -570,
+            origin.y + visibleSize.height -1100
         ));
-        exitItem->setScale(3);  // 调整按钮大小
+        exitItem->setScale(0.2);  // 调整按钮大小
     }
 
     // 将两个菜单项加入菜单
