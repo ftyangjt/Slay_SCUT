@@ -160,6 +160,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\DrawDeck.cpp" />
     <ClCompile Include="..\Classes\Effect.cpp" />
     <ClCompile Include="..\Classes\fail.cpp" />
+    <ClCompile Include="..\Classes\GameSaveManager.cpp" />
     <ClCompile Include="..\Classes\Hero.cpp" />
     <ClCompile Include="..\Classes\FightingScene.cpp" />
     <ClCompile Include="..\Classes\MainMenu.cpp" />
@@ -180,6 +181,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\DrawDeck.h" />
     <ClInclude Include="..\Classes\Effect.h" />
     <ClInclude Include="..\Classes\fail.h" />
+    <ClInclude Include="..\Classes\GameSaveManager.h" />
     <ClInclude Include="..\Classes\Hero.h" />
     <ClInclude Include="..\Classes\FightingScene.h" />
     <ClInclude Include="..\Classes\MainMenu.h" />

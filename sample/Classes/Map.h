@@ -38,6 +38,8 @@ namespace MyGame {
         static cocos2d::Scene* createScene();
         virtual bool init();
         CREATE_FUNC(Map);
+        static int currentLayer;
+        static int currentRoom;
 
     private:
         void menuBattleCallback(cocos2d::Ref* pSender);
@@ -50,6 +52,8 @@ namespace MyGame {
         void generateRandomMap(int layers, int roomsPerLayer);
         void generateMapFromSavedInfo();
         void connectRooms(const std::vector<std::vector<Room>>& map);
+        void saveGame();
+        void createSaveButton();
 
         // 新增的方法
         void createLayerLabels();    // 创建层级标签
@@ -57,8 +61,7 @@ namespace MyGame {
 
         std::vector<std::vector<Room>> mapLayers;
         cocos2d::ui::ScrollView* scrollView;  // 添加 ScrollView 成员变量
-        int currentLayer;  // 当前层
-        int currentRoom;  // 当前房间
+        
     };
 
 } // namespace MyGame
