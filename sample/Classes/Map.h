@@ -21,9 +21,11 @@ namespace MyGame {
     };
     // 仅声明不初始化
     extern RoomType currentRoomType;
-    struct Room {
+
+    // 将 RoomInfo 和 ConnectionInfo 移到这里
+    struct RoomInfo {
         RoomType type;
-        cocos2d::MenuItemImage* item;
+        cocos2d::Vec2 position;
     };
 
     // 连线信息结构体
@@ -31,6 +33,18 @@ namespace MyGame {
         cocos2d::Vec2 start;
         cocos2d::Vec2 end;
     };
+
+    struct Room {
+        RoomType type;
+        cocos2d::MenuItemImage* item;
+    };
+
+    // 声明静态变量
+    extern std::vector<std::vector<RoomInfo>> staticMapInfo;
+    extern std::vector<ConnectionInfo> staticConnectionInfo;
+    extern int maxAccessibleLayer;
+    extern cocos2d::Vec2 currentRoomPosition;
+    extern bool roomCompleted;
 
     class Map : public cocos2d::Scene
     {

@@ -329,7 +329,7 @@ bool SlimeMonster::init() {
     _health = 20;
     _attackDamage = 5;
     _block = 3;
-
+    this->setScale(0.4f);
     initActionPattern();
     return true;
 }
@@ -369,14 +369,14 @@ bool GoblinMonster::init() {
         return false;
     }
 
-    if (!initWithSprite("goblin.png")) {
+    if (!initWithSprite("goblin-1.png")) {
         return false;
     }
 
     _health = 30;
     _attackDamage = 8;
     _block = 5;
-
+	this->setScale(0.7f);
     initActionPattern();
     return true;
 }
@@ -415,7 +415,9 @@ bool SnakeMonster::init() {
     _health = 45;
     _attackDamage = 3;
     _block = 4;
-
+    this->setScale(0.5f);
+    this->setPositionY(this->getPositionY() - 20.0f);
+    this->setPositionX(this->getPositionX() + 200.0f);
     initActionPattern();
     return true;
 }
@@ -462,6 +464,7 @@ bool OrcMonster::init() {
     _health = 85;
     _attackDamage = 12;
     _block = 10;
+    this->setScale(1.5f);
 
     initActionPattern();
     return true;
@@ -509,7 +512,7 @@ bool GolemMonster::init() {
     _health = 80;
     _attackDamage = 15;
     _block = 15;
-
+    this->setScale(1.5f);
     initActionPattern();
     return true;
 }
@@ -557,14 +560,14 @@ bool KnightBossMonster::init() {
         return false;
     }
 
-    if (!initWithSprite("dark_knight.png")) {
+    if (!initWithSprite("knightboss.jpg")) {
         return false;
     }
 
     _health = 200;
     _attackDamage = 25;
     _block = 20;
-
+	this->setScale(2.5f);
     initActionPattern();
     return true;
 }
@@ -612,14 +615,14 @@ bool DragonBossMonster::init() {
         return false;
     }
 
-    if (!initWithSprite("ancient_dragon.png")) {
+    if (!initWithSprite("dragonboss.png")) {
         return false;
     }
 
     _health = 300;
     _attackDamage = 15;
     _block = 25;
-
+	this->setScale(0.8f);
     initActionPattern();
     return true;
 }

@@ -17,11 +17,18 @@ namespace MyGame {
         std::string description; // 商品描述
         std::function<void()> effect; // 购买后的效果
         bool purchased = false; // 记录商品是否已被购买
+        float scale = 0.25f;    // 商品图标的缩放比例，默认为0.5
+    };
+
+    // 用于存储商品索引和原始缩放比例的结构 - 移到命名空间级别
+    struct ItemData {
+        int index;
+        float scale;
     };
 
     // 定义商店商品
     static std::vector<ShopItem> shopItems = {
-        {"Life potion", 20, "life_potion.jpg", "Restore 20 health points", []() { Hero::healHealth(20); }, false},
+        {"Life potion", 20, "life_potion.jpg", "Restore 20 health points", []() { Hero::healHealth(20); }, false, 0.5f},
         // 修改 Shop.cpp 中的商品定义部分，替换神秘草莓的效果函数
         {"Mysterious strawberry", 100, "strawberry.jpg", "Increase maximum health by 10", []() {
             Hero::increaseMaxHealth(10);
@@ -41,8 +48,7 @@ namespace MyGame {
             auto fadeOut = FadeOut::create(2.0f);
             auto remove = RemoveSelf::create();
             msg->runAction(Sequence::create(fadeOut, remove, nullptr));
-        }, false}
-,
+        }, false, 0.5f},
         {"Coin bag", 50, "coin_bag.png", "randomly gain 0-100 coins", []() {
             // 使用cocos2d-x的随机数函数
             int randomCoins = cocos2d::random(0, 100);
@@ -64,8 +70,8 @@ namespace MyGame {
             auto fadeOut = FadeOut::create(2.0f);
             auto remove = RemoveSelf::create();
             coinMsg->runAction(Sequence::create(fadeOut, remove, nullptr));
-        }, false},
-        {"神秘卷轴", 60, "mystery_scroll.png", "习得特殊技能", []() { /* 特殊技能效果 */ }, false}
+        }, false, 0.25f},
+        {"神秘卷轴", 60, "mystery_scroll.png", "习得特殊技能", []() { /* 特殊技能效果 */ }, false, 0.7f}
     };
 
 
@@ -201,7 +207,7 @@ namespace MyGame {
 
         // 尝试使用图片按钮
         auto imageButton = MenuItemImage::create(
-            "back.jpg",
+            "back.png",
             "return_selected.png",
             [](Ref* sender) {
                 // 返回地图场景
@@ -306,9 +312,8 @@ namespace MyGame {
         // 确保悬停卡牌指针置空
         _hoveredCard = nullptr;
 
-        // 新的卡牌布局参数
-        const float CARD_SCALE = 0.5f;  // 增加卡牌大小
-        const float HOVER_SCALE = 0.6f; // 悬停时的放大比例
+        // 卡牌布局参数
+        const float HOVER_SCALE_MULTIPLIER = 1.2f; // 悬停时的放大倍数（相对于每个商品自己的缩放比例）
         const int ITEMS_PER_ROW = 3;    // 每行3个商品
         const int ROWS = 2;             // 2行商品
         const float HORIZONTAL_SPACING = 500.0f; // 水平间距
@@ -362,16 +367,19 @@ namespace MyGame {
                 );
                 card->addChild(cardNode);
             }
-            card->setScale(CARD_SCALE);
+
+            // 使用商品自己的缩放比例
+            float cardScale = shopItems[itemIndex].scale;
+            card->setScale(cardScale);
 
             // 设置卡牌位置 - 横向排列成两行
             float posX = START_X + col * HORIZONTAL_SPACING;
             float posY = START_Y - row * VERTICAL_SPACING;
             card->setPosition(Vec2(posX, posY));
 
-            // 使用智能指针管理索引内存
-            auto itemData = new int(itemIndex);
-            card->setUserData(itemData); // 存储商品索引
+            // 存储商品索引和原始缩放比例到用户数据
+            auto itemData = new ItemData{ itemIndex, cardScale };
+            card->setUserData(itemData); // 存储商品索引和缩放比例
             card->setName("Item_" + std::to_string(itemIndex)); // 设置名称用于标识
 
             // 添加商品名称
@@ -384,7 +392,7 @@ namespace MyGame {
             auto priceLabel = Label::createWithTTF(StringUtils::format("%d Gold", shopItems[itemIndex].price),
                 "fonts/Marker Felt.ttf", 60);
             priceLabel->setPosition(Vec2(0, -85));
-            priceLabel->setColor(Color3B(255, 215, 0)); // 金色
+            priceLabel->setColor(Color3B::BLACK); // 金色
             card->addChild(priceLabel);
 
             // 添加商品描述
@@ -420,11 +428,11 @@ namespace MyGame {
                 }
 
                 // 获取商品索引
-                int* itemIndexPtr = static_cast<int*>(card->getUserData());
-                if (!itemIndexPtr) {
+                auto itemData = static_cast<ItemData*>(card->getUserData());
+                if (!itemData) {
                     return;
                 }
-                int itemIndex = *itemIndexPtr;
+                int itemIndex = itemData->index;
 
                 // 获取当前金币数量
                 int currentCoins = Hero::getCoins();
@@ -464,7 +472,7 @@ namespace MyGame {
                     successMsg->runAction(Sequence::create(fadeOut, remove, nullptr));
 
                     // 释放用户数据内存
-                    delete itemIndexPtr;
+                    delete itemData;
                     card->setUserData(nullptr);
 
                     // 从卡牌列表中移除
@@ -517,7 +525,7 @@ namespace MyGame {
         }
 
         _mouseListener = EventListenerMouse::create();
-        _mouseListener->onMouseMove = [this, CARD_SCALE, HOVER_SCALE](EventMouse* event) {
+        _mouseListener->onMouseMove = [this, HOVER_SCALE_MULTIPLIER](EventMouse* event) {
             Vec2 mousePos = event->getLocationInView();
             bool foundHovered = false;
 
@@ -535,11 +543,19 @@ namespace MyGame {
                         // 恢复上一个悬停卡牌
                         if (_hoveredCard && _hoveredCard->getParent()) {
                             _hoveredCard->stopAllActions();
-                            _hoveredCard->runAction(ScaleTo::create(0.1f, CARD_SCALE));
+                            // 获取原始缩放比例
+                            auto prevItemData = static_cast<ItemData*>(_hoveredCard->getUserData());
+                            if (prevItemData) {
+                                _hoveredCard->runAction(ScaleTo::create(0.1f, prevItemData->scale));
+                            }
                         }
                         // 放大当前卡牌
                         card->stopAllActions();
-                        card->runAction(ScaleTo::create(0.1f, HOVER_SCALE));
+                        // 获取原始缩放比例并应用悬停倍数
+                        auto itemData = static_cast<ItemData*>(card->getUserData());
+                        if (itemData) {
+                            card->runAction(ScaleTo::create(0.1f, itemData->scale * HOVER_SCALE_MULTIPLIER));
+                        }
                         _hoveredCard = card;
                     }
                     foundHovered = true;
@@ -552,7 +568,11 @@ namespace MyGame {
                 // 确保卡牌仍然有效
                 if (_hoveredCard->getParent()) {
                     _hoveredCard->stopAllActions();
-                    _hoveredCard->runAction(ScaleTo::create(0.1f, CARD_SCALE));
+                    // 获取原始缩放比例
+                    auto itemData = static_cast<ItemData*>(_hoveredCard->getUserData());
+                    if (itemData) {
+                        _hoveredCard->runAction(ScaleTo::create(0.1f, itemData->scale));
+                    }
                 }
                 _hoveredCard = nullptr;
             }
@@ -577,7 +597,7 @@ namespace MyGame {
             // 移除所有商品卡牌并释放用户数据
             for (auto& card : _cards) {
                 if (card && card->getUserData()) {
-                    delete static_cast<int*>(card->getUserData());
+                    delete static_cast<ItemData*>(card->getUserData());
                     card->setUserData(nullptr);
                 }
                 if (card && card->getParent()) {
@@ -608,7 +628,7 @@ namespace MyGame {
         // 确保释放所有用户数据内存
         for (auto& card : _cards) {
             if (card && card->getUserData()) {
-                delete static_cast<int*>(card->getUserData());
+                delete static_cast<ItemData*>(card->getUserData());
                 card->setUserData(nullptr);
             }
         }

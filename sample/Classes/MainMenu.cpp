@@ -126,36 +126,55 @@ void MainMenu::loadGame()
     // 读取存档
     int health, gold, currentMapId, currentLevel;
     std::vector<Card> deck;
+    std::vector<std::vector<MyGame::RoomInfo>> mapInfo;
+    std::vector<MyGame::ConnectionInfo> connectionInfo;
+    int maxLayer;
+    cocos2d::Vec2 currentRoomPos;
+    MyGame::RoomType roomType;
+    bool completed;
 
-    if (GameSaveManager::loadGame(health, gold, deck, currentMapId, currentLevel))
+    if (GameSaveManager::loadGame(
+        health,
+        gold,
+        deck,
+        currentMapId,
+        currentLevel,
+        mapInfo,
+        connectionInfo,
+        maxLayer,
+        currentRoomPos,
+        roomType,
+        completed
+    ))
     {
         // 恢复游戏状态
         Hero::resetHealth();
         int maxHealth = Hero::getMaxHealth();
         Hero::healHealth(health - Hero::getCurrentHealth());
         Hero::setCoins(gold);
-        Hero::setDeckInitialized(true);
 
-        // 使用新添加的静态方法操作卡组
-        Hero::clearDeckStatic();
+        // 清空卡组并添加卡牌
+        // 如果假设 Hero 类已经有静态方法操作卡组
+        Hero::clearDeckStatic();  // 假设这是静态方法
         for (const auto& card : deck) {
-            Hero::addCardToDeckStatic(card);
+            Hero::addCardToDeckStatic(card);  // 假设这是静态方法
         }
 
-    
+        // 恢复地图状态
+        MyGame::Map::currentLayer = currentMapId;
+        MyGame::Map::currentRoom = currentLevel;
 
-        // 创建地图场景
+        // 恢复所有静态地图数据
+        MyGame::staticMapInfo = mapInfo;
+        MyGame::staticConnectionInfo = connectionInfo;
+        MyGame::maxAccessibleLayer = maxLayer;
+        MyGame::currentRoomPosition = currentRoomPos;
+        MyGame::currentRoomType = roomType;
+        MyGame::roomCompleted = completed;
+
+        // 切换到地图场景
         auto mapScene = MyGame::Map::createScene();
-
-        // 地图场景初始化后，获取Map实例并设置其成员变量
-        auto mapLayer = dynamic_cast<MyGame::Map*>(mapScene->getChildByName("MapLayer"));
-        if (mapLayer) {
-            // 设置地图层级和房间
-            MyGame::Map::currentLayer = currentMapId;
-            MyGame::Map::currentRoom = currentLevel;
-        }
-
         Director::getInstance()->replaceScene(TransitionFade::create(1.0f, mapScene));
     }
-
 }
+

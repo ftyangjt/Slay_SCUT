@@ -9,10 +9,10 @@ public:
     static cocos2d::Scene* createScene();
     virtual bool init();
 
-    // ¡°¿ªÊ¼ÓÎÏ·¡±°´Å¥»Øµ÷
+    // â€œå¼€å§‹æ¸¸æˆâ€æŒ‰é’®å›è°ƒ
     void menuStartCallback(cocos2d::Ref* pSender);
 
-    // ¡°ÍË³öÓÎÏ·¡±°´Å¥»Øµ÷
+    // â€œé€€å‡ºæ¸¸æˆâ€æŒ‰é’®å›è°ƒ
     void menuCloseCallback(cocos2d::Ref* pSender);
 
     void createContinueButton();
