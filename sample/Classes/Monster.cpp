@@ -273,7 +273,7 @@ std::string Monster::getNextActionDescription() const {
         return "Attack";
     }
 
-    int nextActionIndex = (_currentTurn + 1) % _actionPattern.size();
+    int nextActionIndex = (_currentTurn) % _actionPattern.size();
     const std::string& desc = _actionPattern[nextActionIndex].description;
     CCLOG("Next action description: %s", desc.c_str());
     return desc;

@@ -1005,7 +1005,12 @@ void FightingScene::applyCardEffects(const Card& card)
             switch (buff->getType())
             {
             case Effect::Type::Strength:
-                _hero->addEffect(effect); // 力量效果应用到英雄
+                if (buff->getLevel() > 0) {
+                    _hero->addEffect(effect); // 增加力量加到自己
+                }
+                else {
+                    _monster->addEffect(effect); // 减少力量加到怪物
+                }
                 break;
             default:
                 break;
@@ -1023,6 +1028,7 @@ void FightingScene::applyCardEffects(const Card& card)
             }
         }
     }
+
 
     // 处理特殊卡牌效果 - 修改为处理多种特殊效果
 
