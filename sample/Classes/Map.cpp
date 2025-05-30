@@ -104,7 +104,7 @@ namespace MyGame {
         if (staticMapInfo.empty())
         {
             // 生成多层地图
-            int layers = 18;  // 假设有10层
+            int layers = 1;  // 假设有10层
             int roomsPerLayer = 5;  // 每层有3个房间
             generateRandomMap(layers, roomsPerLayer);
         }
@@ -296,11 +296,11 @@ namespace MyGame {
                     break;
                 case RoomType::QUESTION:
                     roomItem = MenuItemImage::create(
-                        "question_normal.jpg",
+                        "question_normal.png",
                         "question_selected.png",
                         CC_CALLBACK_1(Map::menuQuestionCallback, this)
                     );
-                    roomItem->setScale(0.5);
+                    roomItem->setScale(0.15);
                     break;
                 case RoomType::REST:
                     roomItem = MenuItemImage::create(
