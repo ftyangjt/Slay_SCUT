@@ -42,16 +42,6 @@ public:
     const std::vector<std::shared_ptr<Effect>>& getEffects() const;
     void updateEffects(); // 更新效果，移除持续时间为 0 的效果
 
-<<<<<<< Updated upstream
-=======
-    // 实例方法状态显示
-    void updateStatusDisplay();
-
-	// 判断卡组是否已初始化
-    bool isDeckInitialized() const; // 判断卡组是否已初始化
-    void setDeckInitialized(bool initialized); // 设置卡组初始化状态
-
->>>>>>> Stashed changes
 private:
     int _health; // 生命值
 	int _block; // 防御值

@@ -58,42 +58,10 @@ namespace MyGame {
             log("Merchant image missing!");
         }
 
-<<<<<<< Updated upstream
         // 创建"返回"按钮
         auto returnItem = MenuItemImage::create(
             "return.png",  // 返回按钮图片
             "return_selected.png",  // 选中状态的图片
-=======
-        // 添加金币显示
-        auto coinIcon = Sprite::create("coin_icon.png");
-        if (!coinIcon) {
-            // 如果图像缺失，创建替代图形
-            coinIcon = Sprite::create();
-            auto coinDrawNode = DrawNode::create();
-            coinDrawNode->drawSolidCircle(Vec2::ZERO, 15, 0, 20, Color4F(1.0f, 0.85f, 0.0f, 1.0f));
-            coinIcon->addChild(coinDrawNode);
-        }
-        coinIcon->setPosition(Vec2(80, winSize.height - 40));
-        coinIcon->setScale(0.5f);
-        this->addChild(coinIcon, 5);
-
-        // 显示当前金币数量
-        auto coinLabel = Label::createWithTTF(StringUtils::format("Gold: %d", Hero::getCoins()),
-            "fonts/Marker Felt.ttf", 30);
-        coinLabel->setColor(Color3B(255, 215, 0)); // 金色
-        coinLabel->setPosition(Vec2(150, winSize.height - 40));
-        coinLabel->setName("CoinLabel");
-        this->addChild(coinLabel, 5);
-
-        // 创建"返回"按钮 - 修复类型不匹配问题
-        // 使用基类指针来接收不同类型的菜单项
-        MenuItem* returnItem = nullptr;
-
-        // 尝试使用图片按钮
-        auto imageButton = MenuItemImage::create(
-            "back.png",
-            "return_selected.png",
->>>>>>> Stashed changes
             [](Ref* sender) {
                 // 返回地图场景
                 auto scene = Map::createScene();

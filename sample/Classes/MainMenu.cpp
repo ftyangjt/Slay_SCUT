@@ -1,9 +1,4 @@
 #include "MainMenu.h"
-<<<<<<< Updated upstream
-=======
-#include "Hero.h"
-#include "TransitionScene.h"
->>>>>>> Stashed changes
 #include "Map.h"  // 引入地图场景头文件
 
 USING_NS_CC;
@@ -56,10 +51,10 @@ bool MainMenu::init()
     if (exitItem)
     {
         exitItem->setPosition(Vec2(
-            origin.x + visibleSize.width -570,
-            origin.y + visibleSize.height -1100
+            origin.x + visibleSize.width - 50,
+            origin.y + visibleSize.height / 2 - 300
         ));
-        exitItem->setScale(0.2);  // 调整按钮大小
+        exitItem->setScale(3);  // 调整按钮大小
     }
 
     // 将两个菜单项加入菜单
@@ -69,32 +64,12 @@ bool MainMenu::init()
 
     return true;
 }
-<<<<<<< Updated upstream
 
 void MainMenu::menuStartCallback(Ref* pSender)
 {
     // 切换到地图场景
     auto scene = MyGame::Map::createScene();
     Director::getInstance()->replaceScene(scene);
-=======
-void MainMenu::menuStartCallback(cocos2d::Ref* pSender)
-{
-    // 重置游戏状态
-    MyGame::resetGameState();
-
-    // 重置英雄血量和金币
-    Hero::resetHealth();
-    Hero::resetCoins();
-
-    // 切换到过场动画场景，而不是直接进入地图场景
-    auto scene = MyGame::TransitionScene::createScene();
-
-    // 使用淡入淡出过渡效果，持续1秒
-    auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // 黑色淡入淡出
-
-    // 切换到带过渡效果的过场动画场景
-    Director::getInstance()->replaceScene(transition);
->>>>>>> Stashed changes
 }
 
 void MainMenu::menuCloseCallback(Ref* pSender)

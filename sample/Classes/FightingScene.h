@@ -56,19 +56,6 @@ private:
     void drawSequentialCards(int count);
     cocos2d::Size _visibleSize;
     cocos2d::Vec2 _origin;
-<<<<<<< Updated upstream
-=======
-    bool _isSelectingCard = false; // 是否处于选牌界面
-
-private:
-    // 原有变量保持不变
-    int _hoveringCardIndex = -1; // 当前悬停卡牌的索引
-    std::map<int, bool> _cardIsHovering; // 标记卡牌是否正在悬浮中
-    std::map<int, cocos2d::Vec2> _cardOriginalPositions; // 保存卡牌原始位置
-    std::map<int, float> _cardOriginalRotations; // 保存卡牌原始旋转
-    std::map<int, int> _cardOriginalZOrders; // 保存卡牌原始Z顺序
-
->>>>>>> Stashed changes
     bool _isCooldown = false; // 表示出牌是否处于冷却状态
     int _selectedCardIndex = -1; // -1 表示没有选中的卡牌
     std::vector<Card> _drawPile; // 抽牌堆
