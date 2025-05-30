@@ -19,7 +19,8 @@ namespace MyGame {
         ELITE,
         SHOP
     };
-
+    // 仅声明不初始化
+    extern RoomType currentRoomType;
     struct Room {
         RoomType type;
         cocos2d::MenuItemImage* item;
@@ -43,8 +44,8 @@ namespace MyGame {
         void menuQuestionCallback(cocos2d::Ref* pSender);
         void menuRestCallback(cocos2d::Ref* pSender);
         void menuBossCallback(cocos2d::Ref* pSender);  // 添加 BOSS 回调函数
-		void menuEliteCallback(cocos2d::Ref* pSender); // 添加 ELITE 回调函数
-		void menuShopCallback(cocos2d::Ref* pSender); // 添加 SHOP 回调函数
+        void menuEliteCallback(cocos2d::Ref* pSender); // 添加 ELITE 回调函数
+        void menuShopCallback(cocos2d::Ref* pSender); // 添加 SHOP 回调函数
         RoomType getRandomRoomType();
         void generateRandomMap(int layers, int roomsPerLayer);
         void generateMapFromSavedInfo();
