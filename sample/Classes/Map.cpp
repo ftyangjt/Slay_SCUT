@@ -1,4 +1,4 @@
-// Map.cpp
+ï»¿// Map.cpp
 #include "Map.h"
 #include "FightingScene.h"
 #include "question.h"
@@ -9,45 +9,34 @@
 #include <random>
 
 USING_NS_CC;
-namespace MyGame {
-    // Êµ¼Ê¶¨ÒåºÍ³õÊ¼»¯¾²Ì¬±äÁ¿
-    RoomType currentRoomType = RoomType::BATTLE;
-    int Map::currentLayer = 0;
-    int Map::currentRoom = 0;
-    // ´æ´¢µØÍ¼Êı¾İ£¨·¿¼äÀàĞÍºÍÎ»ÖÃĞÅÏ¢£¬µ«²»´æ´¢Ö¸Õë£©
-    struct RoomInfo {
-        RoomType type;
-        cocos2d::Vec2 position;
-    };
-    static std::vector<std::vector<RoomInfo>> staticMapInfo;
+    namespace MyGame {
+        // å®é™…å®šä¹‰å’Œåˆå§‹åŒ–é™æ€å˜é‡
+        RoomType currentRoomType = RoomType::BATTLE;
+        int Map::currentLayer = 0;
+        int Map::currentRoom = 0;
 
-    // ´æ´¢Á¬ÏßÊı¾İ
-    static std::vector<ConnectionInfo> staticConnectionInfo;
+        // å®šä¹‰åœ¨ Map.h ä¸­å£°æ˜çš„é™æ€å˜é‡
+        std::vector<std::vector<RoomInfo>> staticMapInfo;
+        std::vector<ConnectionInfo> staticConnectionInfo;
+        int maxAccessibleLayer = 0;
+        bool roomCompleted = false;
+        cocos2d::Vec2 currentRoomPosition;
 
-    // ´æ´¢µ±Ç°¿É·ÃÎÊµÄ×î¸ß²ã¼¶£¨¾²Ì¬±äÁ¿£¬ÔÚ³¡¾°ÇĞ»»Ê±±£³Ö£©
-    static int maxAccessibleLayer = 0;
-
-    // ÊÇ·ñ¸Õ¸ÕÍê³ÉÁËÒ»¸ö·¿¼ä£¨ÓÃÓÚ´Ó·¿¼ä³¡¾°·µ»ØµØÍ¼Ê±ÅĞ¶Ï£©
-    static bool roomCompleted = false;
-
-    // ¼ÇÂ¼µ±Ç°Ñ¡ÔñµÄ·¿¼äÎ»ÖÃ£¨ÓÃÓÚÅĞ¶ÏÏÂÒ»²ãÄÄĞ©·¿¼ä¿ÉÒÔ·ÃÎÊ£©
-    static cocos2d::Vec2 currentRoomPosition;
-
-    // Ìí¼ÓÖØÖÃÓÎÏ·×´Ì¬µÄº¯ÊıÊµÏÖ
+    // æ·»åŠ é‡ç½®æ¸¸æˆçŠ¶æ€çš„å‡½æ•°å®ç°
     void resetGameState() {
-        // Çå¿ÕµØÍ¼ĞÅÏ¢
+        // æ¸…ç©ºåœ°å›¾ä¿¡æ¯
         staticMapInfo.clear();
 
-        // Çå¿ÕÁ¬ÏßĞÅÏ¢
+        // æ¸…ç©ºè¿çº¿ä¿¡æ¯
         staticConnectionInfo.clear();
 
-        // ÖØÖÃµ±Ç°·¿¼äÎ»ÖÃ
+        // é‡ç½®å½“å‰æˆ¿é—´ä½ç½®
         currentRoomPosition = Vec2::ZERO;
 
-        // ÖØÖÃ¿É·ÃÎÊ²ã¼¶
+        // é‡ç½®å¯è®¿é—®å±‚çº§
         maxAccessibleLayer = 0;
 
-        // ÖØÖÃ·¿¼äÍê³É×´Ì¬
+        // é‡ç½®æˆ¿é—´å®ŒæˆçŠ¶æ€
         roomCompleted = false;
     }
 
@@ -66,82 +55,82 @@ namespace MyGame {
         auto visibleSize = Director::getInstance()->getVisibleSize();
         auto origin = Director::getInstance()->getVisibleOrigin();
 
-        // ³õÊ¼»¯µ±Ç°²ãºÍµ±Ç°·¿¼ä
+        // åˆå§‹åŒ–å½“å‰å±‚å’Œå½“å‰æˆ¿é—´
         currentLayer = 0;
         currentRoom = -1;
 
-        // ´´½¨ ScrollView
+        // åˆ›å»º ScrollView
         scrollView = ui::ScrollView::create();
         scrollView->setDirection(ui::ScrollView::Direction::VERTICAL);
         scrollView->setContentSize(visibleSize);
-        scrollView->setInnerContainerSize(Size(visibleSize.width, visibleSize.height * 3));  // ÉèÖÃ¹ö¶¯·¶Î§
+        scrollView->setInnerContainerSize(Size(visibleSize.width, visibleSize.height * 3));  // è®¾ç½®æ»šåŠ¨èŒƒå›´
         scrollView->setPosition(origin);
         this->addChild(scrollView);
 
-        // Ìí¼ÓµØÍ¼±³¾°Í¼Æ¬
-        // Ìí¼ÓµØÍ¼±³¾°Í¼Æ¬
-        auto background = Sprite::create("map_background.jpg");
+        // æ·»åŠ åœ°å›¾èƒŒæ™¯å›¾ç‰‡
+        // æ·»åŠ åœ°å›¾èƒŒæ™¯å›¾ç‰‡
+        auto background = Sprite::create("map_background.webp");
         if (background)
         {
-            // »ñÈ¡±³¾°Í¼Æ¬Ô­Ê¼´óĞ¡ºÍ¹ö¶¯ÈİÆ÷´óĞ¡
+            // è·å–èƒŒæ™¯å›¾ç‰‡åŸå§‹å¤§å°å’Œæ»šåŠ¨å®¹å™¨å¤§å°
             Size bgSize = background->getContentSize();
             Size containerSize = scrollView->getInnerContainerSize();
 
-            // ¼ÆËãËõ·ÅÒò×ÓÊ¹Í¼Æ¬¿í¶ÈÊÊÓ¦ÆÁÄ»¿í¶È
+            // è®¡ç®—ç¼©æ”¾å› å­ä½¿å›¾ç‰‡å®½åº¦é€‚åº”å±å¹•å®½åº¦
             float scaleX = visibleSize.width / bgSize.width;
-            // ¼ÆËãËõ·ÅÒò×ÓÊ¹Í¼Æ¬¸ß¶ÈÊÊÓ¦¹ö¶¯ÇøÓò¸ß¶È
+            // è®¡ç®—ç¼©æ”¾å› å­ä½¿å›¾ç‰‡é«˜åº¦é€‚åº”æ»šåŠ¨åŒºåŸŸé«˜åº¦
             float scaleY = containerSize.height / bgSize.height;
-            // Ê¹ÓÃ½Ï´óµÄËõ·ÅÒò×ÓÒÔÈ·±£Í¼Æ¬¸²¸ÇÕû¸ö¿É¼ûÇøÓò
+            // ä½¿ç”¨è¾ƒå¤§çš„ç¼©æ”¾å› å­ä»¥ç¡®ä¿å›¾ç‰‡è¦†ç›–æ•´ä¸ªå¯è§åŒºåŸŸ
             float scale = std::max(scaleX, scaleY);
 
-            // ÉèÖÃ±³¾°Í¼Æ¬Ëõ·Å
+            // è®¾ç½®èƒŒæ™¯å›¾ç‰‡ç¼©æ”¾
             background->setScale(scale);
 
-            // ÉèÖÃ±³¾°Í¼Æ¬Î»ÖÃµ½¹ö¶¯ÈİÆ÷ÖĞĞÄ
+            // è®¾ç½®èƒŒæ™¯å›¾ç‰‡ä½ç½®åˆ°æ»šåŠ¨å®¹å™¨ä¸­å¿ƒ
             background->setPosition(Vec2(visibleSize.width / 2, containerSize.height / 2));
 
-            scrollView->addChild(background, 0);  // ½«±³¾°Í¼Æ¬Ìí¼Óµ½×îµ×²ã
+            scrollView->addChild(background, 0);  // å°†èƒŒæ™¯å›¾ç‰‡æ·»åŠ åˆ°æœ€åº•å±‚
         }
 
-        // ¼ì²éÊÇ·ñÒÑ¾­Éú³ÉÁËµØÍ¼Êı¾İ
+        // æ£€æŸ¥æ˜¯å¦å·²ç»ç”Ÿæˆäº†åœ°å›¾æ•°æ®
         if (staticMapInfo.empty())
         {
-            // Éú³É¶à²ãµØÍ¼
-            int layers = 18;  // ¼ÙÉèÓĞ10²ã
-            int roomsPerLayer = 5;  // Ã¿²ãÓĞ3¸ö·¿¼ä
+            // ç”Ÿæˆå¤šå±‚åœ°å›¾
+            int layers = 18;  // å‡è®¾æœ‰10å±‚
+            int roomsPerLayer = 5;  // æ¯å±‚æœ‰3ä¸ªæˆ¿é—´
             generateRandomMap(layers, roomsPerLayer);
         }
         else
         {
-            // Ê¹ÓÃÒÑ´æ´¢µÄµØÍ¼Êı¾İÖØĞÂÉú³ÉµØÍ¼
+            // ä½¿ç”¨å·²å­˜å‚¨çš„åœ°å›¾æ•°æ®é‡æ–°ç”Ÿæˆåœ°å›¾
             generateMapFromSavedInfo();
         }
 
-        // Èç¹û¸Õ¸ÕÍê³ÉÁËÒ»¸ö·¿¼ä£¬Ôö¼Ó¿É·ÃÎÊµÄ²ã¼¶
+        // å¦‚æœåˆšåˆšå®Œæˆäº†ä¸€ä¸ªæˆ¿é—´ï¼Œå¢åŠ å¯è®¿é—®çš„å±‚çº§
         if (roomCompleted)
         {
             maxAccessibleLayer++;
             roomCompleted = false;
         }
 
-        // ¸üĞÂ·¿¼äµÄ¿É·ÃÎÊĞÔ
+        // æ›´æ–°æˆ¿é—´çš„å¯è®¿é—®æ€§
         updateRoomAccessibility();
 
-        // Ìí¼Ó²ã¼¶ÌáÊ¾±êÇ©
+        // æ·»åŠ å±‚çº§æç¤ºæ ‡ç­¾
         createLayerLabels();
         createSaveButton();
 
         return true;
     }
 
-    // ´´½¨²ã¼¶±êÇ©
+    // åˆ›å»ºå±‚çº§æ ‡ç­¾
     void Map::createLayerLabels()
     {
         auto visibleSize = Director::getInstance()->getVisibleSize();
 
-        // Ìí¼Óµ±Ç°¿É·ÃÎÊ²ã¼¶ÌáÊ¾
+        // æ·»åŠ å½“å‰å¯è®¿é—®å±‚çº§æç¤º
         auto accessLabel = Label::createWithTTF(
-            "¿É·ÃÎÊ²ã¼¶: " + std::to_string(maxAccessibleLayer + 1),
+            "å¯è®¿é—®å±‚çº§: " + std::to_string(maxAccessibleLayer + 1),
             "fonts/Marker Felt.ttf",
             32
         );
@@ -149,53 +138,53 @@ namespace MyGame {
         this->addChild(accessLabel, 3);
     }
 
-    // ¸üĞÂ·¿¼äµÄ¿É·ÃÎÊĞÔ
+    // æ›´æ–°æˆ¿é—´çš„å¯è®¿é—®æ€§
     void Map::updateRoomAccessibility()
     {
-        // ÏÈ½«ËùÓĞ·¿¼äÉèÎª½ûÓÃ×´Ì¬
+        // å…ˆå°†æ‰€æœ‰æˆ¿é—´è®¾ä¸ºç¦ç”¨çŠ¶æ€
         for (int i = 0; i < mapLayers.size(); i++)
         {
             for (auto& room : mapLayers[i])
             {
                 room.item->setEnabled(false);
-                room.item->setColor(Color3B(100, 100, 100)); // »ÒÉ«
+                room.item->setColor(Color3B(100, 100, 100)); // ç°è‰²
             }
         }
 
-        // ÌØÊâÇé¿ö£ºÓÎÏ·¿ªÊ¼Ê±£¬µÚÒ»²ãËùÓĞ·¿¼ä¶¼¿É·ÃÎÊ
+        // ç‰¹æ®Šæƒ…å†µï¼šæ¸¸æˆå¼€å§‹æ—¶ï¼Œç¬¬ä¸€å±‚æ‰€æœ‰æˆ¿é—´éƒ½å¯è®¿é—®
         if (maxAccessibleLayer == 0 && currentRoomPosition == Vec2::ZERO)
         {
             for (auto& room : mapLayers[0])
             {
                 room.item->setEnabled(true);
-                room.item->setColor(Color3B(255, 255, 255)); // Õı³£ÑÕÉ«
+                room.item->setColor(Color3B(255, 255, 255)); // æ­£å¸¸é¢œè‰²
             }
             return;
         }
 
-        // ½öÆôÓÃ¿É·ÃÎÊ²ã¼¶ÖĞÍ¨¹ıÂ·¾¶Á¬½ÓµÄ·¿¼ä
+        // ä»…å¯ç”¨å¯è®¿é—®å±‚çº§ä¸­é€šè¿‡è·¯å¾„è¿æ¥çš„æˆ¿é—´
         int accessibleLayer = maxAccessibleLayer;
 
-        // Èç¹ûµ±Ç°Ã»ÓĞÑ¡ÖĞ·¿¼ä£¬µ«ÒÑ¾­Í¨¹ıÁËÒ»Ğ©²ã¼¶
+        // å¦‚æœå½“å‰æ²¡æœ‰é€‰ä¸­æˆ¿é—´ï¼Œä½†å·²ç»é€šè¿‡äº†ä¸€äº›å±‚çº§
         if (currentRoomPosition == Vec2::ZERO && maxAccessibleLayer > 0) {
-            // ÆôÓÃĞÂ½âËø²ãµÄËùÓĞ·¿¼ä
+            // å¯ç”¨æ–°è§£é”å±‚çš„æ‰€æœ‰æˆ¿é—´
             for (auto& room : mapLayers[maxAccessibleLayer]) {
                 room.item->setEnabled(true);
-                room.item->setColor(Color3B(255, 255, 255)); // Õı³£ÑÕÉ«
+                room.item->setColor(Color3B(255, 255, 255)); // æ­£å¸¸é¢œè‰²
             }
             return;
         }
 
-        // ±éÀúÁ¬ÏßĞÅÏ¢£¬ÕÒ³ö´Óµ±Ç°·¿¼äÎ»ÖÃ¿ÉÒÔµ½´ïµÄÏÂÒ»²ã·¿¼ä
+        // éå†è¿çº¿ä¿¡æ¯ï¼Œæ‰¾å‡ºä»å½“å‰æˆ¿é—´ä½ç½®å¯ä»¥åˆ°è¾¾çš„ä¸‹ä¸€å±‚æˆ¿é—´
         for (auto& connection : staticConnectionInfo) {
-            // ¼ì²éÁ¬ÏßµÄÆğµãÊÇ·ñÓëµ±Ç°·¿¼äÎ»ÖÃÆ¥Åä
+            // æ£€æŸ¥è¿çº¿çš„èµ·ç‚¹æ˜¯å¦ä¸å½“å‰æˆ¿é—´ä½ç½®åŒ¹é…
             if (connection.start.equals(currentRoomPosition)) {
-                // ÕÒµ½¸ÃÁ¬ÏßÖÕµãËù¶ÔÓ¦µÄ·¿¼ä
+                // æ‰¾åˆ°è¯¥è¿çº¿ç»ˆç‚¹æ‰€å¯¹åº”çš„æˆ¿é—´
                 for (auto& room : mapLayers[maxAccessibleLayer]) {
-                    // Èç¹û·¿¼äÎ»ÖÃÓëÁ¬ÏßÖÕµãÆ¥Åä£¬ÔòÆôÓÃ¸Ã·¿¼ä
+                    // å¦‚æœæˆ¿é—´ä½ç½®ä¸è¿çº¿ç»ˆç‚¹åŒ¹é…ï¼Œåˆ™å¯ç”¨è¯¥æˆ¿é—´
                     if (room.item->getPosition().equals(connection.end)) {
                         room.item->setEnabled(true);
-                        room.item->setColor(Color3B(255, 255, 255)); // Õı³£ÑÕÉ«
+                        room.item->setColor(Color3B(255, 255, 255)); // æ­£å¸¸é¢œè‰²
                     }
                 }
             }
@@ -207,11 +196,11 @@ namespace MyGame {
         static std::random_device rd;
         static std::mt19937 gen(rd());
 
-        // ¸üĞÂ¸ÅÂÊ·Ö²¼£¬Ìí¼ÓELITEÀàĞÍ
+        // æ›´æ–°æ¦‚ç‡åˆ†å¸ƒï¼Œæ·»åŠ ELITEç±»å‹
         // START(0), BATTLE(1), QUESTION(2), REST(3), BOSS(4), ELITE(5)
-        static std::discrete_distribution<> dis({ 0, 45, 20, 10, 0, 15,10 });  // ¸øELITE 15%µÄ¸ÅÂÊ
+        static std::discrete_distribution<> dis({ 0, 45, 20, 10, 0, 15,10 });  // ç»™ELITE 15%çš„æ¦‚ç‡
 
-        // »ñÈ¡Ëæ»úÖµ²¢×ª»»ÎªRoomType
+        // è·å–éšæœºå€¼å¹¶è½¬æ¢ä¸ºRoomType
         int randomType = dis(gen);
         return static_cast<RoomType>(randomType);
     }
@@ -221,52 +210,52 @@ namespace MyGame {
         auto visibleSize = Director::getInstance()->getVisibleSize();
         auto origin = Director::getInstance()->getVisibleOrigin();
 
-        // Ëæ»úÊıÉú³ÉÆ÷
+        // éšæœºæ•°ç”Ÿæˆå™¨
         static std::random_device rd;
         static std::mt19937 gen(rd());
 
-        // Ìí¼Ó¿ªÊ¼µãÍ¼±ê
+        // æ·»åŠ å¼€å§‹ç‚¹å›¾æ ‡
         auto startItem = MenuItemImage::create(
-            "start.png",  // Ê¹ÓÃÌØÊâÍ¼°¸
-            "start_selected.png",
-            [](Ref*) {}  // ¿ªÊ¼µã²»ĞèÒª»Øµ÷º¯Êı
-        );
+            "start.png",  // ä½¿ç”¨ç‰¹æ®Šå›¾æ¡ˆ
+            "start.png",
+            [](Ref*) {}  // å¼€å§‹ç‚¹ä¸éœ€è¦å›è°ƒå‡½æ•°
+        );// è°ƒæ•´å›¾æ ‡å¤§å°
         if (startItem)
         {
             startItem->setPosition(Vec2(
                 visibleSize.width / 2,
-                scrollView->getInnerContainerSize().height - 100  // ÉèÖÃ¿ªÊ¼µãÎ»ÖÃ
+                scrollView->getInnerContainerSize().height - 100  // è®¾ç½®å¼€å§‹ç‚¹ä½ç½®
             ));
-            startItem->setScale(0.5);  // µ÷ÕûÍ¼±ê´óĞ¡
+            startItem->setScale(0.1);  // è°ƒæ•´å›¾æ ‡å¤§å°
             auto menu = Menu::create(startItem, nullptr);
             menu->setPosition(Vec2::ZERO);
-            scrollView->addChild(menu, 1);  // È·±£Í¼±êÔÚ±³¾°Í¼Æ¬Ö®ÉÏ
+            scrollView->addChild(menu, 1);  // ç¡®ä¿å›¾æ ‡åœ¨èƒŒæ™¯å›¾ç‰‡ä¹‹ä¸Š
         }
 
-        // Çå¿ÕÊı¾İ
+        // æ¸…ç©ºæ•°æ®
         mapLayers.clear();
         staticMapInfo.clear();
 
-        // ¼ÆËã×îĞ¡·¿¼äÊı
-        int minRooms = std::max(3, roomsPerLayer - 2); // ×îµÍÊıÁ¿Îª3»òÉè¶¨Öµ-2
+        // è®¡ç®—æœ€å°æˆ¿é—´æ•°
+        int minRooms = std::max(3, roomsPerLayer - 2); // æœ€ä½æ•°é‡ä¸º3æˆ–è®¾å®šå€¼-2
 
         for (int i = 0; i < layers; ++i)
         {
             std::vector<Room> layer;
-            std::vector<RoomInfo> layerInfo;  // ´æ´¢µ±Ç°²ãµÄ·¿¼äĞÅÏ¢
-            int roomCount;  // Ã¿²ãµÄ·¿¼äÊıÁ¿
+            std::vector<RoomInfo> layerInfo;  // å­˜å‚¨å½“å‰å±‚çš„æˆ¿é—´ä¿¡æ¯
+            int roomCount;  // æ¯å±‚çš„æˆ¿é—´æ•°é‡
 
-            // ¸ù¾İ²»Í¬²ã¼¶ÉèÖÃ²»Í¬µÄ·¿¼äÊıÁ¿ºÍÀàĞÍ
+            // æ ¹æ®ä¸åŒå±‚çº§è®¾ç½®ä¸åŒçš„æˆ¿é—´æ•°é‡å’Œç±»å‹
             if (i == layers - 1) {
-                // ×îºóÒ»²ã£¨Boss²ã£©Ö»ÓĞ1¸ö·¿¼ä
+                // æœ€åä¸€å±‚ï¼ˆBosså±‚ï¼‰åªæœ‰1ä¸ªæˆ¿é—´
                 roomCount = 1;
             }
             else if (i == layers - 2) {
-                // Boss²ãÇ°Ò»²ãÖÁÉÙÓĞ3¸ö·¿¼ä£¨¶¼ÊÇĞİÏ¢·¿¼ä£©
+                // Bosså±‚å‰ä¸€å±‚è‡³å°‘æœ‰3ä¸ªæˆ¿é—´ï¼ˆéƒ½æ˜¯ä¼‘æ¯æˆ¿é—´ï¼‰
                 roomCount = roomsPerLayer;
             }
             else {
-                // ÆäËû²ãËæ»úÉú³É·¿¼äÊıÁ¿£º×îĞ¡Öµµ½roomsPerLayerÖ®¼ä
+                // å…¶ä»–å±‚éšæœºç”Ÿæˆæˆ¿é—´æ•°é‡ï¼šæœ€å°å€¼åˆ°roomsPerLayerä¹‹é—´
                 std::uniform_int_distribution<> roomDist(minRooms, roomsPerLayer);
                 roomCount = roomDist(gen);
             }
@@ -275,15 +264,15 @@ namespace MyGame {
             {
                 RoomType roomType;
 
-                // ¸ù¾İ²»Í¬²ã¼¶ÉèÖÃ²»Í¬µÄ·¿¼äÀàĞÍ
+                // æ ¹æ®ä¸åŒå±‚çº§è®¾ç½®ä¸åŒçš„æˆ¿é—´ç±»å‹
                 if (i == layers - 1) {
-                    roomType = RoomType::BOSS;  // ×îºóÒ»²ãÊÇ BOSS ·¿¼ä
+                    roomType = RoomType::BOSS;  // æœ€åä¸€å±‚æ˜¯ BOSS æˆ¿é—´
                 }
                 else if (i == layers - 2) {
-                    roomType = RoomType::REST;  // Boss²ãÇ°Ò»²ãÈ«²¿ÊÇĞİÏ¢·¿¼ä
+                    roomType = RoomType::REST;  // Bosså±‚å‰ä¸€å±‚å…¨éƒ¨æ˜¯ä¼‘æ¯æˆ¿é—´
                 }
                 else {
-                    roomType = getRandomRoomType();  // ÆäËû²ãËæ»úÉú³É·¿¼äÀàĞÍ
+                    roomType = getRandomRoomType();  // å…¶ä»–å±‚éšæœºç”Ÿæˆæˆ¿é—´ç±»å‹
                 }
 
                 MenuItemImage* roomItem = nullptr;
@@ -293,31 +282,31 @@ namespace MyGame {
                 case RoomType::BATTLE:
                     roomItem = MenuItemImage::create(
                         "battle_normal.png",
-                        "battle_selected.png",
+                        "battle_normal.png",
                         CC_CALLBACK_1(Map::menuBattleCallback, this)
                     );
                     roomItem->setScale(0.5);
                     break;
                 case RoomType::QUESTION:
                     roomItem = MenuItemImage::create(
-                        "question_normal.jpg",
-                        "question_selected.png",
+                        "question_normal.png",
+                        "question_normal.png",
                         CC_CALLBACK_1(Map::menuQuestionCallback, this)
                     );
-                    roomItem->setScale(0.5);
+                    roomItem->setScale(0.15);
                     break;
                 case RoomType::REST:
                     roomItem = MenuItemImage::create(
-                        "rest.jpg",
-                        "rest_selected.png",
+                        "rest.png",
+                        "rest.png",
                         CC_CALLBACK_1(Map::menuRestCallback, this)
                     );
-                    roomItem->setScale(0.5);
+                    roomItem->setScale(0.15);
                     break;
                 case RoomType::BOSS:
                     roomItem = MenuItemImage::create(
-                        "boss.png",  // Ê¹ÓÃÌØÊâÍ¼°¸
-                        "boss_selected.png",
+                        "boss.png",
+                        "boss.png",
                         CC_CALLBACK_1(Map::menuBossCallback, this)
                     );
                     roomItem->setScale(0.5);
@@ -325,8 +314,8 @@ namespace MyGame {
 
                 case RoomType::ELITE:
                     roomItem = MenuItemImage::create(
-                        "elite_normal.png",  // ĞèÒª×¼±¸ÕâĞ©×ÊÔ´Í¼Æ¬
-                        "elite_selected.png",
+                        "elite_normal.png",
+                        "elite_normal.png",
                         CC_CALLBACK_1(Map::menuEliteCallback, this)
                     );
                     roomItem->setScale(0.5);
@@ -334,7 +323,7 @@ namespace MyGame {
 				case RoomType::SHOP:
 					roomItem = MenuItemImage::create(
 						"shop_normal.png",
-						"shop_selected.png",
+						"shop_normal.png",
 						CC_CALLBACK_1(Map::menuShopCallback, this)
 					);
                     roomItem->setScale(0.15);
@@ -342,40 +331,40 @@ namespace MyGame {
                 }
                 if (roomItem)
                 {
-                    // ¸ù¾İ·¿¼äÊıÁ¿µ÷ÕûÎ»ÖÃ
+                    // æ ¹æ®æˆ¿é—´æ•°é‡è°ƒæ•´ä½ç½®
                     Vec2 position;
                     if (roomCount == 1) {
-                        // Èç¹ûÖ»ÓĞÒ»¸ö·¿¼ä£¬·ÅÔÚÖĞ¼ä
+                        // å¦‚æœåªæœ‰ä¸€ä¸ªæˆ¿é—´ï¼Œæ”¾åœ¨ä¸­é—´
                         position = Vec2(
                             visibleSize.width / 2,
-                            scrollView->getInnerContainerSize().height - (i + 1) * 200  // ¸ù¾İ²ãÊıµ÷ÕûÎ»ÖÃ
+                            scrollView->getInnerContainerSize().height - (i + 1) * 200  // æ ¹æ®å±‚æ•°è°ƒæ•´ä½ç½®
                         );
                     }
                     else {
-                        // ¸ù¾İ·¿¼äÊıÁ¿¾ùÔÈ·Ö²¼
+                        // æ ¹æ®æˆ¿é—´æ•°é‡å‡åŒ€åˆ†å¸ƒ
                         float spacing = visibleSize.width / (roomCount + 1);
                         position = Vec2(
                             origin.x + spacing * (j + 1),
-                            scrollView->getInnerContainerSize().height - (i + 1) * 200  // ¸ù¾İ²ãÊıµ÷ÕûÎ»ÖÃ
+                            scrollView->getInnerContainerSize().height - (i + 1) * 200  // æ ¹æ®å±‚æ•°è°ƒæ•´ä½ç½®
                         );
                     }
 
                     roomItem->setPosition(position);
-                    // ´æ´¢²ã¼¶ĞÅÏ¢
+                    // å­˜å‚¨å±‚çº§ä¿¡æ¯
                     roomItem->setTag(i);
 
                     auto menu = Menu::create(roomItem, nullptr);
                     menu->setPosition(Vec2::ZERO);
-                    scrollView->addChild(menu, 1);  // È·±£²Ëµ¥ÔÚ±³¾°Í¼Æ¬Ö®ÉÏ
+                    scrollView->addChild(menu, 1);  // ç¡®ä¿èœå•åœ¨èƒŒæ™¯å›¾ç‰‡ä¹‹ä¸Š
 
                     layer.push_back({ roomType, roomItem });
 
-                    // ±£´æÎ»ÖÃĞÅÏ¢ÒÔ±ãºóĞøÖØ½¨
+                    // ä¿å­˜ä½ç½®ä¿¡æ¯ä»¥ä¾¿åç»­é‡å»º
                     layerInfo.push_back({ roomType, position });
                 }
             }
             mapLayers.push_back(layer);
-            staticMapInfo.push_back(layerInfo);  // ´æ´¢¸Ã²ãĞÅÏ¢
+            staticMapInfo.push_back(layerInfo);  // å­˜å‚¨è¯¥å±‚ä¿¡æ¯
         }
 
         connectRooms(mapLayers);
@@ -383,10 +372,10 @@ namespace MyGame {
 
     void Map::generateMapFromSavedInfo()
     {
-        // Çå¿ÕÏÖÓĞµØÍ¼Êı¾İ
+        // æ¸…ç©ºç°æœ‰åœ°å›¾æ•°æ®
         mapLayers.clear();
 
-        // ¸ù¾İ±£´æµÄµØÍ¼ĞÅÏ¢ÖØĞÂ´´½¨·¿¼ä
+        // æ ¹æ®ä¿å­˜çš„åœ°å›¾ä¿¡æ¯é‡æ–°åˆ›å»ºæˆ¿é—´
         for (int i = 0; i < staticMapInfo.size(); i++)
         {
             const auto& layerInfo = staticMapInfo[i];
@@ -401,7 +390,7 @@ namespace MyGame {
                 case RoomType::BATTLE:
                     roomItem = MenuItemImage::create(
                         "battle_normal.png",
-                        "battle_selected.png",
+                        "battle_normal.png",
                         CC_CALLBACK_1(Map::menuBattleCallback, this)
                     );
                     roomItem->setScale(0.5);
@@ -409,39 +398,39 @@ namespace MyGame {
                 case RoomType::QUESTION:
                     roomItem = MenuItemImage::create(
                         "question_normal.png",
-                        "question_selected.png",
+                        "question_normal.png",
                         CC_CALLBACK_1(Map::menuQuestionCallback, this)
                     );
                     roomItem->setScale(0.15);
                     break;
                 case RoomType::REST:
                     roomItem = MenuItemImage::create(
-                        "rest.jpg",
-                        "rest_selected.png",
+                        "rest.png",
+                        "rest.png",
                         CC_CALLBACK_1(Map::menuRestCallback, this)
                     );
-                    roomItem->setScale(0.5);
+                    roomItem->setScale(0.15);
                     break;
                 case RoomType::BOSS:
                     roomItem = MenuItemImage::create(
-                        "boss.png",  // Ê¹ÓÃÌØÊâÍ¼°¸
-                        "boss_selected.png",
+                        "boss.png",  // ä½¿ç”¨ç‰¹æ®Šå›¾æ¡ˆ
+                        "boss.png",
                         CC_CALLBACK_1(Map::menuBossCallback, this)
                     );
                     roomItem->setScale(0.5);
                     break;
                 case RoomType::ELITE:
                     roomItem = MenuItemImage::create(
-                        "elite_normal.png",  // ĞèÒª×¼±¸ÕâĞ©×ÊÔ´Í¼Æ¬
-                        "elite_selected.png",
+                        "elite_normal.png",  // éœ€è¦å‡†å¤‡è¿™äº›èµ„æºå›¾ç‰‡
+                        "elite_normal.png",
                         CC_CALLBACK_1(Map::menuEliteCallback, this)
                     );
                     roomItem->setScale(0.5);
                     break;
                 case RoomType::SHOP:
                     roomItem = MenuItemImage::create(
-                        "shop_normal.png",  // Ê¹ÓÃÉÌµêÍ¼±ê
-                        "shop_selected.png",
+                        "shop_normal.png",  // ä½¿ç”¨å•†åº—å›¾æ ‡
+                        "shop_normal.png",
                         CC_CALLBACK_1(Map::menuShopCallback, this)
                     );
                     roomItem->setScale(0.15);
@@ -452,12 +441,12 @@ namespace MyGame {
                 if (roomItem)
                 {
                     roomItem->setPosition(roomInfo.position);
-                    // ´æ´¢²ã¼¶ĞÅÏ¢
+                    // å­˜å‚¨å±‚çº§ä¿¡æ¯
                     roomItem->setTag(i);
 
                     auto menu = Menu::create(roomItem, nullptr);
                     menu->setPosition(Vec2::ZERO);
-                    scrollView->addChild(menu, 1);  // È·±£²Ëµ¥ÔÚ±³¾°Í¼Æ¬Ö®ÉÏ
+                    scrollView->addChild(menu, 1);  // ç¡®ä¿èœå•åœ¨èƒŒæ™¯å›¾ç‰‡ä¹‹ä¸Š
 
                     layer.push_back({ roomInfo.type, roomItem });
                 }
@@ -470,21 +459,21 @@ namespace MyGame {
 
     void Map::connectRooms(const std::vector<std::vector<Room>>& map)
     {
-        // ´´½¨Ò»¸öDrawNodeÓÃÓÚ»æÖÆÁ¬½ÓÏß£¬½µµÍzOrderÊ¹ÆäÎ»ÓÚÍ¼±êÏÂ·½
+        // åˆ›å»ºä¸€ä¸ªDrawNodeç”¨äºç»˜åˆ¶è¿æ¥çº¿ï¼Œé™ä½zOrderä½¿å…¶ä½äºå›¾æ ‡ä¸‹æ–¹
         auto drawNode = DrawNode::create();
-        scrollView->addChild(drawNode, 0);  // zOrderÎª0£¬»á±»zOrderÎª1µÄ·¿¼äÍ¼±ê¸²¸Ç
+        scrollView->addChild(drawNode, 0);  // zOrderä¸º0ï¼Œä¼šè¢«zOrderä¸º1çš„æˆ¿é—´å›¾æ ‡è¦†ç›–
 
-        // Èç¹ûÒÑ¾­ÓĞ±£´æµÄÁ¬ÏßĞÅÏ¢£¬Ö±½ÓÊ¹ÓÃ
+        // å¦‚æœå·²ç»æœ‰ä¿å­˜çš„è¿çº¿ä¿¡æ¯ï¼Œç›´æ¥ä½¿ç”¨
         if (!staticConnectionInfo.empty()) {
             for (const auto& connection : staticConnectionInfo) {
-                // Ê¹ÓÃ½¥±äÉ«µÄÏßÌõ£¬´ÓÆğµãµ½ÖÕµãÓÉÇ³À¶É«¹ı¶Éµ½ÉîÀ¶É«
-                Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);  // Ç³À¶É«£¬°ëÍ¸Ã÷
-                Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);    // ÉîÀ¶É«£¬°ëÍ¸Ã÷
+                // ä½¿ç”¨æ¸å˜è‰²çš„çº¿æ¡ï¼Œä»èµ·ç‚¹åˆ°ç»ˆç‚¹ç”±æµ…è“è‰²è¿‡æ¸¡åˆ°æ·±è“è‰²
+                Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);  // æµ…è“è‰²ï¼ŒåŠé€æ˜
+                Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);    // æ·±è“è‰²ï¼ŒåŠé€æ˜
 
-                // »æÖÆ´ÖÏß¶Î£¬Ê¹ÓÃ½¥±äĞ§¹û
-                float lineWidth = 3.0f;  // Ôö¼ÓÏßÌõ¿í¶È
+                // ç»˜åˆ¶ç²—çº¿æ®µï¼Œä½¿ç”¨æ¸å˜æ•ˆæœ
+                float lineWidth = 3.0f;  // å¢åŠ çº¿æ¡å®½åº¦
 
-                // ÏÈ»æÖÆÒõÓ°Ğ§¹û
+                // å…ˆç»˜åˆ¶é˜´å½±æ•ˆæœ
                 drawNode->drawSegment(
                     connection.start,
                     connection.end,
@@ -492,7 +481,7 @@ namespace MyGame {
                     Color4F(0.0f, 0.0f, 0.0f, 0.3f)
                 );
 
-                // ÔÙ»æÖÆÖ÷Ïß
+                // å†ç»˜åˆ¶ä¸»çº¿
                 drawNode->drawSegment(
                     connection.start,
                     connection.end,
@@ -500,14 +489,14 @@ namespace MyGame {
                     startColor
                 );
 
-                // ÔÚ¹Ø¼üµã»æÖÆĞ¡Ô²µã£¬Ôö¼ÓÊÓ¾õĞ§¹û
+                // åœ¨å…³é”®ç‚¹ç»˜åˆ¶å°åœ†ç‚¹ï¼Œå¢åŠ è§†è§‰æ•ˆæœ
                 drawNode->drawDot(connection.start, lineWidth * 1.2f, startColor);
                 drawNode->drawDot(connection.end, lineWidth * 1.2f, endColor);
             }
             return;
         }
 
-        // Çå¿ÕÁ¬ÏßĞÅÏ¢ÒÔ±ãÖØĞÂÉú³É
+        // æ¸…ç©ºè¿çº¿ä¿¡æ¯ä»¥ä¾¿é‡æ–°ç”Ÿæˆ
         staticConnectionInfo.clear();
 
         for (size_t i = 0; i < map.size() - 1; ++i)
@@ -516,65 +505,65 @@ namespace MyGame {
             const auto& nextLayer = map[i + 1];
 
             if (nextLayer.empty() || currentLayer.empty()) {
-                continue;  // È·±£²ã²»Îª¿Õ
+                continue;  // ç¡®ä¿å±‚ä¸ä¸ºç©º
             }
 
-            // ´¦ÀíBOSS²ãµÄÌØÊâÇé¿ö£¨Ö»ÓĞÒ»¸ö·¿¼ä£©
+            // å¤„ç†BOSSå±‚çš„ç‰¹æ®Šæƒ…å†µï¼ˆåªæœ‰ä¸€ä¸ªæˆ¿é—´ï¼‰
             if (nextLayer.size() == 1) {
-                // ËùÓĞµ±Ç°²ã·¿¼ä¶¼Á¬½Óµ½ÏÂÒ»²ãµÄBOSS·¿¼ä
+                // æ‰€æœ‰å½“å‰å±‚æˆ¿é—´éƒ½è¿æ¥åˆ°ä¸‹ä¸€å±‚çš„BOSSæˆ¿é—´
                 auto bossPos = nextLayer[0].item->getPosition();
                 for (const auto& currentRoom : currentLayer) {
                     auto startPos = currentRoom.item->getPosition();
 
-                    // Ê¹ÓÃ½¥±äÉ«µÄÏßÌõ
+                    // ä½¿ç”¨æ¸å˜è‰²çš„çº¿æ¡
                     Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);
                     Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);
 
-                    // ÏÈ»æÖÆÒõÓ°
+                    // å…ˆç»˜åˆ¶é˜´å½±
                     drawNode->drawSegment(
                         startPos,
                         bossPos,
-                        3.0f + 1.0f,  // Ö÷Ïß¿í¶È+ÒõÓ°¿í¶È
+                        3.0f + 1.0f,  // ä¸»çº¿å®½åº¦+é˜´å½±å®½åº¦
                         Color4F(0.0f, 0.0f, 0.0f, 0.3f)
                     );
 
-                    // ÔÙ»æÖÆÖ÷Ïß
+                    // å†ç»˜åˆ¶ä¸»çº¿
                     drawNode->drawSegment(startPos, bossPos, 3.0f, startColor);
 
-                    // Ìí¼Óµã×ºĞ§¹û
+                    // æ·»åŠ ç‚¹ç¼€æ•ˆæœ
                     drawNode->drawDot(startPos, 4.0f, startColor);
                     drawNode->drawDot(bossPos, 4.0f, endColor);
 
-                    // ±£´æÁ¬ÏßĞÅÏ¢
+                    // ä¿å­˜è¿çº¿ä¿¡æ¯
                     staticConnectionInfo.push_back({ startPos, bossPos });
                 }
                 continue;
             }
 
-            // ¼ÇÂ¼ÏÂÒ»²ã·¿¼äÒÑÁ¬½Ó×´Ì¬
+            // è®°å½•ä¸‹ä¸€å±‚æˆ¿é—´å·²è¿æ¥çŠ¶æ€
             std::vector<bool> nextRoomConnected(nextLayer.size(), false);
 
-            // ÎªÃ¿¸öµ±Ç°²ãµÄ·¿¼ä´´½¨Á¬½Ó£¬ÔÊĞí¿çÔ½Ò»¸ö·¿¼ä
+            // ä¸ºæ¯ä¸ªå½“å‰å±‚çš„æˆ¿é—´åˆ›å»ºè¿æ¥ï¼Œå…è®¸è·¨è¶Šä¸€ä¸ªæˆ¿é—´
             for (size_t j = 0; j < currentLayer.size(); j++)
             {
                 auto startPos = currentLayer[j].item->getPosition();
 
-                // È·¶¨µ±Ç°·¿¼äÔÚÏÂÒ»²ã¿ÉÄÜÁ¬½ÓµÄ·¿¼äË÷Òı·¶Î§
-                // ÔÊĞíºáÏò¿çÔ½Ò»¸ö·¿¼ä£¬µ«²»ÄÜ¿çÔ½Á½¸ö
-                int maxConnections = 2; // ÏŞÖÆÃ¿¸ö·¿¼ä×î¶àÁ¬½ÓÏÂÒ»²ãµÄ·¿¼äÊı
+                // ç¡®å®šå½“å‰æˆ¿é—´åœ¨ä¸‹ä¸€å±‚å¯èƒ½è¿æ¥çš„æˆ¿é—´ç´¢å¼•èŒƒå›´
+                // å…è®¸æ¨ªå‘è·¨è¶Šä¸€ä¸ªæˆ¿é—´ï¼Œä½†ä¸èƒ½è·¨è¶Šä¸¤ä¸ª
+                int maxConnections = 2; // é™åˆ¶æ¯ä¸ªæˆ¿é—´æœ€å¤šè¿æ¥ä¸‹ä¸€å±‚çš„æˆ¿é—´æ•°
                 int connectionsCount = 0;
 
-                // ¸ù¾İµ±Ç°²ãºÍÏÂÒ»²ãµÄ·¿¼äÊıÁ¿¹ØÏµÈ·¶¨Á¬½Ó²ßÂÔ
+                // æ ¹æ®å½“å‰å±‚å’Œä¸‹ä¸€å±‚çš„æˆ¿é—´æ•°é‡å…³ç³»ç¡®å®šè¿æ¥ç­–ç•¥
                 if (nextLayer.size() <= 2) {
-                    // Èç¹ûÏÂÒ»²ã·¿¼äÉÙÓÚ3¸ö£¬ËùÓĞ·¿¼ä¶¼¿ÉÒÔ»¥ÏàÁ¬½Ó
+                    // å¦‚æœä¸‹ä¸€å±‚æˆ¿é—´å°‘äº3ä¸ªï¼Œæ‰€æœ‰æˆ¿é—´éƒ½å¯ä»¥äº’ç›¸è¿æ¥
                     for (size_t k = 0; k < nextLayer.size() && connectionsCount < maxConnections; k++) {
                         auto endPos = nextLayer[k].item->getPosition();
 
-                        // Ê¹ÓÃ½¥±äÉ«µÄÏßÌõ
-                        Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);  // Ç³À¶É«
-                        Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);    // ÉîÀ¶É«
+                        // ä½¿ç”¨æ¸å˜è‰²çš„çº¿æ¡
+                        Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);  // æµ…è“è‰²
+                        Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);    // æ·±è“è‰²
 
-                        // ÏÈ»æÖÆÒõÓ°
+                        // å…ˆç»˜åˆ¶é˜´å½±
                         drawNode->drawSegment(
                             startPos,
                             endPos,
@@ -582,22 +571,22 @@ namespace MyGame {
                             Color4F(0.0f, 0.0f, 0.0f, 0.3f)
                         );
 
-                        // ÔÙ»æÖÆÖ÷Ïß
+                        // å†ç»˜åˆ¶ä¸»çº¿
                         drawNode->drawSegment(startPos, endPos, 3.0f, startColor);
 
-                        // Ìí¼Óµã×ºĞ§¹û
+                        // æ·»åŠ ç‚¹ç¼€æ•ˆæœ
                         drawNode->drawDot(startPos, 4.0f, startColor);
                         drawNode->drawDot(endPos, 4.0f, endColor);
 
-                        // ±£´æÁ¬ÏßĞÅÏ¢
+                        // ä¿å­˜è¿çº¿ä¿¡æ¯
                         staticConnectionInfo.push_back({ startPos, endPos });
                         nextRoomConnected[k] = true;
                         connectionsCount++;
                     }
                 }
                 else {
-                    // ÎªÃ¿¸ö·¿¼äÕÒµ½"ºÏÀí"µÄÁ¬½ÓÎ»ÖÃ
-                    // ÓëÔ­´úÂëÏàÍ¬µÄÂß¼­
+                    // ä¸ºæ¯ä¸ªæˆ¿é—´æ‰¾åˆ°"åˆç†"çš„è¿æ¥ä½ç½®
+                    // ä¸åŸä»£ç ç›¸åŒçš„é€»è¾‘
                     int baseIndex;
 
                     if (currentLayer.size() <= nextLayer.size()) {
@@ -632,15 +621,15 @@ namespace MyGame {
                         }
                     }
 
-                    // »æÖÆËùÓĞÁ¬½Ó£¬Ê¹ÓÃÃÀ»¯Ğ§¹û
+                    // ç»˜åˆ¶æ‰€æœ‰è¿æ¥ï¼Œä½¿ç”¨ç¾åŒ–æ•ˆæœ
                     for (int idx : connectIndexes) {
                         auto endPos = nextLayer[idx].item->getPosition();
 
-                        // Ê¹ÓÃ½¥±äÉ«µÄÏßÌõ
+                        // ä½¿ç”¨æ¸å˜è‰²çš„çº¿æ¡
                         Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);
                         Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);
 
-                        // ÏÈ»æÖÆÒõÓ°
+                        // å…ˆç»˜åˆ¶é˜´å½±
                         drawNode->drawSegment(
                             startPos,
                             endPos,
@@ -648,29 +637,29 @@ namespace MyGame {
                             Color4F(0.0f, 0.0f, 0.0f, 0.3f)
                         );
 
-                        // ÔÙ»æÖÆÖ÷Ïß
+                        // å†ç»˜åˆ¶ä¸»çº¿
                         drawNode->drawSegment(startPos, endPos, 3.0f, startColor);
 
-                        // Ìí¼Óµã×ºĞ§¹û
+                        // æ·»åŠ ç‚¹ç¼€æ•ˆæœ
                         drawNode->drawDot(startPos, 4.0f, startColor);
                         drawNode->drawDot(endPos, 4.0f, endColor);
 
-                        // ±£´æÁ¬ÏßĞÅÏ¢
+                        // ä¿å­˜è¿çº¿ä¿¡æ¯
                         staticConnectionInfo.push_back({ startPos, endPos });
                     }
                 }
             }
 
-            // È·±£ËùÓĞÏÂ²ã·¿¼ä¶¼ÓĞÁ¬½Ó
+            // ç¡®ä¿æ‰€æœ‰ä¸‹å±‚æˆ¿é—´éƒ½æœ‰è¿æ¥
             for (size_t j = 0; j < nextLayer.size(); j++) {
                 if (!nextRoomConnected[j]) {
-                    // ÕÒµ½Ïà¶ÔÎ»ÖÃ×î½üµÄÉÏ²ã·¿¼ä
+                    // æ‰¾åˆ°ç›¸å¯¹ä½ç½®æœ€è¿‘çš„ä¸Šå±‚æˆ¿é—´
                     int closestRoomIndex = 0;
                     float minDistance = FLT_MAX;
 
                     for (size_t k = 0; k < currentLayer.size(); k++) {
                         float xDist = currentLayer[k].item->getPosition().x - nextLayer[j].item->getPosition().x;
-                        float dist = fabs(xDist);  // Ö»¿¼ÂÇË®Æ½¾àÀë
+                        float dist = fabs(xDist);  // åªè€ƒè™‘æ°´å¹³è·ç¦»
 
                         if (dist < minDistance) {
                             minDistance = dist;
@@ -681,11 +670,11 @@ namespace MyGame {
                     auto startPos = currentLayer[closestRoomIndex].item->getPosition();
                     auto endPos = nextLayer[j].item->getPosition();
 
-                    // Ê¹ÓÃ½¥±äÉ«µÄÏßÌõ
+                    // ä½¿ç”¨æ¸å˜è‰²çš„çº¿æ¡
                     Color4F startColor(0.4f, 0.6f, 1.0f, 0.8f);
                     Color4F endColor(0.1f, 0.3f, 0.8f, 0.8f);
 
-                    // ÏÈ»æÖÆÒõÓ°
+                    // å…ˆç»˜åˆ¶é˜´å½±
                     drawNode->drawSegment(
                         startPos,
                         endPos,
@@ -693,14 +682,14 @@ namespace MyGame {
                         Color4F(0.0f, 0.0f, 0.0f, 0.3f)
                     );
 
-                    // ÔÙ»æÖÆÖ÷Ïß
+                    // å†ç»˜åˆ¶ä¸»çº¿
                     drawNode->drawSegment(startPos, endPos, 3.0f, startColor);
 
-                    // Ìí¼Óµã×ºĞ§¹û
+                    // æ·»åŠ ç‚¹ç¼€æ•ˆæœ
                     drawNode->drawDot(startPos, 4.0f, startColor);
                     drawNode->drawDot(endPos, 4.0f, endColor);
 
-                    // ±£´æÁ¬ÏßĞÅÏ¢
+                    // ä¿å­˜è¿çº¿ä¿¡æ¯
                     staticConnectionInfo.push_back({ startPos, endPos });
                     nextRoomConnected[j] = true;
                 }
@@ -714,16 +703,16 @@ namespace MyGame {
         auto item = static_cast<MenuItemImage*>(pSender);
         int layerIndex = item->getTag();
 
-        // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÃÎÊÕâ¸ö²ã¼¶
+        // æ£€æŸ¥æ˜¯å¦å¯ä»¥è®¿é—®è¿™ä¸ªå±‚çº§
         if (layerIndex > maxAccessibleLayer)
         {
-            // ´´½¨ÌáÊ¾±êÇ©
+            // åˆ›å»ºæç¤ºæ ‡ç­¾
             auto visibleSize = Director::getInstance()->getVisibleSize();
             auto label = Label::createWithTTF("unable to enter now", "fonts/Marker Felt.ttf", 32);
             label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
             this->addChild(label, 5);
 
-            // 2ÃëºóÒÆ³ıÌáÊ¾
+            // 2ç§’åç§»é™¤æç¤º
             label->runAction(Sequence::create(
                 DelayTime::create(2.0f),
                 RemoveSelf::create(),
@@ -733,24 +722,24 @@ namespace MyGame {
             return;
         }
 
-        // ÉèÖÃµ±Ç°Ñ¡ÖĞµÄ²ãºÍ·¿¼ä
+        // è®¾ç½®å½“å‰é€‰ä¸­çš„å±‚å’Œæˆ¿é—´
         currentLayer = layerIndex;
         currentRoom = 0;
 
-        // ¼ÇÂ¼µ±Ç°·¿¼äÎ»ÖÃ
+        // è®°å½•å½“å‰æˆ¿é—´ä½ç½®
         currentRoomPosition = item->getPosition();
 
         currentRoomType = RoomType::BATTLE;
 
-        // ±ê¼ÇÎªÒÑÍê³É·¿¼ä
+        // æ ‡è®°ä¸ºå·²å®Œæˆæˆ¿é—´
         roomCompleted = true;
 
-        // ÇĞ»»µ½Õ½¶·³¡¾°
+        // åˆ‡æ¢åˆ°æˆ˜æ–—åœºæ™¯
         auto scene = FightingScene::createScene();
-        // Ê¹ÓÃµ­Èëµ­³ö¹ı¶ÉĞ§¹û£¬³ÖĞø1Ãë
-        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ºÚÉ«µ­Èëµ­³ö
+        // ä½¿ç”¨æ·¡å…¥æ·¡å‡ºè¿‡æ¸¡æ•ˆæœï¼ŒæŒç»­1ç§’
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // é»‘è‰²æ·¡å…¥æ·¡å‡º
 
-        // ÇĞ»»µ½´ø¹ı¶ÉĞ§¹ûµÄµØÍ¼³¡¾°
+        // åˆ‡æ¢åˆ°å¸¦è¿‡æ¸¡æ•ˆæœçš„åœ°å›¾åœºæ™¯
         Director::getInstance()->replaceScene(transition);
     }
 
@@ -759,16 +748,16 @@ namespace MyGame {
         auto item = static_cast<MenuItemImage*>(pSender);
         int layerIndex = item->getTag();
 
-        // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÃÎÊÕâ¸ö²ã¼¶
+        // æ£€æŸ¥æ˜¯å¦å¯ä»¥è®¿é—®è¿™ä¸ªå±‚çº§
         if (layerIndex > maxAccessibleLayer)
         {
-            // ´´½¨ÌáÊ¾±êÇ©
+            // åˆ›å»ºæç¤ºæ ‡ç­¾
             auto visibleSize = Director::getInstance()->getVisibleSize();
             auto label = Label::createWithTTF("unable to enter now", "fonts/Marker Felt.ttf", 32);
             label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
             this->addChild(label, 5);
 
-            // 2ÃëºóÒÆ³ıÌáÊ¾
+            // 2ç§’åç§»é™¤æç¤º
             label->runAction(Sequence::create(
                 DelayTime::create(2.0f),
                 RemoveSelf::create(),
@@ -778,24 +767,24 @@ namespace MyGame {
             return;
         }
 
-        // ÉèÖÃµ±Ç°Ñ¡ÖĞµÄ²ãºÍ·¿¼ä
+        // è®¾ç½®å½“å‰é€‰ä¸­çš„å±‚å’Œæˆ¿é—´
         currentLayer = layerIndex;
         currentRoom = 0;
 		currentRoomType = RoomType::QUESTION;
 
-        // ¼ÇÂ¼µ±Ç°·¿¼äÎ»ÖÃ
+        // è®°å½•å½“å‰æˆ¿é—´ä½ç½®
         currentRoomPosition = item->getPosition();
 
-        // Ìí¼ÓÕâÒ»ĞĞ
+        // æ·»åŠ è¿™ä¸€è¡Œ
         currentRoomType = RoomType::QUESTION;
 
-        // ±ê¼ÇÎªÒÑÍê³É·¿¼ä
+        // æ ‡è®°ä¸ºå·²å®Œæˆæˆ¿é—´
         roomCompleted = true;
 
-        // ÇĞ»»µ½ÎÊºÅ³¡¾°
+        // åˆ‡æ¢åˆ°é—®å·åœºæ™¯
         auto scene = Question::createScene();
-        // Ê¹ÓÃµ­Èëµ­³ö¹ı¶ÉĞ§¹û£¬³ÖĞø1Ãë
-        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ºÚÉ«µ­Èëµ­³ö
+        // ä½¿ç”¨æ·¡å…¥æ·¡å‡ºè¿‡æ¸¡æ•ˆæœï¼ŒæŒç»­1ç§’
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // é»‘è‰²æ·¡å…¥æ·¡å‡º
 		Director::getInstance()->replaceScene(transition);
     }
 
@@ -804,16 +793,16 @@ namespace MyGame {
         auto item = static_cast<MenuItemImage*>(pSender);
         int layerIndex = item->getTag();
 
-        // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÃÎÊÕâ¸ö²ã¼¶
+        // æ£€æŸ¥æ˜¯å¦å¯ä»¥è®¿é—®è¿™ä¸ªå±‚çº§
         if (layerIndex > maxAccessibleLayer)
         {
-            // ´´½¨ÌáÊ¾±êÇ©
+            // åˆ›å»ºæç¤ºæ ‡ç­¾
             auto visibleSize = Director::getInstance()->getVisibleSize();
             auto label = Label::createWithTTF("unable to enter now", "fonts/Marker Felt.ttf", 32);
             label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
             this->addChild(label, 5);
 
-            // 2ÃëºóÒÆ³ıÌáÊ¾
+            // 2ç§’åç§»é™¤æç¤º
             label->runAction(Sequence::create(
                 DelayTime::create(2.0f),
                 RemoveSelf::create(),
@@ -823,25 +812,25 @@ namespace MyGame {
             return;
         }
 
-        // ÉèÖÃµ±Ç°Ñ¡ÖĞµÄ²ãºÍ·¿¼ä
+        // è®¾ç½®å½“å‰é€‰ä¸­çš„å±‚å’Œæˆ¿é—´
         currentLayer = layerIndex;
         currentRoom = 0;
         currentRoomType = RoomType::REST;
 
-        // ¼ÇÂ¼µ±Ç°·¿¼äÎ»ÖÃ
+        // è®°å½•å½“å‰æˆ¿é—´ä½ç½®
         currentRoomPosition = item->getPosition();
 
-        // Ìí¼ÓÕâÒ»ĞĞ
+        // æ·»åŠ è¿™ä¸€è¡Œ
         currentRoomType = RoomType::REST;
 
-        // ±ê¼ÇÎªÒÑÍê³É·¿¼ä
+        // æ ‡è®°ä¸ºå·²å®Œæˆæˆ¿é—´
         roomCompleted = true;
 
-        // ÇĞ»»µ½ĞİÏ¢³¡¾°
+        // åˆ‡æ¢åˆ°ä¼‘æ¯åœºæ™¯
         auto scene = Rest::createScene();
-        // Ê¹ÓÃµ­Èëµ­³ö¹ı¶ÉĞ§¹û£¬³ÖĞø1Ãë
-        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ºÚÉ«µ­Èëµ­³ö
-        // ÇĞ»»µ½´ø¹ı¶ÉĞ§¹ûµÄµØÍ¼³¡¾°
+        // ä½¿ç”¨æ·¡å…¥æ·¡å‡ºè¿‡æ¸¡æ•ˆæœï¼ŒæŒç»­1ç§’
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // é»‘è‰²æ·¡å…¥æ·¡å‡º
+        // åˆ‡æ¢åˆ°å¸¦è¿‡æ¸¡æ•ˆæœçš„åœ°å›¾åœºæ™¯
         Director::getInstance()->replaceScene(transition);
     }
 
@@ -850,16 +839,16 @@ namespace MyGame {
         auto item = static_cast<MenuItemImage*>(pSender);
         int layerIndex = item->getTag();
 
-        // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÃÎÊÕâ¸ö²ã¼¶
+        // æ£€æŸ¥æ˜¯å¦å¯ä»¥è®¿é—®è¿™ä¸ªå±‚çº§
         if (layerIndex > maxAccessibleLayer)
         {
-            // ´´½¨ÌáÊ¾±êÇ©
+            // åˆ›å»ºæç¤ºæ ‡ç­¾
             auto visibleSize = Director::getInstance()->getVisibleSize();
             auto label = Label::createWithTTF("Unable to enter now", "fonts/Marker Felt.ttf", 32);
             label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
             this->addChild(label, 5);
 
-            // 2ÃëºóÒÆ³ıÌáÊ¾
+            // 2ç§’åç§»é™¤æç¤º
             label->runAction(Sequence::create(
                 DelayTime::create(2.0f),
                 RemoveSelf::create(),
@@ -869,23 +858,23 @@ namespace MyGame {
             return;
         }
 
-        // ÉèÖÃµ±Ç°Ñ¡ÖĞµÄ²ãºÍ·¿¼ä
+        // è®¾ç½®å½“å‰é€‰ä¸­çš„å±‚å’Œæˆ¿é—´
         currentLayer = layerIndex;
         currentRoom = 0;
 
-        // ¼ÇÂ¼µ±Ç°·¿¼äÎ»ÖÃ
+        // è®°å½•å½“å‰æˆ¿é—´ä½ç½®
         currentRoomPosition = item->getPosition();
 
 		currentRoomType = RoomType::BOSS;
 
-        // ±ê¼ÇÎªÒÑÍê³É·¿¼ä
+        // æ ‡è®°ä¸ºå·²å®Œæˆæˆ¿é—´
         roomCompleted = true;
 
-        // ÇĞ»»µ½ BOSS Õ½¶·³¡¾°
+        // åˆ‡æ¢åˆ° BOSS æˆ˜æ–—åœºæ™¯
         auto scene = FightingScene::createScene();
-        // Ê¹ÓÃµ­Èëµ­³ö¹ı¶ÉĞ§¹û£¬³ÖĞø1Ãë
-        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ºÚÉ«µ­Èëµ­³ö
-        // ÇĞ»»µ½´ø¹ı¶ÉĞ§¹ûµÄµØÍ¼³¡¾°
+        // ä½¿ç”¨æ·¡å…¥æ·¡å‡ºè¿‡æ¸¡æ•ˆæœï¼ŒæŒç»­1ç§’
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // é»‘è‰²æ·¡å…¥æ·¡å‡º
+        // åˆ‡æ¢åˆ°å¸¦è¿‡æ¸¡æ•ˆæœçš„åœ°å›¾åœºæ™¯
         Director::getInstance()->replaceScene(transition);
     }
 
@@ -894,16 +883,16 @@ namespace MyGame {
         auto item = static_cast<MenuItemImage*>(pSender);
         int layerIndex = item->getTag();
 
-        // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÃÎÊÕâ¸ö²ã¼¶
+        // æ£€æŸ¥æ˜¯å¦å¯ä»¥è®¿é—®è¿™ä¸ªå±‚çº§
         if (layerIndex > maxAccessibleLayer)
         {
-            // ´´½¨ÌáÊ¾±êÇ©
+            // åˆ›å»ºæç¤ºæ ‡ç­¾
             auto visibleSize = Director::getInstance()->getVisibleSize();
-            auto label = Label::createWithTTF("ÎŞ·¨½øÈë´Ë·¿¼ä", "fonts/Marker Felt.ttf", 32);
+            auto label = Label::createWithTTF("æ— æ³•è¿›å…¥æ­¤æˆ¿é—´", "fonts/Marker Felt.ttf", 32);
             label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
             this->addChild(label, 5);
 
-            // 2ÃëºóÒÆ³ıÌáÊ¾
+            // 2ç§’åç§»é™¤æç¤º
             label->runAction(Sequence::create(
                 DelayTime::create(2.0f),
                 RemoveSelf::create(),
@@ -913,23 +902,23 @@ namespace MyGame {
             return;
         }
 
-        // ÉèÖÃµ±Ç°Ñ¡ÖĞµÄ²ãºÍ·¿¼ä
+        // è®¾ç½®å½“å‰é€‰ä¸­çš„å±‚å’Œæˆ¿é—´
         currentLayer = layerIndex;
         currentRoom = 0;
 
-        // ¼ÇÂ¼µ±Ç°·¿¼äÎ»ÖÃ
+        // è®°å½•å½“å‰æˆ¿é—´ä½ç½®
         currentRoomPosition = item->getPosition();
 
         currentRoomType = RoomType::ELITE;
 
-        // ±ê¼ÇÎªÒÑÍê³É·¿¼ä
+        // æ ‡è®°ä¸ºå·²å®Œæˆæˆ¿é—´
         roomCompleted = true;
 
-        // ÇĞ»»µ½Õ½¶·³¡¾° - Ê¹ÓÃÓëÆäËû»Øµ÷ÏàÍ¬µÄ·½Ê½
+        // åˆ‡æ¢åˆ°æˆ˜æ–—åœºæ™¯ - ä½¿ç”¨ä¸å…¶ä»–å›è°ƒç›¸åŒçš„æ–¹å¼
         auto scene = FightingScene::createScene();
 
-        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ºÚÉ«µ­Èëµ­³ö
-        // ÇĞ»»µ½´ø¹ı¶ÉĞ§¹ûµÄµØÍ¼³¡¾°
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // é»‘è‰²æ·¡å…¥æ·¡å‡º
+        // åˆ‡æ¢åˆ°å¸¦è¿‡æ¸¡æ•ˆæœçš„åœ°å›¾åœºæ™¯
         Director::getInstance()->replaceScene(transition);
 
     }
@@ -939,16 +928,16 @@ namespace MyGame {
         auto item = static_cast<MenuItemImage*>(pSender);
         int layerIndex = item->getTag();
 
-        // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÃÎÊÕâ¸ö²ã¼¶
+        // æ£€æŸ¥æ˜¯å¦å¯ä»¥è®¿é—®è¿™ä¸ªå±‚çº§
         if (layerIndex > maxAccessibleLayer)
         {
-            // ´´½¨ÌáÊ¾±êÇ©
+            // åˆ›å»ºæç¤ºæ ‡ç­¾
             auto visibleSize = Director::getInstance()->getVisibleSize();
-            auto label = Label::createWithTTF("ÎŞ·¨½øÈëÉÌµê", "fonts/Marker Felt.ttf", 32);
+            auto label = Label::createWithTTF("æ— æ³•è¿›å…¥å•†åº—", "fonts/Marker Felt.ttf", 32);
             label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
             this->addChild(label, 5);
 
-            // 2ÃëºóÒÆ³ıÌáÊ¾
+            // 2ç§’åç§»é™¤æç¤º
             label->runAction(Sequence::create(
                 DelayTime::create(2.0f),
                 RemoveSelf::create(),
@@ -958,39 +947,39 @@ namespace MyGame {
             return;
         }
 
-        // ÉèÖÃµ±Ç°Ñ¡ÖĞµÄ²ãºÍ·¿¼ä
+        // è®¾ç½®å½“å‰é€‰ä¸­çš„å±‚å’Œæˆ¿é—´
         currentLayer = layerIndex;
         currentRoom = 0;
 
-        // ¼ÇÂ¼µ±Ç°·¿¼äÎ»ÖÃ
+        // è®°å½•å½“å‰æˆ¿é—´ä½ç½®
         currentRoomPosition = item->getPosition();
 
-        // Ìí¼ÓÕâÒ»ĞĞ
+        // æ·»åŠ è¿™ä¸€è¡Œ
         currentRoomType = RoomType::SHOP;
 
-        // ±ê¼ÇÎªÒÑÍê³É·¿¼ä
+        // æ ‡è®°ä¸ºå·²å®Œæˆæˆ¿é—´
         roomCompleted = true;
 
-        // ÇĞ»»µ½ÉÌµê³¡¾°
+        // åˆ‡æ¢åˆ°å•†åº—åœºæ™¯
         auto scene = ShopScene::createScene();
 
-        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ºÚÉ«µ­Èëµ­³ö
-        // ÇĞ»»µ½´ø¹ı¶ÉĞ§¹ûµÄµØÍ¼³¡¾°
+        auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // é»‘è‰²æ·¡å…¥æ·¡å‡º
+        // åˆ‡æ¢åˆ°å¸¦è¿‡æ¸¡æ•ˆæœçš„åœ°å›¾åœºæ™¯
         Director::getInstance()->replaceScene(transition);
     }
 
-    // ÔÚMapÀàÖĞÌí¼Ó
+    // åœ¨Mapç±»ä¸­æ·»åŠ 
     void Map::createSaveButton()
     {
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-        // ´´½¨±£´æ°´Å¥
-        auto saveButton = ui::Button::create("button.png", "button_selected.png");
-        saveButton->setPosition(Vec2(origin.x + visibleSize.width - 50, origin.y + 50));
-        saveButton->setScale(0.5f);
+        // åˆ›å»ºä¿å­˜æŒ‰é’®
+        auto saveButton = ui::Button::create("savebutton.png", "savebutton.png");
+        saveButton->setPosition(Vec2(origin.x + visibleSize.width - 150, origin.y + 150));
+        saveButton->setScale(0.3f);
 
-        // Ìí¼Óµã»÷ÊÂ¼ş
+        // æ·»åŠ ç‚¹å‡»äº‹ä»¶
         saveButton->addClickEventListener([this](Ref* sender) {
             saveGame();
             });
@@ -1000,28 +989,36 @@ namespace MyGame {
 
     void Map::saveGame()
     {
-        // »ñÈ¡µ±Ç°ÓÎÏ·×´Ì¬
+        // è·å–å½“å‰æ¸¸æˆçŠ¶æ€
         int health = Hero::getCurrentHealth();
         int gold = Hero::getCoins();
         const std::vector<Card>& deck = Hero::getDeck();
 
-        // Ê¹ÓÃµ±Ç°²ãºÍ·¿¼äĞÅÏ¢´úÌæ²»´æÔÚµÄ currentMapId ºÍ currentLevel
-        int mapLayer = currentLayer;
-        int roomIndex = currentRoom;
-
-        // ±£´æÓÎÏ·
-        if (GameSaveManager::saveGame(health, gold, deck, mapLayer, roomIndex))
+        // ä¿å­˜æ¸¸æˆï¼Œç°åœ¨ä¼ å…¥æ‰€æœ‰åœ°å›¾ç›¸å…³æ•°æ®
+        if (GameSaveManager::saveGame(
+            health,
+            gold,
+            deck,
+            currentLayer,
+            currentRoom,
+            staticMapInfo,
+            staticConnectionInfo,
+            maxAccessibleLayer,
+            currentRoomPosition,
+            currentRoomType,
+            roomCompleted
+        ))
         {
-            // ÏÔÊ¾±£´æ³É¹¦ÌáÊ¾
+            // æ˜¾ç¤ºä¿å­˜æˆåŠŸæç¤º
             auto visibleSize = Director::getInstance()->getVisibleSize();
             Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-            auto saveLabel = Label::createWithTTF("ÓÎÏ·ÒÑ±£´æ", "fonts/Marker Felt.ttf", 40);
+            auto saveLabel = Label::createWithTTF("æ¸¸æˆå·²ä¿å­˜", "fonts/Marker Felt.ttf", 40);
             saveLabel->setColor(Color3B::GREEN);
             saveLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
             this->addChild(saveLabel, 100);
 
-            // 2ÃëºóÒÆ³ıÌáÊ¾
+            // 2ç§’åç§»é™¤æç¤º
             saveLabel->runAction(Sequence::create(
                 DelayTime::create(2.0f),
                 FadeOut::create(0.5f),

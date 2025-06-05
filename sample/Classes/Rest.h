@@ -9,16 +9,17 @@ namespace MyGame {
     {
     public:
         static cocos2d::Scene* createScene();
-        virtual bool init();
-        // ÊµÏÖ¡£¡£¡£¾²Ì¬ create() º¯Êı
+        virtual bool init() override;
+        cocos2d::Menu* _menu = nullptr;
+        // å®ç°â€œé™æ€ create() æ–¹æ³•â€
         CREATE_FUNC(Rest);
 
     private:
         void menuRestoreCallback(cocos2d::Ref* pSender);
         void menuReturnCallback(cocos2d::Ref* pSender);
-        bool m_restoreUsed; // ¼ÇÂ¼»Ö¸´ÑªÁ¿²Ù×÷ÊÇ·ñÒÑÖ´ĞĞ
-        bool m_increaseMaxHealthUsed; // ¼ÇÂ¼Ôö¼Ó×î´óÑªÁ¿²Ù×÷ÊÇ·ñÒÑÖ´ĞĞ
     };
 
 } // namespace MyGame
+
 #endif // __REST_SCENE_H__
+

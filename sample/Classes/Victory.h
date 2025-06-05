@@ -18,8 +18,8 @@ namespace MyGame {
 
     private:
         cocos2d::Label* _creditsLabel;
-        cocos2d::Sprite* _victoryLogo;
-        cocos2d::Node* _scrollNode;  // 添加滚动节点
+        cocos2d::Label* _victoryInfoLabel;
+        cocos2d::Node* _scrollNode;  // 滚动节点
         float _creditsDuration;      // 滚动时间
     };
 

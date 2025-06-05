@@ -1,7 +1,8 @@
 #include "MainMenu.h"
 #include "Hero.h"
 #include "GameSaveManager.h"
-#include "Map.h"  // ÒıÈëµØÍ¼³¡¾°Í·ÎÄ¼ş
+#include "TransitionScene.h"
+#include "Map.h"  // å¼•å…¥åœ°å›¾åœºæ™¯å¤´æ–‡ä»¶
 
 USING_NS_CC;
 
@@ -20,49 +21,55 @@ bool MainMenu::init()
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // Ìí¼Ó±³¾°Í¼Æ¬
-    auto background = Sprite::create("background.webp");
+    // æ·»åŠ èƒŒæ™¯å›¾ç‰‡
+    auto background = Sprite::create("mainmenu.png");
     if (background)
     {
         background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-        this->addChild(background, 0);  // ½«±³¾°Í¼Æ¬Ìí¼Óµ½×îµ×²ã
-		setScale(1.6);  // µ÷Õû±³¾°Í¼Æ¬´óĞ¡
+        background->setScale(1.6);  // åªç¼©æ”¾èƒŒæ™¯å›¾ç‰‡
+        this->addChild(background, 0);
     }
 
-    // ´´½¨¡°¿ªÊ¼ÓÎÏ·¡±²Ëµ¥Ïî
+    // åˆ›å»ºâ€œå¼€å§‹æ¸¸æˆâ€èœå•é¡¹
     auto startItem = MenuItemImage::create(
-        "start_normal.png",  // Õı³£×´Ì¬µÄÍ¼Æ¬
-        "start_normal.png",  // Ñ¡ÖĞ×´Ì¬µÄÍ¼Æ¬
+        "start_normal.png",  // æ­£å¸¸çŠ¶æ€çš„å›¾ç‰‡
+        "start_normal.png",  // é€‰ä¸­çŠ¶æ€çš„å›¾ç‰‡
         CC_CALLBACK_1(MainMenu::menuStartCallback, this)
     );
     if (startItem)
     {
         startItem->setPosition(Vec2(
-            origin.x + visibleSize.width / 2,
-            origin.y + visibleSize.height / 2 - 145
+            origin.x + visibleSize.width / 2-620,
+            origin.y + visibleSize.height / 2 - 340
         ));
-        startItem->setScale(0.75);  // µ÷Õû°´Å¥´óĞ¡
+        startItem->setScale(1.50);  // è°ƒæ•´æŒ‰é’®å¤§å°
+        // æ·»åŠ ç¼©æ”¾åŠ¨ç”»æ•ˆæœ
+        auto scaleUp = ScaleTo::create(0.6f, 1.60);
+        auto scaleDown = ScaleTo::create(0.6f, 1.50);
+        auto sequence = Sequence::create(scaleUp, scaleDown, nullptr);
+        auto repeatForever = RepeatForever::create(sequence);
+        startItem->runAction(repeatForever);
     }
 
-    // ´´½¨¡°ÍË³öÓÎÏ·¡±²Ëµ¥Ïî
+    // åˆ›å»ºâ€œé€€å‡ºæ¸¸æˆâ€èœå•é¡¹
     auto exitItem = MenuItemImage::create(
-        "CloseNormal.png",  // Õı³£×´Ì¬µÄÍ¼Æ¬
-        "CloseSelected.png",  // Ñ¡ÖĞ×´Ì¬µÄÍ¼Æ¬
+        "exit.png",  // æ­£å¸¸çŠ¶æ€çš„å›¾ç‰‡
+        "CloseSelected.png",  // é€‰ä¸­çŠ¶æ€çš„å›¾ç‰‡
         CC_CALLBACK_1(MainMenu::menuCloseCallback, this)
     );
     if (exitItem)
     {
         exitItem->setPosition(Vec2(
-            origin.x + visibleSize.width - 50,
-            origin.y + visibleSize.height / 2 - 300
+            origin.x + visibleSize.width/2 + 620,
+            origin.y + visibleSize.height / 2 - 340
         ));
-        exitItem->setScale(3);  // µ÷Õû°´Å¥´óĞ¡
+        exitItem->setScale(1.52);  // è°ƒæ•´æŒ‰é’®å¤§å°
     }
 
-    // ½«Á½¸ö²Ëµ¥Ïî¼ÓÈë²Ëµ¥
+    // å°†ä¸¤ä¸ªèœå•é¡¹åŠ å…¥èœå•
     auto menu = Menu::create(startItem, exitItem, nullptr);
     menu->setPosition(Vec2::ZERO);
-    this->addChild(menu, 1);  // È·±£²Ëµ¥ÔÚ±³¾°Í¼Æ¬Ö®ÉÏ
+    this->addChild(menu, 1);  // ç¡®ä¿èœå•åœ¨èƒŒæ™¯å›¾ç‰‡ä¹‹ä¸Š
     createContinueButton();
 
     return true;
@@ -70,50 +77,45 @@ bool MainMenu::init()
 
 void MainMenu::menuStartCallback(cocos2d::Ref* pSender)
 {
-    // ÖØÖÃÓÎÏ·×´Ì¬
+    // é‡ç½®æ¸¸æˆçŠ¶æ€
     MyGame::resetGameState();
 
-    // ÖØÖÃÓ¢ĞÛÑªÁ¿ºÍ½ğ±Ò
+    // é‡ç½®è‹±é›„è¡€é‡å’Œé‡‘å¸
     Hero::resetHealth();
     Hero::resetCoins();
 
-    // ÇĞ»»µ½µØÍ¼³¡¾°
-    auto scene = MyGame::Map::createScene();
-
-    // Ê¹ÓÃµ­Èëµ­³ö¹ı¶ÉĞ§¹û£¬³ÖĞø1Ãë
-    auto transition = TransitionFade::create(1.0f, scene, Color3B(0, 0, 0)); // ºÚÉ«µ­Èëµ­³ö
-
-    // ÇĞ»»µ½´ø¹ı¶ÉĞ§¹ûµÄµØÍ¼³¡¾°
-    Director::getInstance()->replaceScene(transition);
+    // åˆ‡æ¢åˆ°è¿‡åœºåŠ¨ç”»åœºæ™¯
+    auto scene = MyGame::TransitionScene::createScene();
+    Director::getInstance()->replaceScene(scene);
 }
 
 
 void MainMenu::menuCloseCallback(Ref* pSender)
 {
-    // ÍË³öÓÎÏ·
+    // é€€å‡ºæ¸¸æˆ
     Director::getInstance()->end();
 }
 
-// ÔÚÖ÷²Ëµ¥ÀàÖĞÌí¼Ó
+// åœ¨ä¸»èœå•ç±»ä¸­æ·»åŠ 
 void MainMenu::createContinueButton()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    // ´´½¨¼ÌĞøÓÎÏ·°´Å¥
-    auto continueButton = ui::Button::create("button.png", "button_selected.png");
-    continueButton->setPosition(Vec2(origin.x + visibleSize.width / 2+60, origin.y + visibleSize.height / 2 +60));
-	continueButton->setScale(0.5);
+    // åˆ›å»ºç»§ç»­æ¸¸æˆæŒ‰é’®
+    auto continueButton = ui::Button::create("load.png", "button_selected.png");
+    continueButton->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 -335));
+	continueButton->setScale(1.48);
 
-    // ¸ù¾İÊÇ·ñÓĞ´æµµ¾ö¶¨°´Å¥×´Ì¬
+    // æ ¹æ®æ˜¯å¦æœ‰å­˜æ¡£å†³å®šæŒ‰é’®çŠ¶æ€
     bool hasSave = GameSaveManager::hasSavedGame();
     continueButton->setEnabled(hasSave);
     if (!hasSave)
     {
-        continueButton->setColor(Color3B(150, 150, 150)); // »ÒÉ«±íÊ¾½ûÓÃ
+        continueButton->setColor(Color3B(150, 150, 150)); // ç°è‰²è¡¨ç¤ºç¦ç”¨
     }
 
-    // Ìí¼Óµã»÷ÊÂ¼ş
+    // æ·»åŠ ç‚¹å‡»äº‹ä»¶
     continueButton->addClickEventListener([this](Ref* sender) {
         loadGame();
         });
@@ -123,39 +125,58 @@ void MainMenu::createContinueButton()
 
 void MainMenu::loadGame()
 {
-    // ¶ÁÈ¡´æµµ
+    // è¯»å–å­˜æ¡£
     int health, gold, currentMapId, currentLevel;
     std::vector<Card> deck;
+    std::vector<std::vector<MyGame::RoomInfo>> mapInfo;
+    std::vector<MyGame::ConnectionInfo> connectionInfo;
+    int maxLayer;
+    cocos2d::Vec2 currentRoomPos;
+    MyGame::RoomType roomType;
+    bool completed;
 
-    if (GameSaveManager::loadGame(health, gold, deck, currentMapId, currentLevel))
+    if (GameSaveManager::loadGame(
+        health,
+        gold,
+        deck,
+        currentMapId,
+        currentLevel,
+        mapInfo,
+        connectionInfo,
+        maxLayer,
+        currentRoomPos,
+        roomType,
+        completed
+    ))
     {
-        // »Ö¸´ÓÎÏ·×´Ì¬
+        // æ¢å¤æ¸¸æˆçŠ¶æ€
         Hero::resetHealth();
         int maxHealth = Hero::getMaxHealth();
         Hero::healHealth(health - Hero::getCurrentHealth());
         Hero::setCoins(gold);
-        Hero::setDeckInitialized(true);
 
-        // Ê¹ÓÃĞÂÌí¼ÓµÄ¾²Ì¬·½·¨²Ù×÷¿¨×é
-        Hero::clearDeckStatic();
+        // æ¸…ç©ºå¡ç»„å¹¶æ·»åŠ å¡ç‰Œ
+        // å¦‚æœå‡è®¾ Hero ç±»å·²ç»æœ‰é™æ€æ–¹æ³•æ“ä½œå¡ç»„
+        Hero::clearDeckStatic();  // å‡è®¾è¿™æ˜¯é™æ€æ–¹æ³•
         for (const auto& card : deck) {
-            Hero::addCardToDeckStatic(card);
+            Hero::addCardToDeckStatic(card);  // å‡è®¾è¿™æ˜¯é™æ€æ–¹æ³•
         }
 
-    
+        // æ¢å¤åœ°å›¾çŠ¶æ€
+        MyGame::Map::currentLayer = currentMapId;
+        MyGame::Map::currentRoom = currentLevel;
 
-        // ´´½¨µØÍ¼³¡¾°
+        // æ¢å¤æ‰€æœ‰é™æ€åœ°å›¾æ•°æ®
+        MyGame::staticMapInfo = mapInfo;
+        MyGame::staticConnectionInfo = connectionInfo;
+        MyGame::maxAccessibleLayer = maxLayer;
+        MyGame::currentRoomPosition = currentRoomPos;
+        MyGame::currentRoomType = roomType;
+        MyGame::roomCompleted = completed;
+
+        // åˆ‡æ¢åˆ°åœ°å›¾åœºæ™¯
         auto mapScene = MyGame::Map::createScene();
-
-        // µØÍ¼³¡¾°³õÊ¼»¯ºó£¬»ñÈ¡MapÊµÀı²¢ÉèÖÃÆä³ÉÔ±±äÁ¿
-        auto mapLayer = dynamic_cast<MyGame::Map*>(mapScene->getChildByName("MapLayer"));
-        if (mapLayer) {
-            // ÉèÖÃµØÍ¼²ã¼¶ºÍ·¿¼ä
-            MyGame::Map::currentLayer = currentMapId;
-            MyGame::Map::currentRoom = currentLevel;
-        }
-
         Director::getInstance()->replaceScene(TransitionFade::create(1.0f, mapScene));
     }
-
 }
+

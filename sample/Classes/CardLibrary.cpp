@@ -111,7 +111,7 @@ namespace CardLibrary {
     std::vector<Card> getStarterDeck() {
         std::vector<Card> starterDeck;
 
-        // Add 5 "Strike" cards
+        /*Add 5 "Strike" cards*/
         for (int i = 0; i < 5; i++) {
             starterDeck.push_back(Card("Strike", Card::Type::Attack, 1, "Deal 6 damage", "cardBackground.jpg", 6, 0));
         }
@@ -121,6 +121,7 @@ namespace CardLibrary {
             starterDeck.push_back(Card("Defend", Card::Type::Skill, 1, "Gain 5 Block", "cardBackground.jpg", 0, 5));
         }
 
+        //击杀怪物卡牌
         starterDeck.push_back(Card("DEBUG KILL", Card::Type::Attack, 0, "KILL THE ENEMY", "cardBackground.jpg", 9999, 0));
 
         // Add 1 "Bash" card

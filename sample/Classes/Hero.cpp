@@ -17,6 +17,16 @@ int Hero::getMaxHealth()
 {
     return heroMaxHealth;
 }
+// 在Hero.cpp中实现这个静态方法
+void Hero::addCardToDeckStatic(const Card& card)
+{
+    _deck.push_back(card);
+}
+
+void Hero::clearDeckStatic()
+{
+    _deck.clear();
+}
 
 // 增加最大生命值上限
 void Hero::increaseMaxHealth(int amount)
@@ -169,8 +179,9 @@ bool Hero::init(const std::string& filename)
     // 使用角色生命值初始化成员
     _health = heroHealth;
 
-    // 创建默认的卡组
-    createDefaultDeck();
+    if (_deck.empty()) {
+        createDefaultDeck();
+    }
 
     // 初始化英雄实例状态标签
     initStatusDisplay();
@@ -221,7 +232,7 @@ void Hero::addCardToDeck(const Card& card)
 // 获取卡组
 const std::vector<Card>& Hero::getDeck()
 {
-    return _deck; // _deck 需要是静态成员变量
+    return _deck;
 }
 
 // 清空卡组
@@ -302,4 +313,3 @@ bool Hero::isDeckInitialized() const {
 void Hero::setDeckInitialized(bool initialized) {
     _isDeckInitialized = initialized;
 }
-

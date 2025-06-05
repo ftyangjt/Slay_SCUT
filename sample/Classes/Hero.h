@@ -8,77 +8,71 @@
 class Hero : public cocos2d::Sprite
 {
 public:
-    // Hero.h ÖĞÌí¼Ó
-    static void increaseMaxHealth(int amount); // Ôö¼Ó×î´óÉúÃüÖµÉÏÏŞ
-    static int getMaxHealth(); // »ñÈ¡µ±Ç°×î´óÉúÃüÖµÉÏÏŞ
+    // Hero.h ä¸­æ·»åŠ 
+    static void increaseMaxHealth(int amount); // å¢åŠ æœ€å¤§ç”Ÿå‘½å€¼ä¸Šé™
+    static int getMaxHealth(); // è·å–å½“å‰æœ€å¤§ç”Ÿå‘½å€¼ä¸Šé™
+    static void addCardToDeckStatic(const Card& card);
+    static void clearDeckStatic(); // å£°æ˜é™æ€æ¸…ç©ºå¡ç»„æ–¹æ³•
 
-    // ½¡¿µÏà¹Ø
-    static int getCurrentHealth(); // »ñÈ¡µ±Ç°½¡¿µÖµ
-    static void healHealth(int amount); // »Ö¸´Ö¸¶¨ÊıÁ¿µÄÉúÃüÖµ£¬²»³¬¹ıÉÏÏŞ
-    static const int MAX_HEALTH = 100; // ×î´óÉúÃüÖµ
-    static void resetHealth(); // ÖØÖÃ½¡¿µÖµ
+    // å¥åº·ç›¸å…³
+    static int getCurrentHealth(); // è·å–å½“å‰å¥åº·å€¼
+    static void healHealth(int amount); // æ¢å¤æŒ‡å®šæ•°é‡çš„ç”Ÿå‘½å€¼ï¼Œä¸è¶…è¿‡ä¸Šé™
+    static const int MAX_HEALTH = 100; // æœ€å¤§ç”Ÿå‘½å€¼
+    static void resetHealth(); // é‡ç½®å¥åº·å€¼
 
-    // ½ğ±ÒÏà¹Ø
-    static int getCoins(); // »ñÈ¡µ±Ç°½ğ±ÒÊıÁ¿
-    static void setCoins(int coins); // ÉèÖÃ½ğ±ÒÊıÁ¿
-    static void addCoins(int amount); // Ôö¼Ó½ğ±Ò
-    static void resetCoins(); // ÖØÖÃ½ğ±Ò
-    static const int INITIAL_COINS = 100; // ³õÊ¼½ğ±ÒÊıÁ¿
+    // é‡‘å¸ç›¸å…³
+    static int getCoins(); // è·å–å½“å‰é‡‘å¸æ•°é‡
+    static void setCoins(int coins); // è®¾ç½®é‡‘å¸æ•°é‡
+    static void addCoins(int amount); // å¢åŠ é‡‘å¸
+    static void resetCoins(); // é‡ç½®é‡‘å¸
+    static const int INITIAL_COINS = 100; // åˆå§‹é‡‘å¸æ•°é‡
 
-    // ×´Ì¬ÏÔÊ¾Ïà¹Ø - Ìí¼Ó¾²Ì¬·½·¨
-    static void updateStatusDisplayStatic(); // ¾²Ì¬·½·¨¸üĞÂ×´Ì¬ÏÔÊ¾
-    static void initStatusDisplay(); // ³õÊ¼»¯×´Ì¬ÏÔÊ¾
+    // çŠ¶æ€æ˜¾ç¤ºç›¸å…³ - æ·»åŠ é™æ€æ–¹æ³•
+    static void updateStatusDisplayStatic(); // é™æ€æ–¹æ³•æ›´æ–°çŠ¶æ€æ˜¾ç¤º
+    static void initStatusDisplay(); // åˆå§‹åŒ–çŠ¶æ€æ˜¾ç¤º
 
-    // ´´½¨Ö÷½ÇÊµÀı
+    // åˆ›å»ºä¸»è§’å®ä¾‹
     static Hero* create(const std::string& filename);
 
-    // ³õÊ¼»¯Ö÷½Ç
+    // åˆå§‹åŒ–ä¸»è§’
     bool init(const std::string& filename);
 
-    // ÉèÖÃºÍ»ñÈ¡Ö÷½ÇµÄÉúÃüÖµ
+    // è®¾ç½®å’Œè·å–ä¸»è§’çš„ç”Ÿå‘½å€¼
     void setHealth(int health);
     int getHealth() const;
 
-    // ÉèÖÃºÍ»ñÈ¡Ö÷½ÇµÄ·ÀÓùÖµ
+    // è®¾ç½®å’Œè·å–ä¸»è§’çš„é˜²å¾¡å€¼
     void setBlock(int block);
     int getBlock() const;
 
-    // ¿¨×é²Ù×÷½Ó¿Ú
+    // å¡ç»„æ“ä½œæ¥å£
     void addCardToDeck(const Card& card);
     static const std::vector<Card>& getDeck();
     void clearDeck();
-    // ³õÊ¼»¯Ä¬ÈÏ¿¨×é
+    // åˆå§‹åŒ–é»˜è®¤å¡ç»„
     void createDefaultDeck();
 
-    // Ğ§¹û²Ù×÷½Ó¿Ú
+    // æ•ˆæœæ“ä½œæ¥å£
     void addEffect(std::shared_ptr<Effect> effect);
     const std::vector<std::shared_ptr<Effect>>& getEffects() const;
-    void updateEffects(); // ¸üĞÂĞ§¹û£¬ÒÆ³ı³ÖĞøÊ±¼äÎª 0 µÄĞ§¹û
+    void updateEffects(); // æ›´æ–°æ•ˆæœï¼Œç§»é™¤æŒç»­æ—¶é—´ä¸º 0 çš„æ•ˆæœ
 
-    // ÊµÀı·½·¨×´Ì¬ÏÔÊ¾
+    // å®ä¾‹æ–¹æ³•çŠ¶æ€æ˜¾ç¤º
     void updateStatusDisplay();
 
-	// ÅĞ¶Ï¿¨×éÊÇ·ñÒÑ³õÊ¼»¯
-    bool isDeckInitialized() const; // ÅĞ¶Ï¿¨×éÊÇ·ñÒÑ³õÊ¼»¯
-   static void setDeckInitialized(bool initialized); // ÉèÖÃ¿¨×é³õÊ¼»¯×´Ì¬
-
-    static void clearDeckStatic() {
-        _deck.clear();
-    }
-
-    static void addCardToDeckStatic(const Card& card) {
-        _deck.push_back(card);
-    }
+	// åˆ¤æ–­å¡ç»„æ˜¯å¦å·²åˆå§‹åŒ–
+    bool isDeckInitialized() const; // åˆ¤æ–­å¡ç»„æ˜¯å¦å·²åˆå§‹åŒ–
+    void setDeckInitialized(bool initialized); // è®¾ç½®å¡ç»„åˆå§‹åŒ–çŠ¶æ€
 
 private:
-    int _health; // ÉúÃüÖµ
-    int _block; // ·ÀÓùÖµ
-    static std::vector<Card> _deck; // ¿¨×é
-    std::vector<std::shared_ptr<Effect>> _effects; // Ğ§¹û
-    cocos2d::Label* _statusLabel; // ×´Ì¬ÏÔÊ¾±êÇ©
+    int _health; // ç”Ÿå‘½å€¼
+    int _block; // é˜²å¾¡å€¼
+    static std::vector<Card> _deck; // å¡ç»„
+    std::vector<std::shared_ptr<Effect>> _effects; // æ•ˆæœ
+    cocos2d::Label* _statusLabel; // çŠ¶æ€æ˜¾ç¤ºæ ‡ç­¾
 
-    // Ìí¼Ó¾²Ì¬³ÉÔ±
-    static cocos2d::Label* s_statusLabel; // ¾²Ì¬×´Ì¬ÏÔÊ¾±êÇ©
+    // æ·»åŠ é™æ€æˆå‘˜
+    static cocos2d::Label* s_statusLabel; // é™æ€çŠ¶æ€æ˜¾ç¤ºæ ‡ç­¾
 };
 
 #endif // __HERO_H__

@@ -133,8 +133,8 @@ void DrawDeck::showDeck()
 void DrawDeck::createBackButton()
 {
     auto backButton = MenuItemImage::create(
-        "button.png",
-        "button_Selected.png",
+        "Back.png",
+        "Back.png",
         CC_CALLBACK_1(DrawDeck::backToFightingScene, this)
     );
     backButton->setScale(0.5f);
@@ -142,8 +142,8 @@ void DrawDeck::createBackButton()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     // 设置按钮位置在画面左下角
-    backButton->setPosition(Vec2(origin.x + backButton->getContentSize().width / 2,
-        origin.y + backButton->getContentSize().height / 2));
+    backButton->setPosition(Vec2(origin.x + backButton->getContentSize().width * 0.5f-300,
+        origin.y + backButton->getContentSize().height * 0.5f-600));
     auto buttonMenu = Menu::create(backButton, nullptr);
     buttonMenu->setPosition(Vec2::ZERO);
     this->addChild(buttonMenu, 4);

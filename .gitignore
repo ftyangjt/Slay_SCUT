@@ -5,3 +5,4 @@ sample/proj.android
 sample/proj.ios_mac
 sample/proj.linux
 sample/proj.win32/Debug.win32
+sample/proj.win32/Release.win32.zip

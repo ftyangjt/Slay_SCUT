@@ -84,6 +84,7 @@ private:
     bool _isCooldown = false; // 表示出牌是否处于冷却状态
 	bool _isEndTurnButtonEnabled = true; //表示结束回合按钮是否可用
 	bool _isDrawingCards = false; // 是否正在抽牌
+	bool _isAnimating = false; // 是否正在执行动画
     int _selectedCardIndex = -1; // -1 表示没有选中的卡牌
     int _currentCost;         // 当前可用费用
     std::vector<Card> _drawPile; // 抽牌堆

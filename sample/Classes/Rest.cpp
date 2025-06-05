@@ -1,6 +1,6 @@
 #include "Rest.h"
-#include "Map.h"  // Ìí¼Ó¶Ô Map ÀàµÄÒýÓÃ
-#include "Hero.h" // Ìí¼Ó¶Ô Hero ÀàµÄÒýÓÃ
+#include "Map.h"  // æ·»åŠ å¯¹ Map åœºæ™¯çš„å¼•ç”¨
+#include "Hero.h" // æ·»åŠ å¯¹ Hero ç±»çš„å¼•ç”¨
 
 USING_NS_CC;
 
@@ -18,145 +18,129 @@ namespace MyGame {
             return false;
         }
 
-        m_restoreUsed = false; // ³õÊ¼»¯»Ö¸´ÑªÁ¿±êÖ¾
-        m_increaseMaxHealthUsed = false; // ³õÊ¼»¯Ôö¼Ó×î´óÑªÁ¿±êÖ¾
-
         auto visibleSize = Director::getInstance()->getVisibleSize();
         auto origin = Director::getInstance()->getVisibleOrigin();
 
-        // ´´½¨±³¾°Í¼Æ¬
+        // æ·»åŠ ä¼‘æ¯åœºæ™¯èƒŒæ™¯å›¾ç‰‡
         auto background = Sprite::create("rest_background.png");
+        background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+        background->setScale(0.7f); // è®¾ç½®èƒŒæ™¯ç¼©æ”¾ä¸º0.53å€
         if (background)
         {
-
-            // »ñÈ¡±³¾°Í¼Æ¬Ô­Ê¼´óÐ¡
+            // èŽ·å–èƒŒæ™¯å›¾åƒçš„åŽŸå§‹å¤§å°
             Size originalSize = background->getContentSize();
 
-            // ¼ÆËãËõ·Å±ÈÀý£¬Ê¹±³¾°Í¼Æ¬ÍêÈ«¸²¸ÇÆÁÄ»
+            // è®¡ç®—ç¼©æ”¾æ¯”ä¾‹ï¼Œä½¿èƒŒæ™¯å›¾åƒå®Œå…¨è¦†ç›–å±å¹•
             float scaleX = visibleSize.width / originalSize.width;
             float scaleY = visibleSize.height / originalSize.height;
 
-            // Ñ¡Ôñ½Ï´óµÄËõ·Å±ÈÀý£¬È·±£±³¾°Í¼Æ¬ÍêÈ«¸²¸ÇÆÁÄ»
+            // é€‰æ‹©è¾ƒå¤§çš„ç¼©æ”¾æ¯”ä¾‹ä»¥ç¡®ä¿èƒŒæ™¯è¦†ç›–æ•´ä¸ªå±å¹•
             float scale = (scaleX > scaleY) ? scaleX : scaleY;
 
-            // Ó¦ÓÃËõ·Å
+            // åº”ç”¨ç¼©æ”¾
             background->setScale(scale);
 
-            // ÉèÖÃ±³¾°Í¼Æ¬Î»ÖÃÎªÆÁÄ»ÖÐÐÄ
+            // è®¾ç½®èƒŒæ™¯å›¾åƒä½ç½®åœ¨å±å¹•ä¸­å¿ƒ
             background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 
-            this->addChild(background, 0);  // ½«±³¾°Í¼Æ¬Ìí¼Óµ½³¡¾°µ×²ã
-
+            this->addChild(background, 0);  // å°†èƒŒæ™¯å›¾ç‰‡æ·»åŠ åˆ°æœ€åº•å±‚
         }
 
-        // ´´½¨"»Ö¸´"°´Å¥
+        // åˆ›å»º"æ¢å¤"æŒ‰é’®
         auto restoreItem = MenuItemImage::create(
-            "recover.jpg",  // Õý³£×´Ì¬µÄÍ¼Æ¬
-            "restore_selected.png",  // Ñ¡ÖÐ×´Ì¬µÄÍ¼Æ¬
+            "recover.png",  // æ­£å¸¸çŠ¶æ€çš„å›¾ç‰‡
+            "restore_selected.png",  // é€‰ä¸­çŠ¶æ€çš„å›¾ç‰‡
             CC_CALLBACK_1(Rest::menuRestoreCallback, this)
         );
         if (restoreItem)
         {
             restoreItem->setPosition(Vec2(
-
-                origin.x + visibleSize.width / 2 - 400,
+                origin.x + visibleSize.width / 2-400,
                 origin.y + visibleSize.height / 2
             ));
-            restoreItem->setScale(1.0);  // ÉèÖÃ°´Å¥´óÐ¡
-
+            restoreItem->setScale(0.5);  // è°ƒæ•´æŒ‰é’®å¤§å°
         }
 
-        // ´´½¨"·µ»Ø"°´Å¥
+        // åˆ›å»º"è¿”å›ž"æŒ‰é’®
         auto returnItem = MenuItemImage::create(
-            "up.jpg",  // Õý³£×´Ì¬µÄÍ¼Æ¬
-            "return_selected.png",  // Ñ¡ÖÐ×´Ì¬µÄÍ¼Æ¬
+            "up.png",  // æ­£å¸¸çŠ¶æ€çš„å›¾ç‰‡
+            "return_selected.png",  // é€‰ä¸­çŠ¶æ€çš„å›¾ç‰‡
             CC_CALLBACK_1(Rest::menuReturnCallback, this)
         );
         if (returnItem)
         {
             returnItem->setPosition(Vec2(
-
-                origin.x + visibleSize.width / 2 + 400,
+                origin.x + visibleSize.width / 2+400,
                 origin.y + visibleSize.height / 2
             ));
-            returnItem->setScale(1.0);  // ÉèÖÃ°´Å¥´óÐ¡
-
+            returnItem->setScale(0.4);  // è°ƒæ•´æŒ‰é’®å¤§å°
         }
 
-        // ´´½¨²Ëµ¥
-        auto menu = Menu::create(restoreItem, returnItem, nullptr);
-        menu->setPosition(Vec2::ZERO);
-        this->addChild(menu, 1);
+        // åˆ›å»ºèœå•
+        _menu = Menu::create(restoreItem, returnItem, nullptr);
+        _menu->setPosition(Vec2::ZERO);
+        this->addChild(_menu, 1);
 
         return true;
     }
 
     void Rest::menuRestoreCallback(Ref* pSender)
     {
-        if (!m_restoreUsed) {
-            // »Ö¸´Ó¢ÐÛ30µãÑªÁ¿
-            int healAmount = 30;
-            int oldHealth = Hero::getCurrentHealth();
-            Hero::healHealth(healAmount);
-            int actualHealed = Hero::getCurrentHealth() - oldHealth;
+        if (_menu) _menu->setEnabled(false); // ç¦ç”¨æ‰€æœ‰æŒ‰é’®
 
+        // æ¢å¤è‹±é›„30ç‚¹è¡€é‡
+        int healAmount = 30;
+        int oldHealth = Hero::getCurrentHealth();
+        Hero::healHealth(healAmount);
+        int actualHealed = Hero::getCurrentHealth() - oldHealth;
 
-            // ÏÔÊ¾»Ö¸´ÐÅÏ¢£¬ÏÔÊ¾Êµ¼Ê»Ö¸´µÄÑªÁ¿
-            std::string healText = "+" + std::to_string(actualHealed);
-            auto label = Label::createWithTTF(healText, "fonts/Marker Felt.ttf", 60);
-            // ÉèÖÃÎÄ×ÖÑÕÉ«ÎªÂÌÉ«
-            label->setTextColor(Color4B::GREEN);
-            label->setPosition(Vec2(Director::getInstance()->getVisibleSize().width / 2,
-                Director::getInstance()->getVisibleSize().height / 2 + 300));
-            label->setScale(3.0);
-            this->addChild(label, 1);
+        // æ˜¾ç¤ºæ¢å¤ä¿¡æ¯ï¼Œæ˜¾ç¤ºå®žé™…æ¢å¤çš„è¡€é‡
+        std::string healText = "+" + std::to_string(actualHealed);
+        auto label = Label::createWithTTF(healText, "fonts/Marker Felt.ttf", 60);
+        // è®¾ç½®æ–‡æœ¬é¢œè‰²ä¸ºç»¿è‰²
+        label->setTextColor(Color4B::GREEN);
+        label->setPosition(Vec2(Director::getInstance()->getVisibleSize().width / 2,
+            Director::getInstance()->getVisibleSize().height / 2 + 300));
+        label->setScale(3.0);
+        this->addChild(label, 1);
 
-
-            m_restoreUsed = true; // ±ê¼Ç»Ö¸´ÑªÁ¿²Ù×÷ÒÑÖ´ÐÐ
-
-            // ÑÓ³ÙÒ»¶ÎÊ±¼äºó·µ»ØµØÍ¼³¡¾°
-            this->runAction(Sequence::create(
-                DelayTime::create(2.0f),
-                CallFunc::create([]() {
-                    auto scene = Map::createScene();
-                    Director::getInstance()->replaceScene(scene);
-                    }),
-                nullptr
-            ));
-        }
+        // å»¶è¿Ÿä¸€æ®µæ—¶é—´åŽè¿”å›žåœ°å›¾åœºæ™¯
+        this->runAction(Sequence::create(
+            DelayTime::create(2.0f),
+            CallFunc::create([]() {
+                auto scene = Map::createScene();
+                Director::getInstance()->replaceScene(scene);
+                }),
+            nullptr
+        ));
     }
 
     void Rest::menuReturnCallback(Ref* pSender)
     {
-        if (!m_increaseMaxHealthUsed) {
-            // Ôö¼Ó10µã×î´óÑªÁ¿ÉÏÏÞ
-            Hero::increaseMaxHealth(10);
+        if (_menu) _menu->setEnabled(false); // ç¦ç”¨æ‰€æœ‰æŒ‰é’®
 
+        // å¢žåŠ 10ç‚¹æœ€å¤§è¡€é‡ä¸Šé™
+        Hero::increaseMaxHealth(10);
 
-            // ÏÔÊ¾Ôö¼ÓµÄ×î´óÑªÁ¿ÐÅÏ¢
-            std::string maxHealthText = "+10 Max HP";
-            auto label = Label::createWithTTF(maxHealthText, "fonts/Marker Felt.ttf", 60);
-            // ÉèÖÃÎÄ×ÖÑÕÉ«Îª½ðÉ«
-            label->setTextColor(Color4B(255, 215, 0, 255));  // ½ðÉ« (255, 215, 0)
-            label->setPosition(Vec2(Director::getInstance()->getVisibleSize().width / 2,
-                Director::getInstance()->getVisibleSize().height / 2 + 300));
-            label->setScale(3.0);
-            this->addChild(label, 1);
+        // æ˜¾ç¤ºå¢žåŠ çš„æœ€å¤§è¡€é‡ä¿¡æ¯
+        std::string maxHealthText = "+10 Max HP";
+        auto label = Label::createWithTTF(maxHealthText, "fonts/Marker Felt.ttf", 60);
+        // è®¾ç½®æ–‡æœ¬é¢œè‰²ä¸ºé‡‘è‰²
+        label->setTextColor(Color4B(255, 215, 0, 255));  // é‡‘è‰² (255, 215, 0)
+        label->setPosition(Vec2(Director::getInstance()->getVisibleSize().width / 2,
+            Director::getInstance()->getVisibleSize().height / 2 + 300));
+        label->setScale(3.0);
+        this->addChild(label, 1);
 
-
-            m_increaseMaxHealthUsed = true; // ±ê¼ÇÔö¼Ó×î´óÑªÁ¿²Ù×÷ÒÑÖ´ÐÐ
-
-            // ÑÓ³ÙÒ»¶ÎÊ±¼äºó·µ»ØµØÍ¼³¡¾°
-            this->runAction(Sequence::create(
-                DelayTime::create(2.0f),
-                CallFunc::create([]() {
-                    auto scene = Map::createScene();
-                    Director::getInstance()->replaceScene(scene);
-                    }),
-                nullptr
-            ));
-        }
+        // å»¶è¿Ÿä¸€æ®µæ—¶é—´åŽè¿”å›žåœ°å›¾åœºæ™¯
+        this->runAction(Sequence::create(
+            DelayTime::create(2.0f),
+            CallFunc::create([]() {
+                auto scene = Map::createScene();
+                Director::getInstance()->replaceScene(scene);
+                }),
+            nullptr
+        ));
     }
-
 
 } // namespace MyGame

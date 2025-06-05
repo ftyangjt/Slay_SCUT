@@ -4,6 +4,7 @@
 #include "Map.h"
 #include "Hero.h"
 #include "cocos2d.h"
+#include "CardLibrary.h"
 
 USING_NS_CC;
 
@@ -26,30 +27,33 @@ namespace MyGame {
         float scale;
     };
 
+    // 修改 Shop.cpp 中的静态商品定义部分，添加三张从卡牌库随机选取的卡牌
+// 在 shopItems 定义处添加以下内容
+
     // 定义商店商品
     static std::vector<ShopItem> shopItems = {
-        {"Life potion", 20, "life_potion.jpg", "Restore 20 health points", []() { Hero::healHealth(20); }, false, 0.5f},
-        // 修改 Shop.cpp 中的商品定义部分，替换神秘草莓的效果函数
-        {"Mysterious strawberry", 100, "strawberry.jpg", "Increase maximum health by 10", []() {
-            Hero::increaseMaxHealth(10);
+            {"Life potion", 20, "life_potion.png", "Restore 20 health points", []() { Hero::healHealth(20); }, false, 0.30f},
+            // 修改 Shop.cpp 中的商品定义部分，替换神秘草莓的效果函数
+            {"Mysterious strawberry", 100, "strawberry.jpg", "Increase maximum health by 10", []() {
+                Hero::increaseMaxHealth(10);
 
-            // 显示效果信息
-            auto director = Director::getInstance();
-            auto msg = Label::createWithTTF("Max Health increased by 10!",
-                "fonts/Marker Felt.ttf", 30);
-            msg->setColor(Color3B(255, 105, 180)); // 粉色
+                // 显示效果信息
+                auto director = Director::getInstance();
+                auto msg = Label::createWithTTF("Max Health increased by 10!",
+                    "fonts/Marker Felt.ttf", 30);
+                msg->setColor(Color3B(255, 105, 180)); // 粉色
 
-            Size winSize = director->getWinSize();
-            msg->setPosition(Vec2(winSize.width / 2, winSize.height / 2 + 250));
+                Size winSize = director->getWinSize();
+                msg->setPosition(Vec2(winSize.width / 2, winSize.height / 2 + 250));
 
-            director->getRunningScene()->addChild(msg, 2001);
+                director->getRunningScene()->addChild(msg, 2001);
 
-            // 2秒后淡出提示
-            auto fadeOut = FadeOut::create(2.0f);
-            auto remove = RemoveSelf::create();
-            msg->runAction(Sequence::create(fadeOut, remove, nullptr));
-        }, false, 0.5f},
-        {"Coin bag", 50, "coin_bag.png", "randomly gain 0-100 coins", []() {
+                // 2秒后淡出提示
+                auto fadeOut = FadeOut::create(2.0f);
+                auto remove = RemoveSelf::create();
+                msg->runAction(Sequence::create(fadeOut, remove, nullptr));
+            }, false, 0.65f},
+            {"Coin bag", 50, "coin_bag.png", "randomly gain 0-100 coins", []() {
             // 使用cocos2d-x的随机数函数
             int randomCoins = cocos2d::random(0, 100);
             Hero::addCoins(randomCoins);
@@ -57,7 +61,7 @@ namespace MyGame {
             // 显示获得的金币数量
             auto director = Director::getInstance();
             auto coinMsg = Label::createWithTTF(StringUtils::format("Gain %d coins!", randomCoins),
-                "fonts/Marker Felt.ttf", 30);
+                "fonts/Marker Felt.ttf", 60);
             coinMsg->setColor(Color3B(255, 215, 0)); // 金色
 
             // 修正位置计算方式
@@ -70,8 +74,80 @@ namespace MyGame {
             auto fadeOut = FadeOut::create(2.0f);
             auto remove = RemoveSelf::create();
             coinMsg->runAction(Sequence::create(fadeOut, remove, nullptr));
-        }, false, 0.25f},
-        {"神秘卷轴", 60, "mystery_scroll.png", "习得特殊技能", []() { /* 特殊技能效果 */ }, false, 0.7f}
+        }, false, 0.250f},
+        // 添加三张随机卡牌，价格统一为80
+        {"Random Card 1", 80, "cardBackground.jpg", "A random card from the library", []() {
+            // 获取一张随机非初始非诅咒卡牌
+            Card randomCard = CardLibrary::getRandomNonInitialNonCurseCard();
+            std::vector<Card> currentDeck = Hero::getDeck();
+            // 将卡牌添加到英雄牌库
+            Hero::addCardToDeckStatic(randomCard);
+
+            // 显示获得卡牌的信息
+            auto director = Director::getInstance();
+            auto cardMsg = Label::createWithTTF(StringUtils::format("Added %s to your deck!",
+                randomCard.getName().c_str()),
+                "fonts/Marker Felt.ttf", 50);
+            cardMsg->setColor(Color3B(100, 200, 255)); // 淡蓝色
+
+            Size winSize = director->getWinSize();
+            cardMsg->setPosition(Vec2(winSize.width / 2, winSize.height / 2 + 50));
+
+            director->getRunningScene()->addChild(cardMsg, 2001);
+
+            // 2秒后淡出提示
+            auto fadeOut = FadeOut::create(2.0f);
+            auto remove = RemoveSelf::create();
+            cardMsg->runAction(Sequence::create(fadeOut, remove, nullptr));
+        }, false, 0.40f},
+        {"Random Card 2", 80, "cardBackground.jpg", "A random card from the library", []() {
+            // 获取一张随机非初始非诅咒卡牌
+            Card randomCard = CardLibrary::getRandomNonInitialNonCurseCard();
+            std::vector<Card> currentDeck = Hero::getDeck();
+            // 将卡牌添加到英雄牌库
+            Hero::addCardToDeckStatic(randomCard);
+
+            // 显示获得卡牌的信息
+            auto director = Director::getInstance();
+            auto cardMsg = Label::createWithTTF(StringUtils::format("Added %s to your deck!",
+                randomCard.getName().c_str()),
+                "fonts/Marker Felt.ttf", 50);
+            cardMsg->setColor(Color3B(100, 200, 255)); // 淡蓝色
+
+            Size winSize = director->getWinSize();
+            cardMsg->setPosition(Vec2(winSize.width / 2, winSize.height / 2 + 50));
+
+            director->getRunningScene()->addChild(cardMsg, 2001);
+
+            // 2秒后淡出提示
+            auto fadeOut = FadeOut::create(2.0f);
+            auto remove = RemoveSelf::create();
+            cardMsg->runAction(Sequence::create(fadeOut, remove, nullptr));
+        }, false, 0.40f},
+        {"Random Card 3", 80, "cardBackground.jpg", "A random card from the library", []() {
+            // 获取一张随机非初始非诅咒卡牌
+            Card randomCard = CardLibrary::getRandomNonInitialNonCurseCard();
+            std::vector<Card> currentDeck = Hero::getDeck();
+            // 将卡牌添加到英雄牌库
+            Hero::addCardToDeckStatic(randomCard);
+
+            // 显示获得卡牌的信息
+            auto director = Director::getInstance();
+            auto cardMsg = Label::createWithTTF(StringUtils::format("Added %s to your deck!",
+                randomCard.getName().c_str()),
+                "fonts/Marker Felt.ttf", 50);
+            cardMsg->setColor(Color3B(100, 200, 255)); // 淡蓝色
+
+            Size winSize = director->getWinSize();
+            cardMsg->setPosition(Vec2(winSize.width / 2, winSize.height / 2 + 50));
+
+            director->getRunningScene()->addChild(cardMsg, 2001);
+
+            // 2秒后淡出提示
+            auto fadeOut = FadeOut::create(2.0f);
+            auto remove = RemoveSelf::create();
+            cardMsg->runAction(Sequence::create(fadeOut, remove, nullptr));
+        }, false, 0.40f},
     };
 
 
@@ -97,29 +173,67 @@ namespace MyGame {
         _hoveredCard = nullptr;
         _mouseListener = nullptr;
 
-        // 背景设置 - 增加容错处理
-        auto background = Sprite::create("store_background.jpg");
-        if (background) {
-            background->setPosition(winSize / 2);
-            background->setScale(std::max(
-                winSize.width / background->getContentSize().width,
-                winSize.height / background->getContentSize().height
+        // 创建两个背景图片
+        auto background1 = Sprite::create("store_background1.png");
+        auto background2 = Sprite::create("store_background2.png");
+
+        // 检查两个背景图片是否都加载成功
+        if (background1 && background2) {
+            // 设置第一张背景图片
+            background1->setPosition(winSize / 2);
+            background1->setScale(std::max(
+                winSize.width / background1->getContentSize().width,
+                winSize.height / background1->getContentSize().height
             ));
-            this->addChild(background);
+            this->addChild(background1, 0, "Background1");
+
+            // 设置第二张背景图片（初始时不可见）
+            background2->setPosition(winSize / 2);
+            background2->setScale(std::max(
+                winSize.width / background2->getContentSize().width,
+                winSize.height / background2->getContentSize().height
+            ));
+            background2->setOpacity(0); // 设为完全透明
+            this->addChild(background2, 0, "Background2");
+
+            // 1秒后切换背景图片
+            this->runAction(Sequence::create(
+                DelayTime::create(1.0f),
+                CallFunc::create([=]() {
+                    // 第一张背景淡出
+                    background1->runAction(FadeOut::create(0.5f));
+                    // 第二张背景淡入
+                    background2->runAction(FadeIn::create(0.5f));
+                    }),
+                nullptr
+            ));
         }
         else {
-            log("Background image missing! Using a default color background.");
-            // 使用颜色层作为备选背景
-            auto colorBg = LayerColor::create(Color4B(32, 32, 64, 255), winSize.width, winSize.height);
-            this->addChild(colorBg);
+            // 如果至少有一张背景图片加载失败，则尝试使用单张背景图片
+            auto background = Sprite::create("store_background.png");
+            if (background) {
+                background->setPosition(winSize / 2);
+                background->setScale(std::max(
+                    winSize.width / background->getContentSize().width,
+                    winSize.height / background->getContentSize().height
+                ));
+                this->addChild(background);
+            }
+            else {
+                log("Background images missing! Using a default color background.");
+                // 使用颜色层作为备选背景
+                auto colorBg = LayerColor::create(Color4B(32, 32, 64, 255), winSize.width, winSize.height);
+                this->addChild(colorBg);
+            }
         }
+
 
         // 添加商人（可点击）
         auto merchant = Sprite::create("shopman.jpg");
         if (merchant) {
-            merchant->setPosition(Vec2(winSize.width * 0.9f, winSize.height * 0.35f));
+            merchant->setPosition(Vec2(winSize.width * 0.9f - 400, winSize.height * 0.35f + 120));
             merchant->setName("Merchant"); // 给节点命名
-            this->addChild(merchant, 1);   // 确保在背景上层
+            this->addChild(merchant, -1);   // 确保在背景上层
 
             // 启用触摸事件
             auto listener = EventListenerTouchOneByOne::create();
@@ -137,7 +251,7 @@ namespace MyGame {
                 };
             _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, merchant);
             // 在正常商人显示时
-            auto hintLabel = Label::createWithTTF("Click the shopman\nto see the products", "fonts/Marker Felt.ttf", 100);
+            auto hintLabel = Label::createWithTTF(" ", "fonts/Marker Felt.ttf", 100);
             hintLabel->setColor(Color3B(255, 215, 0)); // 金色
             hintLabel->setAlignment(TextHAlignment::CENTER); // 文本居中对齐
             hintLabel->setPosition(Vec2(winSize.width * 0.5f, // 放在屏幕中央
@@ -180,34 +294,13 @@ namespace MyGame {
             this->addChild(hintLabel, 2);
         }
 
-        // 添加金币显示
-        auto coinIcon = Sprite::create("coin_icon.png");
-        if (!coinIcon) {
-            // 如果图像缺失，创建替代图形
-            coinIcon = Sprite::create();
-            auto coinDrawNode = DrawNode::create();
-            coinDrawNode->drawSolidCircle(Vec2::ZERO, 15, 0, 20, Color4F(1.0f, 0.85f, 0.0f, 1.0f));
-            coinIcon->addChild(coinDrawNode);
-        }
-        coinIcon->setPosition(Vec2(80, winSize.height - 40));
-        coinIcon->setScale(0.5f);
-        this->addChild(coinIcon, 5);
-
-        // 显示当前金币数量
-        auto coinLabel = Label::createWithTTF(StringUtils::format("Gold: %d", Hero::getCoins()),
-            "fonts/Marker Felt.ttf", 30);
-        coinLabel->setColor(Color3B(255, 215, 0)); // 金色
-        coinLabel->setPosition(Vec2(150, winSize.height - 40));
-        coinLabel->setName("CoinLabel");
-        this->addChild(coinLabel, 5);
-
         // 创建"返回"按钮 - 修复类型不匹配问题
         // 使用基类指针来接收不同类型的菜单项
         MenuItem* returnItem = nullptr;
 
         // 尝试使用图片按钮
         auto imageButton = MenuItemImage::create(
-            "back.jpg",
+            "back.png",
             "return_selected.png",
             [](Ref* sender) {
                 // 返回地图场景
@@ -256,24 +349,17 @@ namespace MyGame {
             hintLabel->setVisible(false);
         }
 
-        // 更新金币显示
-        auto coinLabel = this->getChildByName("CoinLabel");
-        if (coinLabel) {
-            static_cast<Label*>(coinLabel)->setString(StringUtils::format("Gold: %d", Hero::getCoins()));
-        }
-
         // 移除可能已存在的商品界面
         this->removeChildByName("GoodsColumn");
 
         // 创建商品界面背景
         Node* goods = nullptr;
-        auto goodsSprite = Sprite::create("column.jpg");
-
+        auto goodsSprite = Sprite::create("column.png");
         if (goodsSprite) {
             goodsSprite->setName("GoodsColumn");
             // 放大商品背景以适应商品横向排列
             goodsSprite->setPosition(Vec2(winSize.width * 0.5f, winSize.height / 2));
-            goodsSprite->setScale(3.0f); // 增加背景尺寸以容纳横向排列的商品
+            goodsSprite->setScale(0.6f); // 增加背景尺寸以容纳横向排列的商品
             this->addChild(goodsSprite, 999);
             goods = goodsSprite;
         }
@@ -282,6 +368,7 @@ namespace MyGame {
             // 创建一个默认的商品列表背景
             auto goodsNode = DrawNode::create();
             goodsNode->setName("GoodsColumn");
+            goodsNode->setScale(0.25f);
             goodsNode->drawSolidRect(
                 Vec2(-winSize.width * 0.45f, -winSize.height * 0.35f),
                 Vec2(winSize.width * 0.45f, winSize.height * 0.35f),
@@ -316,10 +403,10 @@ namespace MyGame {
         const float HOVER_SCALE_MULTIPLIER = 1.2f; // 悬停时的放大倍数（相对于每个商品自己的缩放比例）
         const int ITEMS_PER_ROW = 3;    // 每行3个商品
         const int ROWS = 2;             // 2行商品
-        const float HORIZONTAL_SPACING = 500.0f; // 水平间距
-        const float VERTICAL_SPACING = 280.0f;   // 垂直间距
+        const float HORIZONTAL_SPACING = 650.0f; // 水平间距增加到650（原来是500）
+        const float VERTICAL_SPACING = 450.0f;
         const float START_X = goods->getPosition().x - HORIZONTAL_SPACING; // 起始X坐标
-        const float START_Y = goods->getPosition().y + VERTICAL_SPACING * 0.5f; // 起始Y坐标
+        const float START_Y = goods->getPosition().y + VERTICAL_SPACING * 0.7f; // 起始Y坐标
 
         // 获取可显示的未购买商品
         std::vector<int> availableItems;
@@ -382,25 +469,27 @@ namespace MyGame {
             card->setUserData(itemData); // 存储商品索引和缩放比例
             card->setName("Item_" + std::to_string(itemIndex)); // 设置名称用于标识
 
-            // 添加商品名称
-            auto nameLabel = Label::createWithTTF(shopItems[itemIndex].name, "fonts/Marker Felt.ttf", 60);
-            nameLabel->setPosition(Vec2(0, 85));
-            nameLabel->setColor(Color3B::BLACK);
+            // 添加商品名称 - 针对特定商品增加字体大小
+            auto nameLabel = Label::createWithTTF(shopItems[itemIndex].name, "fonts/Marker Felt.ttf",
+                (shopItems[itemIndex].name == "Life potion" || shopItems[itemIndex].name == "Coin bag") ? 120 : 60);
+            nameLabel->setPosition(Vec2(0, 200));
+            nameLabel->setColor(Color3B::RED);
             card->addChild(nameLabel);
 
-            // 添加商品价格
+            // 添加商品价格 - 针对特定商品增加字体大小
             auto priceLabel = Label::createWithTTF(StringUtils::format("%d Gold", shopItems[itemIndex].price),
-                "fonts/Marker Felt.ttf", 60);
-            priceLabel->setPosition(Vec2(0, -85));
-            priceLabel->setColor(Color3B::BLACK); // 金色
+                "fonts/Marker Felt.ttf",
+                (shopItems[itemIndex].name == "Life potion" || shopItems[itemIndex].name == "Coin bag") ? 120 : 60);
+            priceLabel->setPosition(Vec2(0, 50));
+            priceLabel->setColor(Color3B::RED);
             card->addChild(priceLabel);
 
-            // 添加商品描述
-            auto descLabel = Label::createWithTTF(shopItems[itemIndex].description, "fonts/Marker Felt.ttf", 50);
-            descLabel->setPosition(Vec2(0, -150));
-            descLabel->setColor(Color3B::BLACK);
+            // 添加商品描述 - 针对特定商品增加字体大小
+            auto descLabel = Label::createWithTTF(shopItems[itemIndex].description, "fonts/Marker Felt.ttf",
+                (shopItems[itemIndex].name == "Life potion" || shopItems[itemIndex].name == "Coin bag") ? 120 : 50);
+            descLabel->setPosition(Vec2(0, -50));
+            descLabel->setColor(Color3B::RED);
             card->addChild(descLabel);
-
             this->addChild(card, 1000);
             _cards.push_back(card);
 
@@ -453,12 +542,6 @@ namespace MyGame {
 
                     // 标记商品为已购买
                     shopItems[itemIndex].purchased = true;
-
-                    // 更新金币显示
-                    auto coinLabel = this->getChildByName("CoinLabel");
-                    if (coinLabel) {
-                        static_cast<Label*>(coinLabel)->setString(StringUtils::format("Gold: %d", Hero::getCoins()));
-                    }
 
                     // 显示购买成功提示
                     auto successMsg = Label::createWithTTF("Bought successfully", "fonts/Marker Felt.ttf", 40);
@@ -615,7 +698,7 @@ namespace MyGame {
 
         if (closeButton) {
             // 将关闭按钮放在商品列表底部中央
-            closeButton->setPosition(Vec2(goods->getPosition().x, goods->getPosition().y - winSize.height * 0.25f));
+            closeButton->setPosition(Vec2(goods->getPosition().x, goods->getPosition().y - winSize.height * 0.25f - 100));
 
             auto menu = Menu::create(closeButton, nullptr);
             menu->setPosition(Vec2::ZERO);
