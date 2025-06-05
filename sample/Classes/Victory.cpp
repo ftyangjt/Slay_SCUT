@@ -1,6 +1,7 @@
 ﻿#include "Victory.h"
 #include "SimpleAudioEngine.h"
-#include "MainMenu.h" // 导入主菜单场景，根据实际情况调整文件名
+#include "MainMenu.h"
+#include "Hero.h"
 
 USING_NS_CC;
 
@@ -193,7 +194,10 @@ namespace MyGame {
         if (_scrollNode) {
             _scrollNode->stopAllActions();
         }
-
+        // 清空卡组并重新初始化
+        Hero heroInstance;
+        heroInstance.setDeckInitialized(false); // 重置卡组初始化标志
+        Hero::clearDeckStatic();         // 清空卡组
         // 切换回主菜单场景
         auto menuScene = MainMenu::createScene();
         Director::getInstance()->replaceScene(TransitionFade::create(2.0f, menuScene, Color3B(0, 0, 0)));
