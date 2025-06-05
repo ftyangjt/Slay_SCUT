@@ -1,2 +1,0 @@
-C:\game\Slay_SCUT\sample\proj.win32\Release.win32\sample.exe
-C:\game\Test\Slay_SCUT\sample\proj.win32\Release.win32\sample.exe

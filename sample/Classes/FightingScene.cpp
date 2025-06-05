@@ -957,13 +957,9 @@ void FightingScene::applyEffects(int& damage, int& block, const std::vector<std:
             switch (buff->getType())
             {
             case Effect::Type::Strength:
-                if (buff->getLevel() > 0) {
-                    // 增加自己力量
-                    _hero->addEffect(effect);
-                }
-                else if (buff->getLevel() < 0) {
-                    // 减少敌人力量
-                    _monster->addEffect(effect);
+                // 如果是技能牌，跳过力量效果的应用
+                if (cardType != Card::Type::Skill) {
+                    damage += buff->getLevel(); // 力量效果增加攻击力
                 }
                 break;
             default:
@@ -975,41 +971,31 @@ void FightingScene::applyEffects(int& damage, int& block, const std::vector<std:
             switch (debuff->getType())
             {
             case Effect::Type::Vulnerable:
-                _monster->addEffect(effect);
+                if (isTargetMonster) {
+                    damage = static_cast<int>(damage * 1.5); // 易伤效果增加伤害
+                }
                 break;
             default:
                 break;
             }
         }
     }
-
 }
 
-// 应用卡牌效果（攻击、格挡、添加BUFF）
+
 void FightingScene::applyCardEffects(const Card& card)
 {
     int damage = card.getAttack();
     int block = card.getBlock();
 
-    // 应用英雄的效果
-    // 例如，如果有力量效果，增加攻击伤害
+    // 应用英雄的效果（如力量），传入卡牌类型
     applyEffects(damage, block, _hero->getEffects(), card.getType(), false);
 
-    // 只对怪物的debuff（如易伤）生效，不要把怪物的buff（如力量）加到damage上
-    for (const auto& effect : _monster->getEffects()) {
-        if (auto debuff = dynamic_cast<Debuff*>(effect.get())) {
-            switch (debuff->getType()) {
-            case Effect::Type::Vulnerable:
-                damage = static_cast<int>(damage * 1.5);
-                break;
-            default:
-                break;
-            }
-        }
-    }
+    // 应用怪物的效果（如易伤），传入卡牌类型
+    applyEffects(damage, block, _monster->getEffects(), card.getType(), true);
 
+    // 处理卡牌自带的效果
     std::vector<std::shared_ptr<Effect>> effects = card.createEffects();
-
     for (const auto& effect : effects)
     {
         if (auto buff = dynamic_cast<Buff*>(effect.get()))
@@ -1028,7 +1014,7 @@ void FightingScene::applyCardEffects(const Card& card)
             switch (debuff->getType())
             {
             case Effect::Type::Vulnerable:
-                _monster->addEffect(effect);
+                _monster->addEffect(effect); // 易伤效果应用到怪物
                 break;
             default:
                 break;
@@ -1036,108 +1022,71 @@ void FightingScene::applyCardEffects(const Card& card)
         }
     }
 
-    // 处理特殊卡牌效果 - 修改为处理多种特殊效果
-
-    // 处理抽牌效果
+    // 处理特殊效果
     if (card.hasSpecialEffect(Card::SpecialEffect::DrawCard)) {
         int cardsToDraw = card.getSpecialEffectValue(Card::SpecialEffect::DrawCard);
-        CCLOG("Drawing %d card(s) from special effect", cardsToDraw);
         for (int i = 0; i < cardsToDraw; i++) {
-            this->runAction(cocos2d::Sequence::create(
-                cocos2d::DelayTime::create(0.3f + i * 0.2f),
-                cocos2d::CallFunc::create([this]() {
-                    this->drawCard();
-                    }),
+            this->runAction(Sequence::create(
+                DelayTime::create(0.3f + i * 0.2f),
+                CallFunc::create([this]() { this->drawCard(); }),
                 nullptr
             ));
         }
     }
 
-    // 处理失去生命效果
     if (card.hasSpecialEffect(Card::SpecialEffect::LoseHealth)) {
         int healthLoss = card.getSpecialEffectValue(Card::SpecialEffect::LoseHealth);
-        CCLOG("Losing %d health from card effect", healthLoss);
-
-        // 播放英雄受击动画
+        _hero->setHealth(_hero->getHealth() - healthLoss);
         playHeroHitAnimation();
-
-        // 减少英雄生命值
-        int currentHealth = _hero->getHealth();
-        int newHealth = currentHealth - healthLoss;
-
-        // 设置新的生命值
-        _hero->setHealth(newHealth);
-
-        // 更新UI
         updateHealthAndBlockLabels();
-
-        // 检查战斗是否结束（玩家是否死亡）
         checkBattleEnd();
     }
 
-    // 处理获得能量效果
     if (card.hasSpecialEffect(Card::SpecialEffect::GainEnergy)) {
         int energyGain = card.getSpecialEffectValue(Card::SpecialEffect::GainEnergy);
-        CCLOG("Gaining %d energy from card effect", energyGain);
-
-        // 增加当前能量
         _currentCost += energyGain;
-
-        // 更新能量显示
         updateCostLabel();
     }
 
-    // 处理弃牌效果
     if (card.hasSpecialEffect(Card::SpecialEffect::DiscardCard)) {
         int cardsToDiscard = card.getSpecialEffectValue(Card::SpecialEffect::DiscardCard);
-        CCLOG("Discarding %d card(s) from special effect", cardsToDiscard);
-
-        // 实现弃牌逻辑 - 可以让玩家选择弃哪些牌，或随机弃牌
-        // 这里简单实现为弃掉手牌中的前N张，如果有足够的牌
         for (int i = 0; i < cardsToDiscard && !_cards.empty(); i++) {
             discardCard(0); // 弃掉第一张牌
         }
     }
 
-    updateBuffLabels();
-
-    // 处理怪物的格挡
+    // 更新怪物的格挡
     int monsterBlock = _monster->getBlock();
-
-    if (monsterBlock > 0)
-    {
-        if (monsterBlock >= damage)
-        {
+    if (monsterBlock > 0) {
+        if (monsterBlock >= damage) {
             _monster->setBlock(monsterBlock - damage);
             damage = 0;
         }
-        else
-        {
+        else {
             damage -= monsterBlock;
-          
             _monster->setBlock(0);
         }
     }
 
-    // 处理怪物的生命值
-    
-    int newHealth = _monster->getHealth() - damage;
+    // 更新怪物的生命值
     if (damage > 0) {
-        playMonsterHitAnimation(); // 如果造成了伤害，播放怪物受击动画
-    }
-    _monster->setHealth(newHealth);
-
-    // 处理英雄的格挡
-    if (block > 0)
-    {
-        int newBlock = _hero->getBlock() + block;
-        _hero->setBlock(newBlock);
+        playMonsterHitAnimation();
+        _monster->setHealth(_monster->getHealth() - damage);
     }
 
+    // 更新英雄的格挡
+    if (block > 0) {
+        _hero->setBlock(_hero->getBlock() + block);
+    }
+
+    // 更新UI
     updateHealthAndBlockLabels();
+    updateBuffLabels();
+    checkBattleEnd();
 }
 
-// 打出卡牌
+
+
 // 打出卡牌
 void FightingScene::playCard(int index)
 {
@@ -1636,13 +1585,13 @@ void FightingScene::showCardSelectionWithCallback(const std::vector<Card>& cards
     this->addChild(background, 10);
 
     // 提示文字
-    auto tipLabel = Label::createWithTTF("请选择一张卡牌加入你的卡组", "fonts/Marker Felt.ttf", 48);
+    auto tipLabel = Label::createWithTTF("Please select a card to add to your deck", "fonts/Marker Felt.ttf", 48);
     tipLabel->setTextColor(Color4B::YELLOW);
     tipLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height * 0.82f));
     background->addChild(tipLabel, 100);
 
     // 跳过选牌按钮
-    auto skipButton = cocos2d::ui::Button::create("Next.png", "button_selected.png");
+    auto skipButton = cocos2d::ui::Button::create("Next.png", "Next.png");
     skipButton->setScale(0.25f);
     skipButton->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height * 0.18f));
     auto skipLabel = Label::createWithTTF("Skip", "fonts/Marker Felt.ttf", 36);

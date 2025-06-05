@@ -103,7 +103,7 @@ void MainMenu::createContinueButton()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     // 创建继续游戏按钮
-    auto continueButton = ui::Button::create("load.png", "button_selected.png");
+    auto continueButton = ui::Button::create("load.png", "load.png");
     continueButton->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 -335));
 	continueButton->setScale(1.48);
 
