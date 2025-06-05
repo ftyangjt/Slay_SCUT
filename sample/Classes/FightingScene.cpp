@@ -436,7 +436,7 @@ void FightingScene::createDiscardDeck()
 {
     auto showDiscardDeckButton = MenuItemImage::create(
         "showDiscard_Normal.png",
-        "showDiscard_Selected.png",
+        "showDiscard_Normal.png",
         CC_CALLBACK_1(FightingScene::goToDiscardDeck, this)
     );
     showDiscardDeckButton->setScale(0.25f);
@@ -461,7 +461,7 @@ void FightingScene::createDrawDeck()
 {
     auto showDrawDeckButton = MenuItemImage::create(
         "showDraw_Normal.png",
-        "showDraw_Selected.png",
+        "showDraw_Normal.png",
         CC_CALLBACK_1(FightingScene::goToDrawDeck, this)
     );
     showDrawDeckButton->setScale(0.25f);
@@ -1173,6 +1173,7 @@ void FightingScene::playCard(int index)
         if (cost > _currentCost)
         {
             CCLOG("Energy not enough to play this card!");
+            _disabledCardIndices.clear();
             return;
         }
         // 如果费用足够，扣费并进行原有逻辑
@@ -1740,7 +1741,7 @@ void FightingScene::createMonsterIntentLabel()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     // 创建怪物意图标签
-    _monsterIntentLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 40);
+    _monsterIntentLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 80);
     _monsterIntentLabel->setTextColor(Color4B::ORANGE);
     _monsterIntentLabel->setPosition(Vec2(
         origin.x + 3 * visibleSize.width / 4,

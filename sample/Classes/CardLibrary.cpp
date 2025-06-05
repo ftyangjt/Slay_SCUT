@@ -136,6 +136,11 @@ namespace CardLibrary {
 
     // Get card by name
     Card getCardByName(const std::string& cardName) {
+        // 特殊判断：如果卡牌名称为 "DEBUG KILL"，直接返回对应的卡牌
+        if (cardName == "DEBUG KILL") {
+            return Card("DEBUG KILL", Card::Type::Attack, 0, "KILL THE ENEMY", "cardBackground.jpg", 9999, 0);
+        }
+
         std::vector<Card> allCards = getAllCards();
 
         for (const auto& card : allCards) {
