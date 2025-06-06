@@ -7,14 +7,14 @@
 
 USING_NS_CC;
 
-// ´æµµ¼ü
+// å­˜æ¡£é”®
 const char* SAVE_KEY_EXIST = "save_exist";
 const char* SAVE_KEY_HEALTH = "save_health";
 const char* SAVE_KEY_GOLD = "save_gold";
 const char* SAVE_KEY_DECK = "save_deck";
 const char* SAVE_KEY_MAP_ID = "save_map_id";
 const char* SAVE_KEY_ROOM = "save_room";
-// ĞÂÔö¼üÖµ
+// æ–°å¢é”®å€¼
 const char* SAVE_KEY_MAP_INFO = "save_map_info";
 const char* SAVE_KEY_CONNECTIONS = "save_connections";
 const char* SAVE_KEY_MAX_LAYER = "save_max_layer";
@@ -38,17 +38,17 @@ bool GameSaveManager::saveGame(
     bool completed
 )
 {
-    // »ñÈ¡UserDefaultÊµÀı
+    // è·å–UserDefaultå®ä¾‹
     auto userDefault = UserDefault::getInstance();
 
-    // ĞòÁĞ»¯¿¨×é
+    // åºåˆ—åŒ–å¡ç»„
     std::string deckString = serializeDeck(deck);
 
-    // ĞòÁĞ»¯µØÍ¼Êı¾İ
+    // åºåˆ—åŒ–åœ°å›¾æ•°æ®
     std::string mapInfoString = serializeMapInfo(mapInfo);
     std::string connectionString = serializeConnections(connectionInfo);
 
-    // ±£´æÊı¾İ
+    // ä¿å­˜æ•°æ®
     userDefault->setBoolForKey(SAVE_KEY_EXIST, true);
     userDefault->setIntegerForKey(SAVE_KEY_HEALTH, health);
     userDefault->setIntegerForKey(SAVE_KEY_GOLD, gold);
@@ -56,7 +56,7 @@ bool GameSaveManager::saveGame(
     userDefault->setIntegerForKey(SAVE_KEY_MAP_ID, currentMapId);
     userDefault->setIntegerForKey(SAVE_KEY_ROOM, currentRoom);
 
-    // ±£´æĞÂÔöµÄµØÍ¼Êı¾İ
+    // ä¿å­˜æ–°å¢çš„åœ°å›¾æ•°æ®
     userDefault->setStringForKey(SAVE_KEY_MAP_INFO, mapInfoString);
     userDefault->setStringForKey(SAVE_KEY_CONNECTIONS, connectionString);
     userDefault->setIntegerForKey(SAVE_KEY_MAX_LAYER, maxLayer);
@@ -65,7 +65,7 @@ bool GameSaveManager::saveGame(
     userDefault->setIntegerForKey(SAVE_KEY_ROOM_TYPE, static_cast<int>(roomType));
     userDefault->setBoolForKey(SAVE_KEY_COMPLETED, completed);
 
-    // È·±£Êı¾İ±»Ğ´Èë
+    // ç¡®ä¿æ•°æ®è¢«å†™å…¥
     userDefault->flush();
 
     CCLOG("Game saved successfully");
@@ -86,24 +86,24 @@ bool GameSaveManager::loadGame(
     bool& completed
 )
 {
-    // »ñÈ¡UserDefaultÊµÀı
+    // è·å–UserDefaultå®ä¾‹
     auto userDefault = UserDefault::getInstance();
 
-    // ¼ì²éÊÇ·ñÓĞ´æµµ
+    // æ£€æŸ¥æ˜¯å¦æœ‰å­˜æ¡£
     if (!userDefault->getBoolForKey(SAVE_KEY_EXIST, false))
     {
         CCLOG("No saved game found");
         return false;
     }
 
-    // ¼ÓÔØÊı¾İ
+    // åŠ è½½æ•°æ®
     health = userDefault->getIntegerForKey(SAVE_KEY_HEALTH, 100);
     gold = userDefault->getIntegerForKey(SAVE_KEY_GOLD, 0);
     std::string deckString = userDefault->getStringForKey(SAVE_KEY_DECK, "");
     currentMapId = userDefault->getIntegerForKey(SAVE_KEY_MAP_ID, 0);
     currentRoom = userDefault->getIntegerForKey(SAVE_KEY_ROOM, 0);
 
-    // ¼ÓÔØĞÂÔöµÄµØÍ¼Êı¾İ
+    // åŠ è½½æ–°å¢çš„åœ°å›¾æ•°æ®
     std::string mapInfoString = userDefault->getStringForKey(SAVE_KEY_MAP_INFO, "");
     std::string connectionString = userDefault->getStringForKey(SAVE_KEY_CONNECTIONS, "");
     maxLayer = userDefault->getIntegerForKey(SAVE_KEY_MAX_LAYER, 0);
@@ -114,10 +114,10 @@ bool GameSaveManager::loadGame(
     roomType = static_cast<MyGame::RoomType>(roomTypeInt);
     completed = userDefault->getBoolForKey(SAVE_KEY_COMPLETED, false);
 
-    // ·´ĞòÁĞ»¯¿¨×é
+    // ååºåˆ—åŒ–å¡ç»„
     deck = deserializeDeck(deckString);
 
-    // ·´ĞòÁĞ»¯µØÍ¼Êı¾İ
+    // ååºåˆ—åŒ–åœ°å›¾æ•°æ®
     if (!mapInfoString.empty()) {
         mapInfo = deserializeMapInfo(mapInfoString);
     }
@@ -130,14 +130,14 @@ bool GameSaveManager::loadGame(
     return true;
 }
 
-// ¿¨×éĞòÁĞ»¯ºÍ·´ĞòÁĞ»¯·½·¨±£³Ö²»±ä
-// ĞòÁĞ»¯¿¨×é
+// å¡ç»„åºåˆ—åŒ–å’Œååºåˆ—åŒ–æ–¹æ³•ä¿æŒä¸å˜
+// åºåˆ—åŒ–å¡ç»„
 std::string GameSaveManager::serializeDeck(const std::vector<Card>& deck)
 {
     std::string result = "";
     for (size_t i = 0; i < deck.size(); ++i)
     {
-        // Ö»±£´æ¿¨ÅÆÃû³Æ£¬ÓÃ·ÖºÅ·Ö¸ô
+        // åªä¿å­˜å¡ç‰Œåç§°ï¼Œç”¨åˆ†å·åˆ†éš”
         result += deck[i].getName();
         if (i < deck.size() - 1)
         {
@@ -147,7 +147,7 @@ std::string GameSaveManager::serializeDeck(const std::vector<Card>& deck)
     return result;
 }
 
-// ·´ĞòÁĞ»¯¿¨×é
+// ååºåˆ—åŒ–å¡ç»„
 std::vector<Card> GameSaveManager::deserializeDeck(const std::string& deckString)
 {
     std::vector<Card> deck;
@@ -156,7 +156,7 @@ std::vector<Card> GameSaveManager::deserializeDeck(const std::string& deckString
         return deck;
     }
 
-    // ·Ö¸î×Ö·û´®£¬»ñÈ¡¸÷¸ö¿¨ÅÆÃû³Æ
+    // åˆ†å‰²å­—ç¬¦ä¸²ï¼Œè·å–å„ä¸ªå¡ç‰Œåç§°
     size_t pos = 0;
     std::string cardName;
     std::string str = deckString;
@@ -167,7 +167,7 @@ std::vector<Card> GameSaveManager::deserializeDeck(const std::string& deckString
         str.erase(0, pos + 1);
     }
 
-    // ×îºóÒ»¸ö¿¨ÅÆÃû³Æ
+    // æœ€åä¸€ä¸ªå¡ç‰Œåç§°
     if (!str.empty())
     {
         deck.push_back(getCardByName(str));
@@ -176,28 +176,28 @@ std::vector<Card> GameSaveManager::deserializeDeck(const std::string& deckString
     return deck;
 }
 
-// ¸ù¾İÃû³Æ»ñÈ¡¿¨ÅÆ
+// æ ¹æ®åç§°è·å–å¡ç‰Œ
 Card GameSaveManager::getCardByName(const std::string& cardName)
 {
-    // Ê¹ÓÃCardLibraryµÄ·½·¨»ñÈ¡¿¨ÅÆ
+    // ä½¿ç”¨CardLibraryçš„æ–¹æ³•è·å–å¡ç‰Œ
     return CardLibrary::getCardByName(cardName);
 }
 
 
-// ÊµÏÖµØÍ¼Êı¾İĞòÁĞ»¯ºÍ·´ĞòÁĞ»¯
+// å®ç°åœ°å›¾æ•°æ®åºåˆ—åŒ–å’Œååºåˆ—åŒ–
 std::string GameSaveManager::serializeMapInfo(const std::vector<std::vector<MyGame::RoomInfo>>& mapInfo)
 {
     std::stringstream ss;
 
-    // ¼ÇÂ¼ÓĞ¶àÉÙ²ã
+    // è®°å½•æœ‰å¤šå°‘å±‚
     ss << mapInfo.size() << ";";
 
     for (const auto& layer : mapInfo) {
-        // ¼ÇÂ¼ÕâÒ»²ãÓĞ¶àÉÙ¸ö·¿¼ä
+        // è®°å½•è¿™ä¸€å±‚æœ‰å¤šå°‘ä¸ªæˆ¿é—´
         ss << layer.size() << ";";
 
         for (const auto& room : layer) {
-            // ¼ÇÂ¼·¿¼äÀàĞÍºÍÎ»ÖÃ
+            // è®°å½•æˆ¿é—´ç±»å‹å’Œä½ç½®
             ss << static_cast<int>(room.type) << ","
                 << room.position.x << ","
                 << room.position.y << ";";
@@ -213,7 +213,7 @@ std::vector<std::vector<MyGame::RoomInfo>> GameSaveManager::deserializeMapInfo(c
     std::stringstream ss(mapInfoString);
     std::string item;
 
-    // ¶ÁÈ¡²ãÊı
+    // è¯»å–å±‚æ•°
     if (!std::getline(ss, item, ';')) {
         return result;
     }
@@ -222,7 +222,7 @@ std::vector<std::vector<MyGame::RoomInfo>> GameSaveManager::deserializeMapInfo(c
     result.resize(layerCount);
 
     for (int i = 0; i < layerCount; ++i) {
-        // ¶ÁÈ¡¸Ã²ã·¿¼äÊı
+        // è¯»å–è¯¥å±‚æˆ¿é—´æ•°
         if (!std::getline(ss, item, ';')) {
             break;
         }
@@ -230,7 +230,7 @@ std::vector<std::vector<MyGame::RoomInfo>> GameSaveManager::deserializeMapInfo(c
         int roomCount = std::stoi(item);
 
         for (int j = 0; j < roomCount; ++j) {
-            // ¶ÁÈ¡·¿¼äĞÅÏ¢
+            // è¯»å–æˆ¿é—´ä¿¡æ¯
             if (!std::getline(ss, item, ';')) {
                 break;
             }
@@ -238,25 +238,25 @@ std::vector<std::vector<MyGame::RoomInfo>> GameSaveManager::deserializeMapInfo(c
             std::stringstream roomStream(item);
             std::string roomItem;
 
-            // ¶ÁÈ¡·¿¼äÀàĞÍ
+            // è¯»å–æˆ¿é—´ç±»å‹
             if (!std::getline(roomStream, roomItem, ',')) {
                 continue;
             }
             int roomType = std::stoi(roomItem);
 
-            // ¶ÁÈ¡x×ø±ê
+            // è¯»å–xåæ ‡
             if (!std::getline(roomStream, roomItem, ',')) {
                 continue;
             }
             float x = std::stof(roomItem);
 
-            // ¶ÁÈ¡y×ø±ê
+            // è¯»å–yåæ ‡
             if (!std::getline(roomStream, roomItem, ',')) {
                 continue;
             }
             float y = std::stof(roomItem);
 
-            // ´´½¨RoomInfo²¢Ìí¼Óµ½½á¹ûÖĞ
+            // åˆ›å»ºRoomInfoå¹¶æ·»åŠ åˆ°ç»“æœä¸­
             MyGame::RoomInfo info;
             info.type = static_cast<MyGame::RoomType>(roomType);
             info.position.set(x, y);
@@ -272,11 +272,11 @@ std::string GameSaveManager::serializeConnections(const std::vector<MyGame::Conn
 {
     std::stringstream ss;
 
-    // ¼ÇÂ¼Á¬½ÓÊıÁ¿
+    // è®°å½•è¿æ¥æ•°é‡
     ss << connections.size() << ";";
 
     for (const auto& conn : connections) {
-        // ¼ÇÂ¼ÆğµãºÍÖÕµã×ø±ê
+        // è®°å½•èµ·ç‚¹å’Œç»ˆç‚¹åæ ‡
         ss << conn.start.x << "," << conn.start.y << ","
             << conn.end.x << "," << conn.end.y << ";";
     }
@@ -290,7 +290,7 @@ std::vector<MyGame::ConnectionInfo> GameSaveManager::deserializeConnections(cons
     std::stringstream ss(connectionsString);
     std::string item;
 
-    // ¶ÁÈ¡Á¬½ÓÊıÁ¿
+    // è¯»å–è¿æ¥æ•°é‡
     if (!std::getline(ss, item, ';')) {
         return result;
     }
@@ -299,7 +299,7 @@ std::vector<MyGame::ConnectionInfo> GameSaveManager::deserializeConnections(cons
     result.resize(connectionCount);
 
     for (int i = 0; i < connectionCount; ++i) {
-        // ¶ÁÈ¡Á¬½ÓĞÅÏ¢
+        // è¯»å–è¿æ¥ä¿¡æ¯
         if (!std::getline(ss, item, ';')) {
             break;
         }
@@ -307,31 +307,31 @@ std::vector<MyGame::ConnectionInfo> GameSaveManager::deserializeConnections(cons
         std::stringstream connStream(item);
         std::string connItem;
 
-        // ¶ÁÈ¡Æğµãx×ø±ê
+        // è¯»å–èµ·ç‚¹xåæ ‡
         if (!std::getline(connStream, connItem, ',')) {
             continue;
         }
         float startX = std::stof(connItem);
 
-        // ¶ÁÈ¡Æğµãy×ø±ê
+        // è¯»å–èµ·ç‚¹yåæ ‡
         if (!std::getline(connStream, connItem, ',')) {
             continue;
         }
         float startY = std::stof(connItem);
 
-        // ¶ÁÈ¡ÖÕµãx×ø±ê
+        // è¯»å–ç»ˆç‚¹xåæ ‡
         if (!std::getline(connStream, connItem, ',')) {
             continue;
         }
         float endX = std::stof(connItem);
 
-        // ¶ÁÈ¡ÖÕµãy×ø±ê
+        // è¯»å–ç»ˆç‚¹yåæ ‡
         if (!std::getline(connStream, connItem, ',')) {
             continue;
         }
         float endY = std::stof(connItem);
 
-        // ´´½¨ConnectionInfo²¢Ìí¼Óµ½½á¹ûÖĞ
+        // åˆ›å»ºConnectionInfoå¹¶æ·»åŠ åˆ°ç»“æœä¸­
         MyGame::ConnectionInfo info;
         info.start.set(startX, startY);
         info.end.set(endX, endY);

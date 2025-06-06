@@ -823,6 +823,7 @@ void FightingScene::updateHandDisplay()
     // 清除现有卡牌精灵
     for (auto sprite : _cardSprites)
     {
+        sprite->stopAllActions();
         sprite->removeFromParent();
     }
     _cardSprites.clear();
@@ -1325,6 +1326,7 @@ void FightingScene::playDiscardToDrawMeteorEffect(const Vec2& discardPilePositio
     auto sequence = Sequence::create(
         moveAction,
         CallFunc::create([meteor]() {
+            meteor->stopAllActions();
             meteor->removeFromParent(); // 移除粒子
             }),
         nullptr);

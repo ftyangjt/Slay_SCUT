@@ -52,7 +52,7 @@ namespace CardLibrary {
         allCards.push_back(quickGuard);
 
         // 添加Disarm（缴械）卡牌
-        Card disarmCard("Fortify", Card::Type::Skill, 1, "Loses 2 Strength Gain 20 Block Exhaust", "cardBackground.jpg", 20);
+        Card disarmCard("Fortify", Card::Type::Skill, 1, "Loses 2 Strength Gain 20 Block Exhaust", "cardBackground.jpg", 0, 20);
         disarmCard.addEffect(Effect::Type::Strength, -2, -1); // 负数表示减少力量，-1为立即生效
         disarmCard.setExhaust(true); // 使用后消耗
         allCards.push_back(disarmCard);
