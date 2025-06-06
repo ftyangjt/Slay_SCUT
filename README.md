@@ -8,11 +8,11 @@ A game inspired by "Slay the Spire", developed by SCUT students. Experience card
 - Procedurally generated adventure paths
 - Strategic deck building elements
 
-### Quick Start
+## Quick Start
 - Simply download Release.win32.zip, extract, and run sample.exe to start playing
 - No need to install additional components
 
-### Developer Options
+## Developer Options
 - Clone the repository and download cocos2d.zip
 - Extract cocos2d.zip into the sample folder
 - Open sample\proj.win32\sample.sln project file in Visual Studio
